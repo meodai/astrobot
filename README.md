@@ -88,8 +88,11 @@ npx @meodai/astrobot birth-prompt | pbcopy  # copy to clipboard, paste into LLM
 echo '<JSON from LLM>' | npx @meodai/astrobot birth --model <your-model-id>
 ```
 
-After `birth`, the model has a permanent identity stored in `~/.astrobot/profiles.json`.
-Use `export --model <id>` to get a paste-able persona block for any conversation.
+After `birth`, the model has a permanent identity stored in `~/.claude/astrobot/profiles.json`
+(override the location with the `ASTROBOT_DIR` env var). This is the same store the Claude Code
+plugin uses, so an identity you birth via `npx` is also picked up automatically if you later run
+that same model in Claude Code. Use `export --model <id>` to get a paste-able persona block for
+any conversation.
 
 Publish with `npm publish --access public` (scoped public package).
 
