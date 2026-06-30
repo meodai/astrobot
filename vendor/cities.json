@@ -1,0 +1,9 @@
+{
+  "Reykjavík": { "lat": 64.13, "lon": -21.90 },
+  "London": { "lat": 51.51, "lon": -0.13 },
+  "New York": { "lat": 40.71, "lon": -74.01 },
+  "Tokyo": { "lat": 35.68, "lon": 139.69 },
+  "Zürich": { "lat": 47.37, "lon": 8.54 },
+  "Cairo": { "lat": 30.04, "lon": 31.24 },
+  "Sydney": { "lat": -33.87, "lon": 151.21 }
+}

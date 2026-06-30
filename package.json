@@ -1,0 +1,14 @@
+{
+  "name": "astrobot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Give each Claude model a permanent astrological identity that subtly tints its tone day by day.",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test",
+    "vendor": "cp node_modules/astronomy-engine/astronomy.js vendor/astronomy.js"
+  },
+  "devDependencies": {
+    "astronomy-engine": "^2.1.19"
+  }
+}

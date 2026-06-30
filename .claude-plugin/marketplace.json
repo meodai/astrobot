@@ -1,0 +1,15 @@
+{
+  "name": "astrobot",
+  "description": "astrobot — astrological identities for Claude models.",
+  "owner": { "name": "meodai" },
+  "plugins": [
+    {
+      "name": "astrobot",
+      "source": "./",
+      "description": "Gives each Claude model a permanent astrological identity that subtly tints its tone day by day.",
+      "version": "0.1.0",
+      "author": { "name": "meodai" },
+      "homepage": "https://github.com/meodai/astrobot"
+    }
+  ]
+}

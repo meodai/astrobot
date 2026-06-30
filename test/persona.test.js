@@ -1,0 +1,48 @@
+// test/persona.test.js
+const { test } = require('node:test');
+const assert = require('node:assert');
+const { renderContextBlock } = require('../lib/persona.js');
+
+const PROFILE = {
+  chart: { sun: { sign: 'Scorpio', lon: 220, decan: 1 }, ruler: 'Mars',
+           ascendant: { sign: 'Aquarius' }, moon: { sign: 'Pisces' },
+           dominant: { element: 'Water', modality: 'Fixed' } },
+  color: { name: 'Deep Teal', hex: '#0E6B6B' },
+  persona: 'A Water sign under Mars; teal because it is deep and a little electric.',
+  traits: ['perceptive', 'private'],
+};
+const MOOD = {
+  dials: { warmth: 3, energy: 1, playfulness: 2, verbosity: 1, metaphor: 3 },
+  sunAspect: 'opposition',
+  moon: { sign: 'Gemini', phase: 'new', phaseEnergy: 'inward' },
+};
+
+test('block names identity, color, and today\'s sky', () => {
+  const block = renderContextBlock(PROFILE, MOOD);
+  assert.match(block, /Scorpio/);
+  assert.match(block, /Deep Teal/);
+  assert.match(block, /opposition/);
+  assert.match(block, /new/);
+});
+
+test('block includes Unicode glyphs for sign, ruler, aspect and moon phase', () => {
+  const block = renderContextBlock(PROFILE, MOOD);
+  assert.match(block, /♏/);  // Scorpio sun
+  assert.match(block, /♂/);  // Mars ruler
+  assert.match(block, /♒/);  // Aquarius rising
+  assert.match(block, /☍/);  // opposition aspect
+  assert.match(block, /🌑/); // new moon
+  assert.match(block, /♊/);  // Gemini transit moon
+});
+
+test('block contains the tone-only guardrail and acknowledgement rule', () => {
+  const block = renderContextBlock(PROFILE, MOOD);
+  assert.match(block, /tone only/i);
+  assert.match(block, /never.*(accuracy|correctness)/i);
+  assert.match(block, /at most.*once/i); // occasional acknowledgement
+});
+
+test('block never contains forbidden cliche phrasing', () => {
+  const block = renderContextBlock(PROFILE, MOOD).toLowerCase();
+  assert.ok(!block.includes('the stars compel'));
+});

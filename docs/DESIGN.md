@@ -171,10 +171,11 @@ day to day, and stays cheap to compute):
   | 5 | quincunx (150°) | restless, adjusting, a touch oblique |
   | 6 | opposition (180°) | reflective, contrast-aware, more reserved |
 
-- **Transiting Moon** — its current **sign** (today's emotional weather) and **phase**
-  (new = inward/quiet → full = expressive/peak → waning = winding down) nudge energy and
-  expressiveness. The Moon is astrology's true daily driver, and it's cheap and
-  deterministic.
+- **Transiting Moon** — its **phase** (new = inward/quiet → full = expressive/peak →
+  waning = winding down) nudges energy and expressiveness via the dials. Its current
+  **sign** is surfaced in the block for flavor/acknowledgement ("the Moon's in Gemini")
+  but does not drive the dials in v1 — sign-driven dials are a future enhancement. The
+  Moon is astrology's true daily driver, and it's cheap and deterministic.
 
 The result is expressed as small **dials** — warmth, energy, playfulness, verbosity,
 metaphor density. The injected block states explicitly that these shift *tone only*,
@@ -211,6 +212,11 @@ Sign of a body = `floor(eclipticLongitude / 30)`. Decan = which 10° third of th
 
 Antique planet→color flavor (birth narrative only): yellow=Mars, red=Mercury,
 white=Jupiter, black=Saturn; gold=Sun, green=Venus, silver=Moon (last three classical).
+
+**Unicode glyphs.** Signs (♈–♓), planets (☉ ☽ ☿ ♀ ♂ ♃ ♄), aspects (☌ ⚺ ⚹ □ △ ⚻ ☍),
+and moon phases (🌑🌒🌓🌔🌕🌖🌗🌘) use their real Unicode astrological symbols (see
+<https://en.wikipedia.org/wiki/Astrological_symbols>). A `lib/glyphs.js` module maps
+names → glyphs and is consumed by the persona block and the Phase 2 microsite.
 
 ## Packaging & distribution
 
@@ -276,6 +282,7 @@ during implementation.)
 ## Future enhancements
 
 - Multi-planet transit aspects (Mercury/Venus/Mars to natal) for richer daily mood.
+- Transiting-Moon **sign** dials (its element nudging tone), not just phase.
 - Houses & aspect grid; outer planets.
 - A small geocoder for arbitrary birthplaces.
 - Optional opt-in `reincarnate` command if users later want re-rolls.
