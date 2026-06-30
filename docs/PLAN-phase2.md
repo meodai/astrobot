@@ -516,6 +516,85 @@ const { birth, colorHex } = roll(seeded ? Number(args.seed) : undefined, seeded 
 
 ---
 
+### Task 13: Color as a tone + esoteric input (warm/cool + vivid/muted + planetary + chakra + theosophy)
+
+**Why:** the rolled color is decorative — make it a real temperament input. Two mechanical axes (color-expert grounded) plus three esoteric layers:
+- **Warm/cool** (hue) → `warmth` dial. Warm ≈ orange peak (~35°), cool ≈ blue (~215°), green/purple neutral.
+- **Vivid/muted** (saturation, the stronger intensity signal per character-first research) → playfulness/metaphor/energy vs reserved.
+- **Planetary (Boll-Bezold, mechanical):** nearest classical planetary color → a small one-dial nudge from that planet's nature.
+- **Chakra (flavor):** hue → one of 7 centers + life-theme.
+- **Theosophy / Thought-Forms 1901 (flavor):** color → a quality word.
+The two mechanical axes + the planetary nudge feed the dials; chakra + theosophy are surfaced as text (persona + site).
+
+**Files:** Create `lib/colortone.js`; Modify `lib/mood.js` (3rd arg `colorHex`), `lib/persona.js` (a color-lore line in both blocks), `bin/astrobot.js` + `hooks/session-start.js` + `site/app.js` (pass color; surface lore; FIX the CSS-unsafe hex from Task 11 review), `scripts/gen-gallery.js`; Tests `test/colortone.test.js`, extend `test/mood.test.js`. Controller regenerates gallery + rebuilds bundle.
+
+**Interfaces:** `hexToHsl(hex)`→`{h,s,l}`|null; `colorTone(hex)`→dial-delta object; `colorLore(hex)`→`{warmCool, vividMuted, planet, chakra:{name,theme}, theosophy}`|null. `composeMood(chart, date, colorHex?)` — colorHex optional (omitted → no color delta, backward compatible).
+
+- [ ] **Step 1: `lib/colortone.js`** — `hexToHsl`, plus the data tables and `colorTone`/`colorLore`:
+```js
+function hexToHsl(hex) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || ''));
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  const r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+  let h = 0;
+  if (d) {
+    if (max === r) h = (((g - b) / d) % 6 + 6) % 6;
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h *= 60;
+  }
+  const l = (max + min) / 2;
+  const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  return { h, s: s * 100, l: l * 100 };
+}
+
+// Boll-Bezold/classical planetary color anchors; nearest by RGB distance.
+const PLANET_ANCHORS = { Mars:'#E6C200', Mercury:'#C0392B', Jupiter:'#FFFFFF', Saturn:'#111111', Sun:'#D4AF37', Venus:'#2E8B57', Moon:'#C9CCD1' };
+const PLANET_NUDGE   = { Mars:{energy:1}, Mercury:{playfulness:1}, Jupiter:{verbosity:1}, Saturn:{playfulness:-1}, Sun:{warmth:1}, Venus:{warmth:1}, Moon:{metaphor:1} };
+function rgb(hex){ const n=parseInt(/^#?([0-9a-f]{6})$/i.exec(hex)[1],16); return [n>>16&255,n>>8&255,n&255]; }
+function nearestPlanet(hex){ const c=rgb(hex); let best=null,bd=1e9; for(const p in PLANET_ANCHORS){ const a=rgb(PLANET_ANCHORS[p]); const dd=(c[0]-a[0])**2+(c[1]-a[1])**2+(c[2]-a[2])**2; if(dd<bd){bd=dd;best=p;} } return best; }
+
+const CHAKRAS = [ // {max hue exclusive, name, theme}; root wraps 345..360 and 0..15
+  {max:15,name:'root',theme:'grounding & survival'},{max:45,name:'sacral',theme:'creativity & pleasure'},
+  {max:70,name:'solar plexus',theme:'will & confidence'},{max:165,name:'heart',theme:'love & balance'},
+  {max:255,name:'throat',theme:'communication & truth'},{max:285,name:'third eye',theme:'intuition & insight'},
+  {max:345,name:'crown',theme:'spirit & meaning'} ];
+function chakraOf(h){ const x=((h%360)+360)%360; if(x>=345) return {name:'root',theme:'grounding & survival'}; for(const c of CHAKRAS) if(x<c.max) return {name:c.name,theme:c.theme}; return {name:'crown',theme:'spirit & meaning'}; }
+
+function theosophyOf(hsl){ if(hsl.l<25) return 'depth & gravity'; const x=((hsl.h%360)+360)%360;
+  if(x>=345||x<15) return 'courage'; if(x<45) return 'ambition'; if(x<70) return 'intellect';
+  if(x<165) return 'sympathy'; if(x<255) return 'devotion'; if(x<310) return 'spiritual aspiration'; return 'love'; }
+
+function warmthCos(h){ return Math.cos(((h-35)*Math.PI)/180); }
+
+function colorTone(hex){ const hsl=hexToHsl(hex); if(!hsl) return {}; const d={}; const add=(k,v)=>d[k]=(d[k]||0)+v;
+  const w=warmthCos(hsl.h); if(w>0.4) add('warmth',1); else if(w<-0.4) add('warmth',-1);
+  if(hsl.s>=60){add('playfulness',1);add('metaphor',1);add('energy',1);} else if(hsl.s<=25){add('playfulness',-1);add('verbosity',-1);}
+  const nudge=PLANET_NUDGE[nearestPlanet(hex)]||{}; for(const k in nudge) add(k,nudge[k]); return d; }
+
+function colorLore(hex){ const hsl=hexToHsl(hex); if(!hsl) return null; const w=warmthCos(hsl.h);
+  return { warmCool: w>0.4?'warm':w<-0.4?'cool':'balanced', vividMuted: hsl.s>=60?'vivid':hsl.s<=25?'muted':'soft',
+    planet: nearestPlanet(hex), chakra: chakraOf(hsl.h), theosophy: theosophyOf(hsl) }; }
+
+module.exports = { hexToHsl, colorTone, colorLore, nearestPlanet };
+```
+
+- [ ] **Step 2: `lib/mood.js`** — `composeMood(chart, date, colorHex)`: after element + ruler deltas, `applyDelta(dials, colorTone(colorHex))` (import `colorTone`; no colorHex → `{}` no-op). Clamp last. Deterministic (color static).
+
+- [ ] **Step 3: `lib/persona.js`** — import `colorLore`; in BOTH `renderContextBlock` and `renderPortableBlock`, when `colorLore(color.hex)` is non-null add one line: ``Your color ${color.name} runs ${lore.warmCool} and ${lore.vividMuted} — it resonates with ${planetGlyph(lore.planet)} ${lore.planet}, governs the ${lore.chakra.name} chakra (${lore.chakra.theme}), and in the old books signifies ${lore.theosophy}.`` Keep existing content + guardrail.
+
+- [ ] **Step 4: callers pass color** — `bin/astrobot.js` (`today`/`export`/`show`) + `hooks/session-start.js`: 3rd arg `resolved.data.color && resolved.data.color.hex`. `gen-gallery.js`: `composeMood(chart, SAMPLE_DATE, e.color.hex)`. `site/app.js`: pass the color input hex to `Astrobot.composeMood`; render the lore (warmCool/vividMuted/planet/chakra/theosophy) under the swatch + on gallery cards using `Astrobot.colortone`? — expose `colorLore` via the bundle: add `colorLore` to `site/src/engine.js` exports (so `Astrobot.colorLore`). **Also FIX the Task 11 hex-in-CSS issue:** before putting any `color.hex` into a `style`, validate `/^#[0-9a-fA-F]{3,8}$/.test(hex)` (else fall back to a neutral) — or set it via `el.style.setProperty('background', hex)` only when valid.
+
+- [ ] **Step 5: tests** — `colortone.test.js`: `hexToHsl('#ff0000')`≈{h:0,s:100,l:50}; `'#808080'.s===0`; `colorTone('#ff5a1f')` warm+vivid (`warmth>0`,`playfulness>0`); `colorTone('#36495a')` cool+muted (`warmth<0`,`playfulness<0`); `colorTone('#3aa34c')` green has no `warmth` key; bad input→`{}`; `nearestPlanet('#c0392b')==='Mercury'` and `nearestPlanet('#2e8b57')==='Venus'`; `colorLore('#ff0000')` → `{warmCool:'warm',...,chakra.name:'root',theosophy:'courage'}` (spot-check fields); `colorLore('#3344aa')` → chakra throat/`devotion`. `mood.test.js`: same chart+date, warm-vivid vs cool-muted → warm-vivid higher `warmth` & `playfulness`; no-color call == prior behavior.
+
+- [ ] **Step 6:** full suite → pass. Commit (`feat: color drives temperament + esoteric lore (warm/cool, vivid/muted, planetary, chakra, theosophy)`).
+
+- [ ] **Step 7 (controller):** regenerate gallery + rebuild bundle (`node scripts/gen-gallery.js && npm run build:site`), commit `site/gallery.json` + `site/astrobot.bundle.js`.
+
+---
+
 ## Self-Review
 
 **Coverage:** portable mode (Task 1: renderer + CLI + README + tests); browser bundle reusing real engine (Task 2 + smoke test asserting Capricorn/Aries via the bundle); gallery of real example profiles (Task 3); interactive playground + gallery UI, vintage-celestial, honesty label on live persona (Task 4); Actions→Pages deploy (Task 5); build/verify/no-drift (Task 6). Matches the Phase 2 scope (playground + gallery + portable mode).
