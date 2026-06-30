@@ -138,7 +138,7 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   /* Static field: no drift, no comet. Stars still render via box-shadow. */
-  .starfield__layer { animation: none; }
+  .starfield__layer { animation: none; will-change: auto; }
   .starfield__comet { display: none; }
 }
 

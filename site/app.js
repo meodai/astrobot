@@ -674,7 +674,7 @@
   // the field whispers rather than glares. No animation here: the slow drift
   // and seamless loop live in CSS (and are disabled by prefers-reduced-motion),
   // so a static field is rendered when motion is reduced.
-  function buildStarShadows(count, size) {
+  function buildStarShadows(count, w, h) {
     // Weighted toward warm parchment, with a minority of leaf/gilt gold.
     var tones = [
       '233,224,203', '233,224,203', '233,224,203', // parchment (common)
@@ -683,8 +683,8 @@
     ];
     var parts = new Array(count);
     for (var i = 0; i < count; i++) {
-      var x = (Math.random() * size) | 0;
-      var y = (Math.random() * size) | 0;
+      var x = (Math.random() * w) | 0;
+      var y = (Math.random() * h) | 0;
       var tone = tones[(Math.random() * tones.length) | 0];
       var alpha = (0.18 + Math.random() * 0.42).toFixed(2); // 0.18–0.60, varied brightness
       parts[i] = x + 'px ' + y + 'px 0 0 rgba(' + tone + ',' + alpha + ')';
@@ -695,7 +695,8 @@
   function initStarfield() {
     var field = document.querySelector('.starfield');
     if (!field) return;
-    var FIELD = 2000;
+    var FIELD = 2000;                                     // vertical loop height
+    var W = Math.max(FIELD, window.innerWidth || FIELD);  // cover ultrawide screens
     // Modest counts for mobile perf; CSS gives each layer its size and speed.
     var layers = [
       ['.starfield__layer--sm', 500],
@@ -706,7 +707,7 @@
       var el = field.querySelector(cfg[0]);
       if (!el) return;
       el.style.setProperty('--field-h', FIELD + 'px');
-      el.style.setProperty('--star-shadows', buildStarShadows(cfg[1], FIELD));
+      el.style.setProperty('--star-shadows', buildStarShadows(cfg[1], W, FIELD));
     });
   }
 
