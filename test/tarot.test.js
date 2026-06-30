@@ -184,3 +184,7 @@ test('cardSlug: 10 of Pentacles → pentacles-10', () => {
 test('cardSlug: empty string → empty string', () => {
   assert.strictEqual(cardSlug(''), '');
 });
+
+test('cardSlug: Justice → major-justice', () => {
+  assert.strictEqual(cardSlug('Justice'), 'major-justice');
+});
