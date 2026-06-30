@@ -379,6 +379,105 @@ git push -u origin build/phase2
 
 ---
 
+---
+
+## Phase 2b — birth-bias fix, houses, font
+
+**Execution order:** run Tasks 7 → 8 → 9 → 10 → 11 FIRST, then the deploy/verify Tasks 5 → 6 last (they publish + check the final state).
+
+### Task 7: `astrobot roll` — random birth + random color (kills LLM self-selection bias)
+
+**Why:** asked to "freely choose," models converge on Scorpio + a muted blue-green. Fix: the script rolls a random chart + color; the LLM interprets what it got (it no longer chooses what it *is*).
+
+**Files:** Create `lib/roll.js`; Modify `bin/astrobot.js` (add `roll` command + `--seed` parse); Test `test/roll.test.js`.
+
+**Interfaces:** `roll(seed?)` → `{ birth:{datetime,tzOffsetMinutes,place,lat,lon}, colorHex }`; `rng(seed?)` (seedable PRNG; `Math.random` when seed omitted); `hslToHex`, `rollColor(rand)`, `rollBirth(rand)`.
+
+- [ ] **Step 1: failing test `test/roll.test.js`** — assert: `rng(42)` deterministic; `roll(42)` reproducible (deep-equal two calls); `rollColor` returns `/^#[0-9a-f]{6}$/i`; **anti-bias distribution** — over 120 seeds, `computeChart(roll(seed).birth).sun.sign` yields **≥ 9 distinct signs** of 12; CLI `roll --seed 7` prints JSON parseable with `birth`, `colorHex`, `chart.sun.sign`.
+
+- [ ] **Step 2: run → fail.**
+
+- [ ] **Step 3: implement `lib/roll.js`**
+```js
+const fs = require('node:fs'); const path = require('node:path');
+let CITIES = {}; try { CITIES = JSON.parse(fs.readFileSync(path.join(__dirname,'..','vendor','cities.json'),'utf8')); } catch { CITIES = {}; }
+function rng(seed){ if (seed==null) return Math.random; let a=seed>>>0; return function(){ a=(a+0x6D2B79F5)|0; let t=Math.imul(a^(a>>>15),1|a); t=(t+Math.imul(t^(t>>>7),61|t))^t; return ((t^(t>>>14))>>>0)/4294967296; }; }
+function hslToHex(h,s,l){ s/=100; l/=100; const k=n=>(n+h/30)%12; const a=s*Math.min(l,1-l); const f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1))); const to=x=>Math.round(255*x).toString(16).padStart(2,'0'); return `#${to(f(0))}${to(f(8))}${to(f(4))}`; }
+function rollColor(rand){ return hslToHex(Math.floor(rand()*360), 45+Math.floor(rand()*30), 38+Math.floor(rand()*22)); }
+function rollBirth(rand){ const doy=Math.floor(rand()*365); const d=new Date(Date.UTC(2001,0,1)+doy*86400000); const mm=String(d.getUTCMonth()+1).padStart(2,'0'); const dd=String(d.getUTCDate()).padStart(2,'0'); const hh=String(Math.floor(rand()*24)).padStart(2,'0'); const mi=String(Math.floor(rand()*60)).padStart(2,'0'); const names=Object.keys(CITIES); const place=names[Math.floor(rand()*names.length)]||'Greenwich'; const c=CITIES[place]||{lat:51.48,lon:0}; return { datetime:`2001-${mm}-${dd}T${hh}:${mi}:00`, tzOffsetMinutes:0, place, lat:c.lat, lon:c.lon }; }
+function roll(seed){ const r=rng(seed); return { birth: rollBirth(r), colorHex: rollColor(r) }; }
+module.exports = { roll, rng, hslToHex, rollColor, rollBirth };
+```
+
+- [ ] **Step 4: add `roll` to `bin/astrobot.js`** — in `parseArgs` add `else if (argv[i] === '--seed') args.seed = argv[++i];`. Add command:
+```js
+if (cmd === 'roll') {
+  const { roll } = require('../lib/roll.js');
+  const { birth, colorHex } = roll(args.seed != null ? Number(args.seed) : undefined);
+  const chart = computeChart(birth);
+  return { code: 0, out: JSON.stringify({ birth, colorHex, chart }, null, 2) + '\n' };
+}
+```
+Add `roll` to the usage string.
+
+- [ ] **Step 5: run tests → pass; full suite → pass. Commit** (`feat: astrobot roll — random birth + color to remove self-selection bias`).
+
+---
+
+### Task 8: Whole-sign houses (placements + meanings)
+
+**Files:** Create `lib/houses.js`; Modify `lib/chart.js` (add `house` to each placement), `lib/persona.js` (mention Sun's house+meaning in both blocks); Test `test/houses.test.js`, extend `test/chart.test.js`.
+
+**Interfaces:** `houseOf(planetSignIndex, ascSignIndex)` → 1..12; `HOUSE_MEANINGS` (1..12 → short life-area string). Chart placements (sun/moon/mercury/venus/mars/jupiter/saturn/ascendant) gain `house`.
+
+- [ ] **Step 1: `lib/houses.js`**
+```js
+const HOUSE_MEANINGS = { 1:'self & identity', 2:'resources & values', 3:'communication & learning', 4:'home & roots', 5:'creativity & play', 6:'work & health', 7:'partnership', 8:'depth & transformation', 9:'meaning & travel', 10:'vocation & public life', 11:'community & hopes', 12:'inner life & retreat' };
+function houseOf(planetSignIndex, ascSignIndex){ return ((planetSignIndex - ascSignIndex + 12) % 12) + 1; }
+module.exports = { HOUSE_MEANINGS, houseOf };
+```
+
+- [ ] **Step 2: chart.js** — after the ascendant is computed, set `const ascIndex = signFromLongitude(ascLon).index;` and add `house` to every placement: for each body `chart[k].house = houseOf(signFromLongitude(chart[k].lon).index, ascIndex)`, and `chart.ascendant.house = 1`. Import `houseOf` from `./houses.js`.
+
+- [ ] **Step 3: persona.js** — in BOTH `renderContextBlock` and `renderPortableBlock`, append to the identity line: `Sun in the ${chart.sun.house}th house (${HOUSE_MEANINGS[chart.sun.house]})`. Import `HOUSE_MEANINGS`. (Use a small ordinal helper or just `${n}th` — acceptable for the block.)
+
+- [ ] **Step 4: tests** — `houses.test.js`: `houseOf(asc,asc)===1`; wraps mod 12; e.g. ascIndex=7 (Scorpio), planet sign index 9 → house 3. `chart.test.js`: every placement has `house` in 1..12; `ascendant.house===1`; sun.house consistent with `houseOf`. persona test: block contains `house (`.
+
+- [ ] **Step 5: run → pass; full suite → pass. Commit** (`feat: whole-sign houses — placements + meanings in chart and persona`).
+
+---
+
+### Task 9 (controller-run): regenerate gallery + rebuild engine bundle
+
+After Tasks 7–8 change the chart shape, regenerate the gallery and the browser bundle so they carry houses. (The controller runs `node scripts/gen-gallery.js` and `npm run build:site`, commits `site/gallery.json` + `site/astrobot.bundle.js`.) `gen-gallery.js` needs no change (it serializes whatever `computeChart` returns).
+
+---
+
+### Task 10: Rewrite the `/astrobot` skill for roll-based birth + houses
+
+**Files:** Modify `skills/astrobot/SKILL.md`.
+
+- [ ] Replace the birth section: instead of "invent your birth story / pick a color," Step 2 becomes **roll**: run `node "${CLAUDE_PLUGIN_ROOT}/bin/astrobot.js" roll`, which prints a RANDOM `birth`, a `colorHex`, and the computed `chart`. The model did NOT choose it — that's the point. The model then (a) reads the chart (sun/moon/rising + **house placements & meanings**), (b) writes a 2–3 sentence persona that fits THIS chart (may reference the Sun's house/life-area), (c) NAMES the rolled color (keep the exact `colorHex`), (d) picks 1–2 traits, then persists by piping `{ birth:<rolled birth>, color:{name:<chosen name>, hex:<colorHex>}, persona, traits }` into `birth --model <id>` — reusing the rolled birth + hex verbatim (no re-rolling, no editing coordinates). Keep the persona soft-structure, no-clichés, and the tone-only guardrail. Remove the antique-color "free choice" wording.
+
+- [ ] Sanity-check + commit (`feat: skill uses astrobot roll (random chart) + house-aware birth`).
+
+---
+
+### Task 11: Microsite — Unifraktur display font, roll button, houses UI, gallery polish
+
+**Files:** Modify `site/index.html`, `site/styles.css`, `site/app.js`. (Engine bundle already rebuilt in Task 9.)
+
+**REQUIRED SUB-SKILL:** invoke `frontend-design` before restyling.
+
+- [ ] **Font:** load **UnifrakturMaguntia** (Google Fonts `<link>`) and use it for the wordmark + section headings ONLY; body stays a readable serif (blackletter is unreadable at body sizes). Ensure good contrast on the dark ground.
+- [ ] **Roll button:** add a "🎲 Roll a random identity" button to the playground that randomizes the date/time/city inputs (from `Astrobot.CITIES`) and the color input, then re-renders — demoing the real birth UX. (Pure input-randomization in the page; no engine logic duplicated beyond picking a random city + random color.)
+- [ ] **Houses:** in the playground chart readout and gallery cards, show each planet's **house** number, and add a compact **house-meanings legend** (1–12 → life area). The wheel already draws the house divisions.
+- [ ] **Gallery polish (from review):** display `entry.sample.mood.sunAspect` (with its aspect glyph) on each card; escape interpolated `gallery.json` strings (use `textContent`/attribute-setting or a small `esc()` helper) instead of raw `innerHTML`.
+- [ ] **Verify** (serve over HTTP; describe in report): font loads, roll button changes the chart, houses + legend show, gallery shows sunAspect. Run `npm test`.
+- [ ] Commit (`feat: microsite — Unifraktur display, roll button, houses UI, gallery polish`).
+
+---
+
 ## Self-Review
 
 **Coverage:** portable mode (Task 1: renderer + CLI + README + tests); browser bundle reusing real engine (Task 2 + smoke test asserting Capricorn/Aries via the bundle); gallery of real example profiles (Task 3); interactive playground + gallery UI, vintage-celestial, honesty label on live persona (Task 4); Actions→Pages deploy (Task 5); build/verify/no-drift (Task 6). Matches the Phase 2 scope (playground + gallery + portable mode).
