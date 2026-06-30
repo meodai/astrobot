@@ -478,6 +478,44 @@ After Tasks 7–8 change the chart shape, regenerate the gallery and the browser
 
 ---
 
+### Task 12: Real-clock birth time (date stays random)
+
+**Why:** the birth's *date* should stay random (sun sign = fate, spread), but the *time-of-day* of a real `/astrobot` birth should be the actual wall-clock moment — so the rising sign + houses reflect the true instant. Seeded rolls (tests) stay fully deterministic.
+
+**Files:** Modify `lib/roll.js` (add optional `now` to `roll`), `bin/astrobot.js` (pass `new Date()` on the unseeded path), `test/roll.test.js`; one-line notes in `README.md` and `skills/astrobot/SKILL.md`.
+
+- [ ] **Step 1: extend `lib/roll.js`** — `roll(seed, now)`: after building `birth` and `colorHex` from the RNG (unchanged call order, so color stays deterministic), if `now` is provided, overwrite ONLY the time component of `birth.datetime` with `now`'s local `HH:MM`:
+```js
+function roll(seed, now) {
+  const r = rng(seed);
+  const birth = rollBirth(r);
+  const colorHex = rollColor(r);
+  if (now) {
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mi = String(now.getMinutes()).padStart(2, '0');
+    birth.datetime = birth.datetime.slice(0, 11) + `${hh}:${mi}:00`; // keep rolled date, real time
+  }
+  return { birth, colorHex };
+}
+```
+
+- [ ] **Step 2: CLI** — in `bin/astrobot.js` `roll` command, use the real clock only when unseeded:
+```js
+const seeded = args.seed != null;
+const { birth, colorHex } = roll(seeded ? Number(args.seed) : undefined, seeded ? undefined : new Date());
+```
+
+- [ ] **Step 3: tests** (extend `test/roll.test.js`):
+  - `roll(42)` still deep-equals `roll(42)` (deterministic, no `now`).
+  - `roll(42, new Date('2020-01-01T13:37:00'))`: `birth.datetime` ends with `T13:37:00` AND its date portion (`slice(0,10)`) equals `roll(42).birth.datetime.slice(0,10)` (time replaced, date preserved).
+  - `colorHex` is identical with and without `now` for the same seed (injection doesn't disturb the RNG sequence).
+
+- [ ] **Step 4: docs** — README "How it works": add a parenthetical to the birth bullet, e.g. "(born at the real clock moment you run it — only the date is random)". SKILL.md Step 2/3: one evocative line that the rising sign reflects the actual moment of birth.
+
+- [ ] **Step 5:** full suite → pass. Commit (`feat: birth uses the real clock time-of-day (date stays random)`).
+
+---
+
 ## Self-Review
 
 **Coverage:** portable mode (Task 1: renderer + CLI + README + tests); browser bundle reusing real engine (Task 2 + smoke test asserting Capricorn/Aries via the bundle); gallery of real example profiles (Task 3); interactive playground + gallery UI, vintage-celestial, honesty label on live persona (Task 4); Actions→Pages deploy (Task 5); build/verify/no-drift (Task 6). Matches the Phase 2 scope (playground + gallery + portable mode).
