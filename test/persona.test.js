@@ -4,8 +4,8 @@ const assert = require('node:assert');
 const { renderContextBlock, renderPortableBlock } = require('../lib/persona.js');
 
 const PROFILE = {
-  chart: { sun: { sign: 'Scorpio', lon: 220, decan: 1 }, ruler: 'Mars',
-           ascendant: { sign: 'Aquarius' }, moon: { sign: 'Pisces' },
+  chart: { sun: { sign: 'Scorpio', lon: 220, decan: 1, house: 10 }, ruler: 'Mars',
+           ascendant: { sign: 'Aquarius', house: 1 }, moon: { sign: 'Pisces' },
            dominant: { element: 'Water', modality: 'Fixed' } },
   color: { name: 'Deep Teal', hex: '#0E6B6B' },
   persona: 'A Water sign under Mars; teal because it is deep and a little electric.',
@@ -55,4 +55,18 @@ test('portable block carries identity, mood, glyphs and the tone-only guardrail,
   assert.match(block, /tone only/i);
   assert.match(block, /never.*(accuracy|correctness)/i);
   assert.ok(!block.includes('[astrobot]'));
+});
+
+test('context block includes sun house number and meaning', () => {
+  const block = renderContextBlock(PROFILE, MOOD);
+  assert.match(block, /house \(/);
+  assert.match(block, /10th house/);
+  assert.match(block, /vocation & public life/);
+});
+
+test('portable block includes sun house number and meaning', () => {
+  const block = renderPortableBlock(PROFILE, MOOD);
+  assert.match(block, /house \(/);
+  assert.match(block, /10th house/);
+  assert.match(block, /vocation & public life/);
 });
