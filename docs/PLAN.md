@@ -654,7 +654,7 @@ test('corrupt JSON is treated as empty, never throws', () => {
 });
 ```
 
-Note on `resolve('unknown')`: when the model id is present but not stored, fall back to `_default` (matches the hook's "omitted/unknown → default" rule).
+Note on `resolve('unknown')`: when the model id is **present but not stored**, return `null` (an explicit-but-unborn model stays silent — it must NOT borrow `_default`). Only an **omitted** model falls back to `_default`.
 
 - [ ] **Step 2: Run test to verify it fails**
 
