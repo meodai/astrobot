@@ -9,6 +9,7 @@ function parseArgs(argv) {
   const args = { _: [] };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--model') args.model = argv[++i];
+    else if (argv[i] === '--seed') args.seed = argv[++i];
     else args._.push(argv[i]);
   }
   return args;
@@ -74,7 +75,14 @@ async function run(argv, opts = {}) {
     return { code: 0, out };
   }
 
-  return { code: 1, out: 'usage: astrobot <today|birth|show|export> [--model <id>]\n' };
+  if (cmd === 'roll') {
+    const { roll } = require('../lib/roll.js');
+    const { birth, colorHex } = roll(args.seed != null ? Number(args.seed) : undefined);
+    const chart = computeChart(birth);
+    return { code: 0, out: JSON.stringify({ birth, colorHex, chart }, null, 2) + '\n' };
+  }
+
+  return { code: 1, out: 'usage: astrobot <today|birth|show|export|roll> [--model <id>] [--seed <n>]\n' };
 }
 
 if (require.main === module) {
