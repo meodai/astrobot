@@ -6,9 +6,11 @@
   "license": "MIT",
   "scripts": {
     "test": "node --test",
-    "vendor": "cp node_modules/astronomy-engine/astronomy.js vendor/astronomy.js"
+    "vendor": "cp node_modules/astronomy-engine/astronomy.js vendor/astronomy.js",
+    "build:site": "esbuild site/src/engine.js --bundle --format=iife --global-name=Astrobot --outfile=site/astrobot.bundle.js"
   },
   "devDependencies": {
-    "astronomy-engine": "^2.1.19"
+    "astronomy-engine": "^2.1.19",
+    "esbuild": "^0.21.0"
   }
 }
