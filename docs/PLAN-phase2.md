@@ -227,9 +227,12 @@ git commit -m "feat: gallery dataset of example profiles (real charts + authored
 
 ---
 
-### Task 4: Microsite UI (vintage-celestial) — playground + gallery
+### Task 4: Microsite UI (vintage-celestial) — playground + gallery + chart wheel
 
 **Files:**
+- Modify: `package.json` (add `@astrodraw/astrochart` devDependency; split build scripts)
+- Create: `site/src/astrochart.js` (browser entry for the chart library)
+- Create: `site/astrochart.bundle.js` (build output — committed)
 - Create: `site/index.html`
 - Create: `site/styles.css`
 - Create: `site/app.js`
@@ -237,26 +240,73 @@ git commit -m "feat: gallery dataset of example profiles (real charts + authored
 
 **REQUIRED SUB-SKILL for this task:** invoke the `frontend-design` skill before writing CSS/markup; the design must be distinctive (vintage-celestial: gold-on-dark, antique woodcut/ink, real astrological glyphs), not a templated default.
 
-**Interfaces:** consumes `site/astrobot.bundle.js` (`globalThis.Astrobot`) and `site/gallery.json` (fetched).
+**Interfaces:** consumes `site/astrobot.bundle.js` (`globalThis.Astrobot`), `site/astrochart.bundle.js` (`globalThis.astrology` — the AstroChart library), and `site/gallery.json` (fetched).
 
-- [ ] **Step 1: `index.html`** — loads `astrobot.bundle.js` then `app.js`; two sections: **Playground** and **Gallery**; a header explaining astrobot in one sentence with a link to the repo.
+- [ ] **Step 1: Bundle AstroChart (site-only devDep)**
 
-- [ ] **Step 2: Playground (`app.js` + markup)** — controls: birth date, birth time, city `<select>` (populated from `Astrobot.CITIES`) or manual lat/lon, a favorite-color input (default-suggested from the sun-sign ruler's antique color), and a **"today" date scrubber**. On any change: call `Astrobot.computeChart` then `Astrobot.composeMood(chart, scrubDate)`; render:
-  - the natal chart: each placement as `glyph Sign` (Sun/Moon/Mercury–Saturn, decan, ascendant, dominant element/modality) using `Astrobot.glyphs`;
+Add `"@astrodraw/astrochart": "^4.1.0"` to `devDependencies` and refactor the `scripts` so a single command builds BOTH bundles:
+```json
+"build:engine": "esbuild site/src/engine.js --bundle --format=iife --global-name=Astrobot --outfile=site/astrobot.bundle.js",
+"build:astrochart": "esbuild site/src/astrochart.js --bundle --format=iife --global-name=astrology --outfile=site/astrochart.bundle.js",
+"build:site": "npm run build:engine && npm run build:astrochart"
+```
+Run `npm install`. Create `site/src/astrochart.js`:
+```js
+// Browser entry — bundles the AstroChart SVG chart library as global `astrology`.
+module.exports = require('@astrodraw/astrochart');
+```
+Run `npm run build:site` and confirm BOTH `site/astrobot.bundle.js` and `site/astrochart.bundle.js` exist and are non-empty. (If the package's default export shape differs, adjust `site/src/astrochart.js` so the bundle's global exposes a usable `Chart` constructor — verify with `node -e "const a=require('@astrodraw/astrochart'); console.log(Object.keys(a))"`.)
+
+- [ ] **Step 2: `index.html`** — loads `astrobot.bundle.js`, `astrochart.bundle.js`, then `app.js`; two sections: **Playground** and **Gallery**; a header explaining astrobot in one sentence with a link to the repo.
+
+- [ ] **Step 3: Whole-sign house helper + chart-wheel renderer (`app.js`)**
+
+Add a pure helper that turns the engine chart into AstroChart's data shape using **whole-sign houses** from the ascendant (no fabricated MC):
+```js
+function wheelData(chart) {
+  const ascSignStart = Math.floor(chart.ascendant.lon / 30) * 30;
+  const cusps = Array.from({ length: 12 }, (_, i) => (ascSignStart + 30 * i) % 360);
+  return {
+    planets: {
+      Sun: [chart.sun.lon], Moon: [chart.moon.lon], Mercury: [chart.mercury.lon],
+      Venus: [chart.venus.lon], Mars: [chart.mars.lon], Jupiter: [chart.jupiter.lon],
+      Saturn: [chart.saturn.lon],
+    },
+    cusps,
+  };
+}
+```
+Render with a gold-on-dark theme and aspect lines:
+```js
+function drawWheel(elementId, chart, size) {
+  const el = document.getElementById(elementId);
+  el.innerHTML = '';
+  const settings = { /* gold-on-dark COLORS_SIGNS, line/stroke/background, SYMBOL_SCALE */ };
+  const data = wheelData(chart);
+  const radix = new astrology.Chart(elementId, size, size, settings).radix(data);
+  radix.addPointsOfInterest({ As: [data.cusps[0]], Ds: [data.cusps[6]] });
+  radix.aspects();
+}
+```
+Theme `settings` to match the vintage-celestial palette (gold strokes/symbols on the dark ground). Below each wheel, a small note: **"Whole-sign houses from the ascendant (full Placidus houses are a future enhancement)."**
+
+- [ ] **Step 4: Playground (`app.js` + markup)** — controls: birth date, birth time, city `<select>` (populated from `Astrobot.CITIES`) or manual lat/lon, a favorite-color input (default-suggested from the sun-sign ruler's antique color), and a **"today" date scrubber**. On any change: call `Astrobot.computeChart` then `Astrobot.composeMood(chart, scrubDate)`; render:
+  - the **chart wheel** via `drawWheel(...)`;
+  - the natal chart text: each placement as `glyph Sign` (Sun/Moon/Mercury–Saturn, decan, ascendant, dominant element/modality) using `Astrobot.glyphs`;
   - a color swatch;
   - the mood dials as labeled bars (warmth/energy/playfulness/verbosity/metaphor, 0–4);
   - the rendered block via `Astrobot.renderContextBlock`, under a clear label: **"Structure the LLM fills in (persona text here is a placeholder — real personas are LLM-written, see the gallery)."**
 
-- [ ] **Step 3: Gallery** — `fetch('gallery.json')` and render a card per entry: sign glyph + name, color swatch, the real persona text, a compact chart summary, and the sample-day mood. Handle fetch failure gracefully (show a message, don't blank the page).
+- [ ] **Step 5: Gallery** — `fetch('gallery.json')` and render a card per entry: a **compact chart wheel** (`drawWheel` from `entry.chart`), sign glyph + name, color swatch, the real persona text, a compact chart summary, and the sample-day mood. Handle fetch failure gracefully (show a message, don't blank the page).
 
-- [ ] **Step 4: Styles (`site/styles.css`)** — vintage-celestial per the frontend-design pass: dark ground, gold/parchment ink, a display face for headings + readable body face (system stacks or Google Fonts via `<link>`), glyphs prominent, subtle star/woodcut texture allowed but keep it legible and fast. Responsive (works on the phone screenshot width).
+- [ ] **Step 6: Styles (`site/styles.css`)** — vintage-celestial per the frontend-design pass: dark ground, gold/parchment ink, a display face for headings + readable body face (system stacks or Google Fonts via `<link>`), glyphs prominent, the chart wheels framed like plates, subtle star/woodcut texture allowed but keep it legible and fast. Responsive (works on the phone screenshot width).
 
-- [ ] **Step 5: Manual check** — `npm run build:site` (ensure bundle fresh), then open `site/index.html` (or `python3 -m http.server` in `site/`) and confirm: changing inputs updates the chart/mood live; the scrubber changes the mood; the gallery renders. Capture nothing automated here; describe the verification in the report.
+- [ ] **Step 7: Manual check** — `npm run build:site` (ensure both bundles fresh), then serve `site/` (`python3 -m http.server` in `site/`) and confirm: changing inputs updates the wheel + chart + mood live; the scrubber changes the mood; both bundles load; the gallery renders cards with wheels. Describe the verification in the report (note: open via http server, not file://, so `fetch('gallery.json')` works).
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 8: Commit**
 ```bash
-git add site/index.html site/styles.css site/app.js site/.nojekyll
-git commit -m "feat: microsite UI — interactive playground + gallery (vintage-celestial)"
+git add package.json package-lock.json site/src/astrochart.js site/astrochart.bundle.js site/index.html site/styles.css site/app.js site/.nojekyll
+git commit -m "feat: microsite UI — playground + gallery with AstroChart wheel (vintage-celestial)"
 ```
 
 ---
