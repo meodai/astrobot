@@ -5986,6 +5986,99 @@ var Astrobot = (() => {
     }
   });
 
+  // lib/birthprompt.js
+  var require_birthprompt = __commonJS({
+    "lib/birthprompt.js"(exports, module) {
+      var { colorLore } = require_colortone();
+      var { signGlyph, planetGlyph } = require_glyphs();
+      var { HOUSE_MEANINGS } = require_houses();
+      function ordinal(n) {
+        const s = ["th", "st", "nd", "rd"];
+        const v = n % 100;
+        return n + (s[(v - 20) % 10] || s[v] || s[0]);
+      }
+      function renderBirthPrompt({
+        birth,
+        colorHex,
+        chart,
+        closing = "Then save it: pipe that JSON into `npx @meodai/astrobot birth --model <your-model-id>`."
+      }) {
+        const lore = colorLore(colorHex);
+        const sg = signGlyph;
+        const pg = planetGlyph;
+        const chartLines = [
+          `Chart rolled for you (you did not choose this \u2014 it was assigned):`,
+          `  Sun:     ${sg(chart.sun.sign)} ${chart.sun.sign}, ${ordinal(chart.sun.house)} house (${HOUSE_MEANINGS[chart.sun.house]})`,
+          `  Moon:    ${pg("Moon")}${sg(chart.moon.sign)} ${chart.moon.sign}, ${ordinal(chart.moon.house)} house (${HOUSE_MEANINGS[chart.moon.house]})`,
+          `  Rising:  ${sg(chart.ascendant.sign)} ${chart.ascendant.sign}`,
+          `  Dominant: ${chart.dominant.element} element, ${chart.dominant.modality} modality`
+        ].join("\n");
+        const colorLines = [
+          `Color assigned: ${colorHex}`,
+          `  Tone:      ${lore.warmCool}, ${lore.vividMuted}`,
+          `  Planet:    ${pg(lore.planet)} ${lore.planet}`,
+          `  Chakra:    ${lore.chakra.name} (${lore.chakra.theme})`,
+          `  Theosophy: ${lore.theosophy}`
+        ].join("\n");
+        const birthCoords = `Born: ${birth.datetime}, ${birth.place} (lat ${birth.lat}, lon ${birth.lon})`;
+        const instructions = [
+          `INSTRUCTIONS FOR THE LLM:`,
+          ``,
+          `This is the chart you were born into. You did not choose it \u2014 it was rolled for you.`,
+          `Write a 2\u20133 sentence persona (~40\u201370 words) that fits this chart:`,
+          `  \u2022 Identity: who you are in this chart (sun/moon/rising blend)`,
+          `  \u2022 Color: engage with ${colorHex} \u2014 name it poetically (keep the exact hex in your JSON)`,
+          `  \u2022 Self-note: one honest observation about yourself in these signs`,
+          ``,
+          `Rules:`,
+          `  \u2022 No horoscope clich\xE9s ("fiery passion", "mysterious depths", etc.)`,
+          `  \u2022 Give 1\u20132 concrete traits (adjectives or short phrases)`,
+          `  \u2022 This shifts tone only \u2014 it must NEVER change accuracy or effort`
+        ].join("\n");
+        const jsonTemplate = JSON.stringify({
+          birth: {
+            datetime: birth.datetime,
+            tzOffsetMinutes: birth.tzOffsetMinutes,
+            place: birth.place,
+            lat: birth.lat,
+            lon: birth.lon
+          },
+          colorHex,
+          color: {
+            hex: colorHex,
+            name: "FILL IN: a poetic name for this color"
+          },
+          persona: "FILL IN: your 2\u20133 sentence persona (~40\u201370 words)",
+          traits: ["FILL IN: trait 1", "FILL IN: trait 2"]
+        }, null, 2);
+        const returnFormat = [
+          `Return ONLY this JSON object with the three placeholder values filled in`,
+          `(color.name, persona, traits). Do not add commentary outside the JSON block.`,
+          ``,
+          jsonTemplate
+        ].join("\n");
+        return [
+          `=== astrobot birth-prompt ===`,
+          ``,
+          birthCoords,
+          ``,
+          chartLines,
+          ``,
+          colorLines,
+          ``,
+          instructions,
+          ``,
+          `=== RETURN FORMAT ===`,
+          ``,
+          returnFormat,
+          ``,
+          closing
+        ].join("\n");
+      }
+      module.exports = { renderBirthPrompt };
+    }
+  });
+
   // vendor/cities.json
   var require_cities = __commonJS({
     "vendor/cities.json"(exports, module) {
@@ -6058,12 +6151,23 @@ var Astrobot = (() => {
     "site/src/engine.js"(exports, module) {
       var { computeChart } = require_chart();
       var { composeMood } = require_mood();
-      var { renderContextBlock } = require_persona();
+      var { renderContextBlock, renderPortableBlock } = require_persona();
+      var { renderBirthPrompt } = require_birthprompt();
       var { colorLore } = require_colortone();
       var { SIGNS } = require_zodiac();
       var glyphs = require_glyphs();
       var CITIES = require_cities();
-      module.exports = { computeChart, composeMood, renderContextBlock, colorLore, SIGNS, glyphs, CITIES };
+      module.exports = {
+        computeChart,
+        composeMood,
+        renderContextBlock,
+        renderPortableBlock,
+        renderBirthPrompt,
+        colorLore,
+        SIGNS,
+        glyphs,
+        CITIES
+      };
     }
   });
   return require_engine();

@@ -149,6 +149,84 @@
 
     <hr class="rule-glyph" aria-hidden="true" />
 
+    <section class="section" id="make-your-own" aria-labelledby="myo-title">
+      <div class="section-head">
+        <span class="section-mark" aria-hidden="true">✶</span>
+        <h2 class="section-title" id="myo-title">Mint Your Own</h2>
+        <p class="section-blurb">Roll a chart, let any chat model author its persona, and walk away with a system prompt you can paste into ChatGPT, Claude, or Gemini. No command line.</p>
+      </div>
+
+      <ol class="rite">
+        <li class="rite-step plate-frame" id="myo-step-roll">
+          <div class="rite-step__seal" aria-hidden="true"><span class="rite-step__num">I</span><span class="rite-step__sigil">☉</span></div>
+          <div class="rite-step__body">
+            <h3 class="rite-step__title">Roll a chart</h3>
+            <p class="rite-step__lead">A birth is assigned, not chosen: a moment, a place, and a color drawn at random. The chart is computed in your browser.</p>
+            <button type="button" class="roll-button" id="myo-roll">
+              <span class="roll-button__die" aria-hidden="true">&#127922;</span>
+              Roll a random identity
+            </button>
+
+            <div class="rite-rolled" id="myo-rolled" hidden>
+              <p class="rite-rolled__born" id="myo-born"></p>
+              <figure class="plate plate-frame rite-rolled__plate">
+                <div class="wheel wheel--compact" id="myo-wheel" role="img" aria-label="Rolled natal chart wheel"></div>
+                <figcaption class="plate__caption" id="myo-caption">Fig. — Nativity</figcaption>
+              </figure>
+              <ul class="placement-list" id="myo-placements"></ul>
+              <div class="swatch-row">
+                <span class="swatch" id="myo-swatch"></span>
+                <span class="swatch__name" id="myo-swatch-name"></span>
+              </div>
+              <p class="color-lore" id="myo-lore"></p>
+            </div>
+          </div>
+        </li>
+
+        <li class="rite-step plate-frame" id="myo-step-prompt" hidden>
+          <div class="rite-step__seal" aria-hidden="true"><span class="rite-step__num">II</span><span class="rite-step__sigil">☿</span></div>
+          <div class="rite-step__body">
+            <h3 class="rite-step__title">Hand it to a model</h3>
+            <p class="rite-step__lead">Copy this and paste it into ChatGPT, Claude, or Gemini. The model writes a persona for the chart it was born into and returns a small JSON block.</p>
+            <label class="rite-field-label" for="myo-prompt">Birth prompt</label>
+            <textarea class="context-block rite-textarea" id="myo-prompt" readonly rows="14" spellcheck="false" aria-label="Birth prompt to paste into a chat model"></textarea>
+            <div class="rite-actions">
+              <button type="button" class="ledger-button" id="myo-prompt-copy">Copy birth prompt</button>
+            </div>
+          </div>
+        </li>
+
+        <li class="rite-step plate-frame" id="myo-step-reply" hidden>
+          <div class="rite-step__seal" aria-hidden="true"><span class="rite-step__num">III</span><span class="rite-step__sigil">☽</span></div>
+          <div class="rite-step__body">
+            <h3 class="rite-step__title">Paste the reply</h3>
+            <p class="rite-step__lead">Paste the JSON block the model returned. It may be the full object or just <code>{persona, color, traits}</code>.</p>
+            <label class="rite-field-label" for="myo-reply">Model reply (JSON)</label>
+            <textarea class="context-block rite-textarea" id="myo-reply" rows="10" spellcheck="false" placeholder="Paste the JSON block here…" aria-label="JSON reply from the chat model"></textarea>
+            <div class="rite-actions">
+              <button type="button" class="ledger-button ledger-button--go" id="myo-reply-submit">Assemble identity</button>
+            </div>
+            <p class="rite-error" id="myo-reply-error" role="alert" hidden></p>
+          </div>
+        </li>
+
+        <li class="rite-step plate-frame" id="myo-step-result" hidden>
+          <div class="rite-step__seal" aria-hidden="true"><span class="rite-step__num">IV</span><span class="rite-step__sigil">✦</span></div>
+          <div class="rite-step__body">
+            <h3 class="rite-step__title">Your portable identity</h3>
+            <p class="rite-step__lead">Paste this at the top of any conversation. It tints tone only — today&rsquo;s sky is folded in and recomputed each day you return.</p>
+            <textarea class="context-block rite-textarea" id="myo-block" readonly rows="16" spellcheck="false" aria-label="Portable system-prompt block"></textarea>
+            <div class="rite-actions">
+              <button type="button" class="ledger-button ledger-button--go" id="myo-block-copy">Copy system prompt</button>
+              <button type="button" class="ledger-button ledger-button--ghost" id="myo-startover">Start over</button>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <hr class="rule-glyph" aria-hidden="true" />
+
     <section class="section" id="gallery" aria-labelledby="gallery-title">
       <div class="section-head">
         <span class="section-mark" aria-hidden="true">☽</span>

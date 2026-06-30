@@ -113,8 +113,8 @@
     return li;
   }
 
-  function renderPlacements(chart) {
-    var list = document.getElementById('placements');
+  function renderPlacements(chart, list) {
+    list = list || document.getElementById('placements');
     list.innerHTML = '';
     list.appendChild(placementRow(pg('Sun'), 'Sun', chart.sun.sign, chart.sun.house,
       ordinal(chart.sun.decan + 1) + ' decan'));
@@ -318,6 +318,7 @@
       clearTimeout(pgResizeTimer);
       pgResizeTimer = setTimeout(function () {
         if (lastChart) drawWheel('pg-wheel', lastChart, pgWheelSize());
+        if (myoChart) drawWheel('myo-wheel', myoChart, myoWheelSize());
       }, 180);
     });
   }
@@ -402,6 +403,212 @@
       });
   }
 
+  /* ---- Make your own (mint an identity for any LLM) -------------------- */
+
+  var MYO_KEY = 'astrobot:identity';
+  var myoState = null;   // { birth, colorHex, chart } from the latest roll
+  var myoChart = null;   // chart currently drawn in the myo wheel (for resize)
+
+  function myoWheelSize() {
+    var plate = document.querySelector('#make-your-own .wheel');
+    var w = plate ? plate.clientWidth : 300;
+    return Math.max(240, Math.min(380, Math.round(w)));
+  }
+
+  // Show a step <li> and, optionally, scroll it into view.
+  function myoShow(id, reveal) {
+    var el = $(id);
+    if (el) el.hidden = !reveal;
+  }
+
+  function myoRenderRolled(chart, birth, colorHex) {
+    var born = $('myo-born');
+    born.textContent = 'Born ' + birth.datetime.replace('T', ' ').slice(0, 16) +
+      ' · ' + birth.place + ' (' + birth.lat + ', ' + birth.lon + ')';
+
+    myoChart = chart;
+    drawWheel('myo-wheel', chart, myoWheelSize());
+    $('myo-caption').textContent = 'Fig. — Nativity, ' + sg(chart.sun.sign) + ' ' +
+      chart.sun.sign + ' with ' + chart.ascendant.sign + ' rising';
+
+    renderPlacements(chart, $('myo-placements'));
+
+    var validHex = safeHex(colorHex);
+    $('myo-swatch').style.setProperty('background', validHex);
+    $('myo-swatch-name').textContent = colorHex.toUpperCase();
+    renderLore('myo-lore', colorHex);
+
+    $('myo-rolled').hidden = false;
+  }
+
+  function myoRoll() {
+    var date = randInt(1940, 2012) + '-' + pad2(randInt(1, 12)) + '-' + pad2(randInt(1, 28));
+    var time = pad2(randInt(0, 23)) + ':' + pad2(randInt(0, 59));
+    var cities = Object.keys(A.CITIES);
+    var cityName = cities[randInt(0, cities.length - 1)];
+    var c = A.CITIES[cityName];
+    var colorHex = '#' + ('000000' + randInt(0, 0xffffff).toString(16)).slice(-6);
+
+    var birth = {
+      datetime: date + 'T' + time + ':00',
+      tzOffsetMinutes: 0,
+      place: cityName,
+      lat: c.lat,
+      lon: c.lon
+    };
+
+    var chart;
+    try {
+      chart = A.computeChart(birth);
+    } catch (err) {
+      $('myo-born').textContent = 'The ephemeris stumbled on that roll — try rolling again.';
+      $('myo-rolled').hidden = false;
+      return;
+    }
+
+    myoState = { birth: birth, colorHex: colorHex, chart: chart };
+    myoRenderRolled(chart, birth, colorHex);
+
+    $('myo-prompt').value = A.renderBirthPrompt({ birth: birth, colorHex: colorHex, chart: chart, closing: 'Then paste the JSON the model returns back into step 3 of the panel below.' });
+    $('myo-reply').value = '';
+    myoHideError();
+
+    myoShow('myo-step-prompt', true);
+    myoShow('myo-step-reply', true);
+    myoShow('myo-step-result', false);
+  }
+
+  function myoHideError() {
+    var e = $('myo-reply-error');
+    e.hidden = true;
+    e.textContent = '';
+  }
+
+  function myoShowError(msg) {
+    var e = $('myo-reply-error');
+    e.textContent = msg;
+    e.hidden = false;
+  }
+
+  // Accept the full birth object or a bare { persona, color, traits } reply.
+  function myoParseReply(raw, colorHex) {
+    var data = JSON.parse(raw);                 // throws on bad JSON
+    if (!data || typeof data !== 'object') throw new Error('not an object');
+
+    var persona = typeof data.persona === 'string' ? data.persona.trim() : '';
+    if (!persona) throw new Error('no persona');
+
+    var name = '';
+    if (data.color && typeof data.color === 'object' && data.color.name) name = String(data.color.name);
+    else if (typeof data.color === 'string') name = data.color;
+    if (!name) name = colorHex.toUpperCase();
+
+    var traits = Array.isArray(data.traits)
+      ? data.traits.filter(function (t) { return typeof t === 'string' && t.trim(); })
+      : [];
+
+    return { persona: persona, name: name, traits: traits };
+  }
+
+  function myoAssemble() {
+    if (!myoState) return;
+    var raw = $('myo-reply').value.trim();
+    if (!raw) { myoShowError('Paste the JSON block the model returned.'); return; }
+
+    var parsed;
+    try {
+      parsed = myoParseReply(raw, myoState.colorHex);
+    } catch (err) {
+      myoShowError('Couldn’t read that — paste the JSON block the model returned (it needs at least a "persona").');
+      return;
+    }
+    myoHideError();
+
+    var profile = {
+      birth: myoState.birth,
+      chart: myoState.chart,
+      color: { name: parsed.name, hex: myoState.colorHex },
+      persona: parsed.persona,
+      traits: parsed.traits
+    };
+
+    try {
+      localStorage.setItem(MYO_KEY, JSON.stringify(profile));
+    } catch (err) { /* private mode / quota — non-fatal */ }
+
+    myoRenderResult(profile);
+    myoShow('myo-step-result', true);
+  }
+
+  function myoRenderResult(profile) {
+    var mood = A.composeMood(profile.chart, new Date(), profile.color.hex);
+    $('myo-block').value = A.renderPortableBlock(profile, mood);
+  }
+
+  function myoStartOver() {
+    try { localStorage.removeItem(MYO_KEY); } catch (err) { /* ignore */ }
+    myoState = null;
+    myoChart = null;
+    $('myo-rolled').hidden = true;
+    $('myo-prompt').value = '';
+    $('myo-reply').value = '';
+    $('myo-block').value = '';
+    myoHideError();
+    myoShow('myo-step-prompt', false);
+    myoShow('myo-step-reply', false);
+    myoShow('myo-step-result', false);
+  }
+
+  function myoCopy(textareaId, btn) {
+    var ta = $(textareaId);
+    var label = btn.textContent;
+    function done() {
+      btn.textContent = 'Copied ✓';
+      setTimeout(function () { btn.textContent = label; }, 1600);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(ta.value).then(done, function () { ta.select(); done(); });
+    } else {
+      ta.select();
+      try { document.execCommand('copy'); } catch (err) { /* ignore */ }
+      done();
+    }
+  }
+
+  // Restore a saved identity: show the rolled chart and today's portable block.
+  function myoRestore() {
+    var raw;
+    try { raw = localStorage.getItem(MYO_KEY); } catch (err) { return; }
+    if (!raw) return;
+
+    var profile;
+    try { profile = JSON.parse(raw); } catch (err) { return; }
+    if (!profile || !profile.chart || !profile.color) return;
+
+    var birth = profile.birth || { datetime: '', place: '', lat: '', lon: '' };
+    myoState = { birth: birth, colorHex: profile.color.hex, chart: profile.chart };
+
+    myoRenderRolled(profile.chart, birth, profile.color.hex);
+    if (birth.datetime) {
+      $('myo-prompt').value = A.renderBirthPrompt({
+        birth: birth, colorHex: profile.color.hex, chart: profile.chart,
+        closing: 'Then paste the JSON the model returns back into step 3 of the panel below.'
+      });
+    }
+    $('myo-reply').value = '';
+    myoRenderResult(profile);
+    myoShow('myo-step-result', true);
+  }
+
+  function wireMakeYourOwn() {
+    $('myo-roll').addEventListener('click', myoRoll);
+    $('myo-reply-submit').addEventListener('click', myoAssemble);
+    $('myo-startover').addEventListener('click', myoStartOver);
+    $('myo-prompt-copy').addEventListener('click', function () { myoCopy('myo-prompt', this); });
+    $('myo-block-copy').addEventListener('click', function () { myoCopy('myo-block', this); });
+    myoRestore();
+  }
+
   /* ---- Boot ------------------------------------------------------------ */
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -409,6 +616,7 @@
     wireControls();
     updateScrubLabel();
     render();
+    wireMakeYourOwn();
     renderGallery();
   });
 })();

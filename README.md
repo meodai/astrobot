@@ -47,10 +47,18 @@ Astronomy by the vendored [Astronomy Engine](https://github.com/cosinekitty/astr
 
 ## Use with other LLMs
 
+### Born in Claude Code
+
 astrobot's identity is portable. After a model is born, print a paste-able persona block:
 
 ```
 node bin/astrobot.js export --model <id>
+```
+
+Or use it directly via npx (no install required):
+
+```
+npx @meodai/astrobot export --model <id>   # print the persona block to paste
 ```
 
 Paste the output into any assistant's system prompt (ChatGPT, Gemini, local models, etc.).
@@ -58,6 +66,35 @@ The block is self-contained — sign, color, chart, today's mood, and the tone-o
 so the other model adopts the persona without astrobot installed. Re-run `export` on any day
 to refresh that day's mood, then update the pasted block. (Automatic per-session application
 is Claude Code-only, via the plugin's hook.)
+
+### Born outside Claude Code (ChatGPT, Gemini, local models, etc.)
+
+Use `birth-prompt` to roll a chart and generate a ready-to-paste prompt for any LLM:
+
+```
+npx @meodai/astrobot birth-prompt           # random chart (real clock time)
+npx @meodai/astrobot birth-prompt --seed 7  # reproducible chart for testing
+```
+
+The loop:
+1. Run `birth-prompt` — it rolls a chart and prints a prompt.
+2. Paste the prompt into your LLM (ChatGPT, Gemini, a local model, etc.).
+3. The LLM returns a JSON object with `persona`, `color.name`, and `traits` filled in.
+4. Pipe the JSON to `birth`:
+
+```
+npx @meodai/astrobot birth-prompt | pbcopy  # copy to clipboard, paste into LLM
+# ... LLM returns JSON ...
+echo '<JSON from LLM>' | npx @meodai/astrobot birth --model <your-model-id>
+```
+
+After `birth`, the model has a permanent identity stored in `~/.claude/astrobot/profiles.json`
+(override the location with the `ASTROBOT_DIR` env var). This is the same store the Claude Code
+plugin uses, so an identity you birth via `npx` is also picked up automatically if you later run
+that same model in Claude Code. Use `export --model <id>` to get a paste-able persona block for
+any conversation.
+
+Publish with `npm publish --access public` (scoped public package).
 
 ## Development
 
