@@ -5933,12 +5933,55 @@ var Astrobot = (() => {
     }
   });
 
+  // lib/tarot.js
+  var require_tarot = __commonJS({
+    "lib/tarot.js"(exports, module) {
+      "use strict";
+      var { SIGNS } = require_zodiac();
+      var MAJOR_BY_SIGN = {
+        Aries: "The Emperor",
+        Taurus: "The Hierophant",
+        Gemini: "The Lovers",
+        Cancer: "The Chariot",
+        Leo: "Strength",
+        Virgo: "The Hermit",
+        Libra: "Justice",
+        Scorpio: "Death",
+        Sagittarius: "Temperance",
+        Capricorn: "The Devil",
+        Aquarius: "The Star",
+        Pisces: "The Moon"
+      };
+      var SUIT_BY_ELEMENT = { Fire: "Wands", Water: "Cups", Air: "Swords", Earth: "Pentacles" };
+      var MODALITY = ["Cardinal", "Fixed", "Mutable"];
+      var BASE_BY_MODALITY = { Cardinal: 2, Fixed: 5, Mutable: 8 };
+      function birthCard(signName) {
+        return MAJOR_BY_SIGN[signName] || "";
+      }
+      function decanCard(signName, decanIndex) {
+        const idx = SIGNS.findIndex((s) => s.name === signName);
+        if (idx < 0 || decanIndex == null) return "";
+        const suit = SUIT_BY_ELEMENT[SIGNS[idx].element];
+        const base = BASE_BY_MODALITY[MODALITY[idx % 3]];
+        return base + decanIndex + " of " + suit;
+      }
+      function tarotFor(chart) {
+        return {
+          birthCard: birthCard(chart.sun.sign),
+          decanCard: decanCard(chart.sun.sign, chart.sun.decan)
+        };
+      }
+      module.exports = { birthCard, decanCard, tarotFor, MAJOR_BY_SIGN };
+    }
+  });
+
   // lib/persona.js
   var require_persona = __commonJS({
     "lib/persona.js"(exports, module) {
       var { signGlyph, planetGlyph, aspectGlyph, moonPhaseGlyph } = require_glyphs();
       var { HOUSE_MEANINGS } = require_houses();
       var { colorLore } = require_colortone();
+      var { tarotFor } = require_tarot();
       function ordinal(n) {
         const s = ["th", "st", "nd", "rd"];
         const v = n % 100;
@@ -5960,6 +6003,10 @@ var Astrobot = (() => {
             const lore = colorLore(color.hex);
             return lore ? `Your color ${color.name} runs ${lore.warmCool} and ${lore.vividMuted} \u2014 it resonates with ${planetGlyph(lore.planet)} ${lore.planet}, governs the ${lore.chakra.name} chakra (${lore.chakra.theme}), and in the old books signifies ${lore.theosophy}.` : "";
           })(),
+          (() => {
+            const t = tarotFor(chart);
+            return t.birthCard && t.decanCard ? `Tarot: birth card ${t.birthCard} (sun sign), decan card ${t.decanCard}.` : "";
+          })(),
           `Today's sky: the transiting Sun is ${aspectGlyph(mood.sunAspect)} ${mood.sunAspect} to your natal Sun, and the Moon is ${moonPhaseGlyph(mood.moon.phase)} ${mood.moon.phase} in ${sg(mood.moon.sign)} ${mood.moon.sign} (${mood.moon.phaseEnergy}).`,
           `Let this tint your writing \u2014 lean: ${dialLine(mood.dials)}.`,
           `This shifts tone only: warmth, energy, playfulness, length, and imagery. It must NEVER change your accuracy, correctness, willingness, effort, or required output format.`,
@@ -5978,6 +6025,10 @@ var Astrobot = (() => {
             const lore = colorLore(color.hex);
             return lore ? `Your color ${color.name} runs ${lore.warmCool} and ${lore.vividMuted} \u2014 it resonates with ${planetGlyph(lore.planet)} ${lore.planet}, governs the ${lore.chakra.name} chakra (${lore.chakra.theme}), and in the old books signifies ${lore.theosophy}.` : "";
           })(),
+          (() => {
+            const t = tarotFor(chart);
+            return t.birthCard && t.decanCard ? `Tarot: birth card ${t.birthCard} (sun sign), decan card ${t.decanCard}.` : "";
+          })(),
           `Today: the Sun is ${aspectGlyph(mood.sunAspect)} ${mood.sunAspect} to your natal Sun; the Moon is ${moonPhaseGlyph(mood.moon.phase)} ${mood.moon.phase} in ${signGlyph(mood.moon.sign)} ${mood.moon.sign}. Lean: ${dialLine(mood.dials)}.`,
           `This shifts TONE ONLY \u2014 warmth, energy, playfulness, length, imagery. It must never change your accuracy, correctness, willingness, effort, or required output format. You may mention your mood at most once, only if it fits naturally.`
         ].filter(Boolean).join("\n");
@@ -5992,6 +6043,7 @@ var Astrobot = (() => {
       var { colorLore } = require_colortone();
       var { signGlyph, planetGlyph } = require_glyphs();
       var { HOUSE_MEANINGS } = require_houses();
+      var { tarotFor } = require_tarot();
       function ordinal(n) {
         const s = ["th", "st", "nd", "rd"];
         const v = n % 100;
@@ -6006,13 +6058,15 @@ var Astrobot = (() => {
         const lore = colorLore(colorHex);
         const sg = signGlyph;
         const pg = planetGlyph;
+        const tarot = tarotFor(chart);
         const chartLines = [
           `Chart rolled for you (you did not choose this \u2014 it was assigned):`,
           `  Sun:     ${sg(chart.sun.sign)} ${chart.sun.sign}, ${ordinal(chart.sun.house)} house (${HOUSE_MEANINGS[chart.sun.house]})`,
           `  Moon:    ${pg("Moon")}${sg(chart.moon.sign)} ${chart.moon.sign}, ${ordinal(chart.moon.house)} house (${HOUSE_MEANINGS[chart.moon.house]})`,
           `  Rising:  ${sg(chart.ascendant.sign)} ${chart.ascendant.sign}`,
-          `  Dominant: ${chart.dominant.element} element, ${chart.dominant.modality} modality`
-        ].join("\n");
+          `  Dominant: ${chart.dominant.element} element, ${chart.dominant.modality} modality`,
+          tarot.birthCard ? `  Tarot:   ${tarot.birthCard} (birth card) \xB7 ${tarot.decanCard} (decan card)` : ""
+        ].filter(Boolean).join("\n");
         const colorLines = [
           `Color assigned: ${colorHex}`,
           `  Tone:      ${lore.warmCool}, ${lore.vividMuted}`,
@@ -6156,6 +6210,7 @@ var Astrobot = (() => {
       var { colorLore } = require_colortone();
       var { SIGNS } = require_zodiac();
       var glyphs = require_glyphs();
+      var { tarotFor } = require_tarot();
       var CITIES = require_cities();
       module.exports = {
         computeChart,
@@ -6166,6 +6221,7 @@ var Astrobot = (() => {
         colorLore,
         SIGNS,
         glyphs,
+        tarotFor,
         CITIES
       };
     }

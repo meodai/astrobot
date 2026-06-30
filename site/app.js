@@ -268,6 +268,14 @@
     renderLore('pg-lore', color.hex);
     renderDials($('pg-dials'), mood.dials);
 
+    var pgTarot = A.tarotFor && A.tarotFor(chart);
+    var pgTarotEl = $('pg-tarot');
+    if (pgTarotEl) {
+      pgTarotEl.textContent = pgTarot
+        ? 'Birth card: ' + pgTarot.birthCard + ' · Decan: ' + pgTarot.decanCard
+        : '';
+    }
+
     var profile = {
       chart: chart,
       color: color,
@@ -367,6 +375,12 @@
             esc(lore.theosophy) + '</p>'
           : '';
       }()) +
+      (function () {
+        var t = A.tarotFor && A.tarotFor(c);
+        return (t && t.birthCard)
+          ? '<p class="tarot-line">Birth card: ' + esc(t.birthCard) + ' · Decan: ' + esc(t.decanCard) + '</p>'
+          : '';
+      }()) +
       '<p class="gallery-card__persona">' + esc(entry.persona) + '</p>' +
       '<p class="gallery-card__summary">' +
         pg('Sun') + ' ' + c.sun.sign + ' (' + ordinal(c.sun.house) + ') · ' +
@@ -445,6 +459,14 @@
     $('myo-swatch').style.setProperty('background', validHex);
     $('myo-swatch-name').textContent = colorHex.toUpperCase();
     renderLore('myo-lore', colorHex);
+
+    var myoTarot = A.tarotFor && A.tarotFor(chart);
+    var myoTarotEl = $('myo-tarot');
+    if (myoTarotEl) {
+      myoTarotEl.textContent = myoTarot
+        ? 'Birth card: ' + myoTarot.birthCard + ' · Decan: ' + myoTarot.decanCard
+        : '';
+    }
   }
 
   function myoRoll() {

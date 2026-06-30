@@ -711,6 +711,13 @@ textarea.rite-textarea:focus {
 }
 .plate--compact { margin: 0 0 .9rem; padding: 0; text-align: center; }
 .gallery-card__persona { font-style: italic; margin: 0 0 1rem; }
+.tarot-line {
+  font-family: var(--sc);
+  font-size: .8rem;
+  letter-spacing: .05em;
+  color: var(--verdigris);
+  margin: .35rem 0 .7rem;
+}
 .gallery-card__summary {
   font-size: .92rem;
   color: var(--gold);
