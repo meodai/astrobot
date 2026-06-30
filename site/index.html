@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>astrobot — a chart for every Claude</title>
+  <meta name="description" content="astrobot gives each Claude model a permanent astrological identity that gently tints its tone day by day. Cast a chart and watch the persona structure assemble." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IM+Fell+DW+Pica:ital@0;1&family=IM+Fell+DW+Pica+SC&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="starfield" aria-hidden="true"></div>
+
+  <header class="frontispiece">
+    <div class="plate-frame frontispiece__inner">
+      <p class="eyebrow">A Treatise in Software · Anno MMXXVI</p>
+      <div class="zodiac-band" aria-hidden="true">♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓</div>
+      <h1 class="title">astrobot</h1>
+      <p class="lede">
+        A Claude Code plugin that grants each Claude model a fixed astrological identity,
+        then lets the day&rsquo;s real sky gently tint its tone.
+      </p>
+      <p class="frontispiece__links">
+        <a class="link-pill" href="https://github.com/meodai/astrobot" rel="noopener">View the repository ↗</a>
+      </p>
+    </div>
+  </header>
+
+  <main>
+    <section class="section" id="playground" aria-labelledby="playground-title">
+      <div class="section-head">
+        <span class="section-mark" aria-hidden="true">☉</span>
+        <h2 class="section-title" id="playground-title">The Casting Table</h2>
+        <p class="section-blurb">Set a birth moment and place. The chart, placements, and today&rsquo;s mood update as you go.</p>
+      </div>
+
+      <div class="playground">
+        <form class="controls plate-frame" id="controls" autocomplete="off">
+          <fieldset class="field-group">
+            <legend>Birth moment</legend>
+            <label class="field">
+              <span class="field__label">Date</span>
+              <input type="date" id="birth-date" value="1996-11-08" />
+            </label>
+            <label class="field">
+              <span class="field__label">Time</span>
+              <input type="time" id="birth-time" value="03:14" />
+            </label>
+          </fieldset>
+
+          <fieldset class="field-group">
+            <legend>Birth place</legend>
+            <label class="field">
+              <span class="field__label">City</span>
+              <select id="birth-city"></select>
+            </label>
+            <div class="field-row" id="manual-coords" hidden>
+              <label class="field">
+                <span class="field__label">Latitude</span>
+                <input type="number" id="birth-lat" step="0.01" min="-90" max="90" value="64.13" />
+              </label>
+              <label class="field">
+                <span class="field__label">Longitude</span>
+                <input type="number" id="birth-lon" step="0.01" min="-180" max="180" value="-21.90" />
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="field-group">
+            <legend>Favorite color</legend>
+            <div class="field-row field-row--color">
+              <input type="color" id="fav-color" value="#9E4636" aria-label="Favorite color" />
+              <p class="hint" id="color-hint">Suggested from the chart ruler&rsquo;s antique pigment. Pick your own to override.</p>
+            </div>
+          </fieldset>
+
+          <fieldset class="field-group">
+            <legend>Sky for the day</legend>
+            <label class="field">
+              <span class="field__label">
+                Scrub the sky <strong id="scrub-date">today</strong>
+              </span>
+              <input type="range" id="scrub" min="-180" max="180" step="1" value="0" />
+            </label>
+            <p class="hint">Moves the transiting Sun and Moon, which drive the mood dials.</p>
+          </fieldset>
+        </form>
+
+        <div class="readout">
+          <figure class="plate plate-frame">
+            <div class="wheel" id="pg-wheel" role="img" aria-label="Natal chart wheel"></div>
+            <figcaption class="plate__caption" id="pg-caption">Fig. — Nativity</figcaption>
+          </figure>
+          <p class="house-note">Whole-sign houses from the ascendant (full Placidus houses are a future enhancement).</p>
+
+          <div class="readout-grid">
+            <div class="card plate-frame placements">
+              <h3 class="card__title">Placements</h3>
+              <ul class="placement-list" id="placements"></ul>
+            </div>
+
+            <div class="card plate-frame">
+              <h3 class="card__title">Color &amp; mood</h3>
+              <div class="swatch-row">
+                <span class="swatch" id="pg-swatch"></span>
+                <span class="swatch__name" id="pg-swatch-name"></span>
+              </div>
+              <dl class="dials" id="pg-dials"></dl>
+            </div>
+          </div>
+
+          <div class="card plate-frame context">
+            <h3 class="card__title">The context block</h3>
+            <p class="honesty">
+              Structure the LLM fills in — the persona line here is a placeholder.
+              Real personas are model-written; see the gallery below.
+            </p>
+            <pre class="context-block" id="pg-context"></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="rule-glyph" aria-hidden="true" />
+
+    <section class="section" id="gallery" aria-labelledby="gallery-title">
+      <div class="section-head">
+        <span class="section-mark" aria-hidden="true">☽</span>
+        <h2 class="section-title" id="gallery-title">The Cabinet of Nativities</h2>
+        <p class="section-blurb">Eight cast identities, each with a model-written self-portrait and a true chart.</p>
+      </div>
+      <div class="gallery-grid" id="gallery-grid"></div>
+    </section>
+  </main>
+
+  <footer class="colophon">
+    <span class="colophon__glyphs" aria-hidden="true">☉ ☽ ☿ ♀ ♂ ♃ ♄</span>
+    <p>astrobot tints tone only — never accuracy, willingness, or output format. Charts computed in your browser.</p>
+  </footer>
+
+  <script src="astrobot.bundle.js"></script>
+  <script src="astrochart.bundle.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
