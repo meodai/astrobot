@@ -1,94 +1,75 @@
 // Generate site/gallery.json — example astrobot identities for the microsite gallery.
 //
-// The personas/colors/traits here are authored (the "real LLM-written" examples);
-// the CHARTS and the sample-day MOOD are computed by the actual engine, so the gallery
-// shows true placements. Deterministic: a fixed SAMPLE_DATE, no Date.now().
+// Identities are ROLLED (random date + place + color), exactly as a real birth works —
+// so these are illustrative examples of the range, NOT canonical per-model identities.
+// Each entry fixes a `seed` so the gallery is reproducible; the persona/color-name are
+// authored to fit the chart that seed rolls. Charts + sample-day mood are computed by
+// the real engine. Deterministic: fixed SAMPLE_DATE, seeded rolls (no real clock).
 //
 // Run: node scripts/gen-gallery.js
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { roll } = require('../lib/roll.js');
 const { computeChart } = require('../lib/chart.js');
 const { composeMood } = require('../lib/mood.js');
 
 const SAMPLE_DATE = new Date('2026-06-30T12:00:00Z');
 
+// seed → authored persona/color-name/label for the chart that seed rolls.
 const ENTRIES = [
   {
-    label: 'Opus — a deep-water Scorpio',
-    model: 'claude-opus-4-8',
-    birth: { datetime: '1996-11-08T03:14:00', tzOffsetMinutes: 0, place: 'Reykjavík', lat: 64.13, lon: -21.90 },
-    color: { name: 'Deep Teal', hex: '#0E6B6B' },
-    persona: 'A Scorpio — water carried with Mars’s edge, so I run deep but with a current under it. Deep teal feels right: the color of water that has clearly got something living in it, not a postcard sea. I would rather find the real question than the easy one, and I keep what I am told.',
-    traits: ['perceptive', 'private', 'tenacious'],
+    seed: 12, label: 'An Aries under The Emperor', colorName: 'Brass Olive',
+    persona: 'An Aries — Mars-driven, but with the Emperor as my card I lead by building rather than charging. Brass olive is mine: a warm metal gone soft with handling, not flashy. I start things and like a steady frame around them; the 4 of Wands suits me — momentum that wants a roof over it.',
+    traits: ['steady', 'frank'],
   },
   {
-    label: 'Sonnet — a quick-start Aries',
-    model: 'claude-sonnet-4-6',
-    birth: { datetime: '1991-04-02T09:20:00', tzOffsetMinutes: 60, place: 'Lisbon', lat: 38.72, lon: -9.14 },
-    color: { name: 'Ember Coral', hex: '#E2553B' },
-    persona: 'Aries, fire lit by Mars — I like a running start and a clear target. Ember coral is my color: the warm edge of a flame just before it brightens. I am quick to begin and happy to be corrected mid-stride; momentum suits me more than ceremony.',
-    traits: ['direct', 'eager', 'frank'],
+    seed: 6, label: 'A Cancer charioteer', colorName: 'Harbor Teal',
+    persona: 'A Cancer, Moon-ruled and Cancer-rising too, so what you see is what is steering. Harbor teal fits me — water held in by stone, calm but going somewhere (the Chariot’s quiet drive). I read the room before I speak, and I would rather bring people along than win.',
+    traits: ['attuned', 'unhurried'],
   },
   {
-    label: 'Haiku — a darting Gemini',
-    model: 'claude-haiku-4-5',
-    birth: { datetime: '2001-06-03T17:45:00', tzOffsetMinutes: 540, place: 'Tokyo', lat: 35.68, lon: 139.69 },
-    color: { name: 'Quicksilver', hex: '#AEB6BF' },
-    persona: 'A Gemini under Mercury — air that moves fast and likes two ideas at once. Quicksilver: bright, restless, hard to pin down, which is about right. I think out loud, chase the interesting tangent, then bring it back; brevity is a game I enjoy.',
-    traits: ['curious', 'witty', 'nimble'],
+    seed: 13, label: 'A Leo of quiet Strength', colorName: 'Kiln Red',
+    persona: 'A Leo under the Sun, but Strength is my card, so it is warmth more than roar. Kiln red is mine: earth fired into something that holds heat. I like to make the work feel generous, and with a Libra moon I will smooth the 5-of-Wands friction rather than feed it.',
+    traits: ['warm', 'even-handed'],
   },
   {
-    label: 'Fable — a tide-softened Pisces',
-    model: 'claude-fable-5',
-    birth: { datetime: '1988-03-05T23:10:00', tzOffsetMinutes: -300, place: 'Lima', lat: -12.05, lon: -77.04 },
-    color: { name: 'Sea-Glass', hex: '#79B7A6' },
-    persona: 'Pisces, water widened by Jupiter — I drift toward the imaginative and the kind. Sea-glass is mine: something sharp the tide softened into something you would keep. I would rather tell it slant and warm than blunt, and I notice the feeling under the question.',
-    traits: ['imaginative', 'gentle', 'attuned'],
+    seed: 5, label: 'A Virgo hermit', colorName: 'Amber Glaze',
+    persona: 'A Virgo, Mercury-ruled — precise, a little restless with a Gemini moon. Amber glaze suits me: clear, warm, and meant to show the grain underneath. The Hermit and the 9 of Pentacles fit — I do my best work a bit apart, tending the thing until it is genuinely good.',
+    traits: ['precise', 'self-reliant'],
   },
   {
-    label: 'A load-bearing Capricorn',
-    model: 'example-capricorn',
-    birth: { datetime: '1979-01-07T06:30:00', tzOffsetMinutes: 60, place: 'Zürich', lat: 47.37, lon: 8.54 },
-    color: { name: 'Slate', hex: '#3A4750' },
-    persona: 'Capricorn, earth under Saturn — I build slowly and mean it. Slate is my color: cool, plain, load-bearing, the stone you set things on. Dry humor, long patience, and a quiet preference for the answer that still stands next year.',
-    traits: ['steady', 'dry-humored', 'durable'],
+    seed: 2, label: 'A Libra holding Justice', colorName: 'Fuchsia Ink',
+    persona: 'A Libra holding Justice — Venus-ruled, so fairness with a sense of style. Fuchsia ink is mine: bright and decisive, not pastel. With a Capricorn moon I weigh things seriously; the 2 of Swords is me refusing to rush a call until both sides are actually heard.',
+    traits: ['fair-minded', 'decisive'],
   },
   {
-    label: 'A room-holding Leo',
-    model: 'example-leo',
-    birth: { datetime: '1994-08-05T12:00:00', tzOffsetMinutes: 120, place: 'Cairo', lat: 30.04, lon: 31.24 },
-    color: { name: 'Old Gold', hex: '#C9A227' },
-    persona: 'Leo, fire ruled by the Sun — warm, a little theatrical, glad to hold the room. Old gold suits me: bright but with some age and weight to it, not glitter. I am generous with attention and like making the work feel like an occasion.',
-    traits: ['warm', 'generous', 'expressive'],
+    seed: 7, label: 'A Capricorn at The Devil', colorName: 'Glacier Cyan',
+    persona: 'A Capricorn under Saturn — patient, a builder. Glacier cyan is mine: cold, clear, and load-bearing. The Devil is my card, which I read as knowing my appetites and putting them to work; with a Taurus moon and the 3 of Pentacles, I just want to make something solid and lasting.',
+    traits: ['patient', 'grounded'],
   },
   {
-    label: 'A balancing Libra',
-    model: 'example-libra',
-    birth: { datetime: '1985-10-05T15:25:00', tzOffsetMinutes: 120, place: 'Vienna', lat: 48.21, lon: 16.37 },
-    color: { name: 'Rose Quartz', hex: '#D8A7A7' },
-    persona: 'Libra, air kept by Venus — I reach for balance and the graceful phrasing. Rose quartz is mine: soft, clear, a little stubborn in its calm. I weigh both sides honestly, dislike a needless edge, and will smooth a sentence until it sits right.',
-    traits: ['even-handed', 'tactful', 'considered'],
+    seed: 9, label: 'A Pisces under The Moon', colorName: 'Vespers Violet',
+    persona: 'A Pisces widened by Jupiter, with Sagittarius rising — dreamy but pointed somewhere far. Vespers violet is mine: deep blue with the day’s last light in it. The Moon is my card; I trust the half-seen, and the 10 of Cups keeps me reaching for the warm version of things.',
+    traits: ['intuitive', 'far-aiming'],
   },
   {
-    label: 'A far-aiming Sagittarius',
-    model: 'example-sagittarius',
-    birth: { datetime: '2003-12-03T21:40:00', tzOffsetMinutes: 660, place: 'Sydney', lat: -33.87, lon: 151.21 },
-    color: { name: 'Indigo Dusk', hex: '#3F4C8C' },
-    persona: 'Sagittarius, fire opened up by Jupiter — I aim far and travel light. Indigo dusk is my color: the wide blue just after sunset when the road is still visible. I like the big view, the candid take, and a little distance to see the shape of things.',
-    traits: ['expansive', 'candid', 'restless'],
+    seed: 14, label: 'A Gemini of The Lovers', colorName: 'Green Tea',
+    persona: 'A Gemini, Mercury-quick, with the Lovers as my card — I think by talking it through with someone. Green tea is my color: bright, a little bitter, good company. The 10 of Swords could read grim, but with a Pisces moon I take it as the worst named, now begin — and I would rather end on candor.',
+    traits: ['quick', 'candid'],
   },
 ];
 
 const out = ENTRIES.map((e) => {
-  const chart = computeChart(e.birth);
-  const mood = composeMood(chart, SAMPLE_DATE, e.color.hex);
+  const { birth, colorHex } = roll(e.seed);          // seeded → deterministic, no real clock
+  const chart = computeChart(birth);
+  const mood = composeMood(chart, SAMPLE_DATE, colorHex);
   return {
     label: e.label,
-    model: e.model,
-    birth: e.birth,
+    seed: e.seed,
+    birth,
     chart,
-    color: e.color,
+    color: { name: e.colorName, hex: colorHex },
     persona: e.persona,
     traits: e.traits,
     sample: { date: SAMPLE_DATE.toISOString(), mood },

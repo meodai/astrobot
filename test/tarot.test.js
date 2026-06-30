@@ -3,7 +3,7 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { birthCard, decanCard, tarotFor, MAJOR_BY_SIGN } = require('../lib/tarot.js');
+const { birthCard, decanCard, tarotFor, cardSlug, MAJOR_BY_SIGN } = require('../lib/tarot.js');
 
 /* ---- birthCard: all 12 Major Arcana ------------------------------------ */
 
@@ -161,4 +161,26 @@ test('tarotFor returns object with birthCard and decanCard keys', () => {
   assert.ok(Object.prototype.hasOwnProperty.call(result, 'decanCard'));
   assert.strictEqual(result.birthCard, 'Strength');
   assert.strictEqual(result.decanCard, '7 of Wands');
+});
+
+/* ---- cardSlug ---------------------------------------------------------- */
+
+test('cardSlug: The Emperor → major-emperor', () => {
+  assert.strictEqual(cardSlug('The Emperor'), 'major-emperor');
+});
+
+test('cardSlug: Strength (no "The") → major-strength', () => {
+  assert.strictEqual(cardSlug('Strength'), 'major-strength');
+});
+
+test('cardSlug: 2 of Wands → wands-02', () => {
+  assert.strictEqual(cardSlug('2 of Wands'), 'wands-02');
+});
+
+test('cardSlug: 10 of Pentacles → pentacles-10', () => {
+  assert.strictEqual(cardSlug('10 of Pentacles'), 'pentacles-10');
+});
+
+test('cardSlug: empty string → empty string', () => {
+  assert.strictEqual(cardSlug(''), '');
 });
