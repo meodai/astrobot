@@ -601,7 +601,7 @@ git commit -m "feat: natal chart computation with ascendant"
   - `profile.load()` → object (`{}` if missing/corrupt).
   - `profile.save(model, data)` → writes profile for `model`, sets `_default = model`, persists.
   - `profile.get(model)` → profile object or `null`.
-  - `profile.resolve(model)` → `{ model, data }` using `model`, else `_default`, else `null`.
+  - `profile.resolve(model)` → `{ model, data }`. If `model` is **provided**: return its own profile, else `null` (an explicit-but-unborn model stays silent). If `model` is **omitted** (falsy): fall back to `_default`, else `null`.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -633,17 +633,18 @@ test('save then get roundtrips and sets _default', () => {
   assert.strictEqual(profile.load()._default, 'claude-x');
 });
 
-test('resolve falls back to _default when model missing/omitted', () => {
+test('resolve returns own profile, and falls back to _default ONLY when model omitted', () => {
   const profile = require('../lib/profile.js');
   profile.save('claude-x', { color: { name: 'Teal' } });
-  assert.strictEqual(profile.resolve('claude-x').model, 'claude-x');
-  assert.strictEqual(profile.resolve(undefined).model, 'claude-x');
-  assert.strictEqual(profile.resolve('unknown').model, 'claude-x'); // falls back
+  assert.strictEqual(profile.resolve('claude-x').model, 'claude-x'); // own profile
+  assert.strictEqual(profile.resolve(undefined).model, 'claude-x');  // omitted -> _default
+  assert.strictEqual(profile.resolve('unknown'), null);              // present-but-unborn -> silent
 });
 
 test('resolve returns null when store is empty', () => {
   const profile = require('../lib/profile.js');
   assert.strictEqual(profile.resolve('anything'), null);
+  assert.strictEqual(profile.resolve(undefined), null);
 });
 
 test('corrupt JSON is treated as empty, never throws', () => {
@@ -707,7 +708,11 @@ function get(model) {
 
 function resolve(model) {
   const store = load();
-  if (model && store[model] && model !== '_default') return { model, data: store[model] };
+  if (model) {
+    // Explicit model: only its own identity, else stay silent (no borrowing).
+    return store[model] && model !== '_default' ? { model, data: store[model] } : null;
+  }
+  // Model omitted (e.g. after /clear): fall back to the most-recently-born.
   const def = store._default;
   if (def && store[def]) return { model: def, data: store[def] };
   return null;
@@ -1090,7 +1095,7 @@ Expected: FAIL (cannot find module).
 // bin/astrobot.js
 const profile = require('../lib/profile.js');
 const { computeChart } = require('../lib/chart.js');
-const { composeMood, phaseEnergy } = require('../lib/mood.js');
+const { composeMood } = require('../lib/mood.js');
 const { renderContextBlock } = require('../lib/persona.js');
 
 function parseArgs(argv) {
@@ -1235,6 +1240,12 @@ test('falls back to _default when model omitted', () => {
 test('emits nothing when no profile exists', () => {
   const { buildOutput } = require('../hooks/session-start.js');
   assert.strictEqual(buildOutput({ model: 'nobody' }), '');
+});
+
+test('stays silent for an explicit but unborn model even when a default exists', () => {
+  seed(); // births claude-x and sets it as _default
+  const { buildOutput } = require('../hooks/session-start.js');
+  assert.strictEqual(buildOutput({ model: 'claude-other' }), ''); // does NOT borrow claude-x
 });
 
 test('never throws on garbage input', () => {
