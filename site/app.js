@@ -97,8 +97,12 @@
     return n + (s[(v - 20) % 10] || s[v] || s[0]);
   }
 
-  function pg(planet) { return glyphs.planetGlyph(planet); }
-  function sg(sign) { return glyphs.signGlyph(sign); }
+  // U+FE0E (text variation selector) forces monochrome text presentation instead
+  // of color emoji — CSS font-variant-emoji isn't honored in all browsers (Safari).
+  var VS_TEXT = String.fromCharCode(0xFE0E);
+  function asText(g) { return g ? g + VS_TEXT : ''; }
+  function pg(planet) { return asText(glyphs.planetGlyph(planet)); }
+  function sg(sign) { return asText(glyphs.signGlyph(sign)); }
 
   // glyph/label/sign/extra are engine-derived (safe). house is a number.
   function placementRow(glyph, label, sign, house, extra) {
@@ -336,7 +340,7 @@
     var aspect = mood.sunAspect;
     var aspectTag = aspect
       ? '<span class="mood-tag mood-tag--aspect">Transiting Sun ' +
-          '<span class="mood-tag__glyph">' + esc(glyphs.aspectGlyph(aspect)) + '</span> ' +
+          '<span class="mood-tag__glyph">' + esc(asText(glyphs.aspectGlyph(aspect))) + '</span> ' +
           esc(aspect) + ' natal Sun</span>'
       : '';
 
