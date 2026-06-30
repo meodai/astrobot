@@ -45,3 +45,30 @@ test('today falls back to _default when model omitted', async () => {
   const t = await run(['today'], { stdin: '' });
   assert.match(t.out, /\[astrobot\]/);
 });
+
+test('birth with JSON missing color returns code 1 and does not throw', async () => {
+  const { run } = require('../bin/astrobot.js');
+  const bad = JSON.stringify({
+    birth: { datetime: '2000-01-01T12:00:00', tzOffsetMinutes: 0, lat: 51.5, lon: -0.13 },
+  });
+  const r = await run(['birth', '--model', 'x'], { stdin: bad });
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /requires birth and color/);
+});
+
+test('birth with place but no lat/lon resolves coords and stores a valid chart', async () => {
+  const { run } = require('../bin/astrobot.js');
+  const input = JSON.stringify({
+    birth: { datetime: '2000-01-01T12:00:00', tzOffsetMinutes: 0, place: 'London' },
+    color: { name: 'Slate Blue', hex: '#6A5ACD' },
+  });
+  const b = await run(['birth', '--model', 'place-test'], { stdin: input });
+  assert.strictEqual(b.code, 0, 'birth should succeed: ' + b.out);
+  // chart.ascendant.sign must be a real sign string, not 'undefined'
+  assert.ok(!b.out.includes('undefined'), 'output should not contain undefined');
+
+  // Verify stored profile via show command
+  const s = await run(['show', '--model', 'place-test'], { stdin: '' });
+  assert.ok(!s.out.includes('undefined'), 'show output should not contain undefined');
+  assert.match(s.out, /rising/, 'show output should include a rising sign');
+});

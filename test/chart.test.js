@@ -41,3 +41,17 @@ test('ascendant sign matches verified reference for the London J2000 fixture', (
   // Verified by the controller via two independent methods (closed-form + numeric horizon).
   assert.strictEqual(computeChart(BIRTH).ascendant.sign, 'Aries');
 });
+
+test('computeChart throws when birth is missing lat/lon', () => {
+  assert.throws(
+    () => computeChart({ datetime: '2000-01-01T12:00:00', tzOffsetMinutes: 0 }),
+    /requires numeric birth\.lat and birth\.lon/
+  );
+});
+
+test('computeChart throws when birth has NaN lat', () => {
+  assert.throws(
+    () => computeChart({ datetime: '2000-01-01T12:00:00', tzOffsetMinutes: 0, lat: NaN, lon: 0 }),
+    /requires numeric birth\.lat and birth\.lon/
+  );
+});

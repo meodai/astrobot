@@ -1,6 +1,7 @@
 // bin/astrobot.js
 const profile = require('../lib/profile.js');
 const { computeChart } = require('../lib/chart.js');
+const { resolveCoords } = require('../lib/places.js');
 const { composeMood } = require('../lib/mood.js');
 const { renderContextBlock } = require('../lib/persona.js');
 
@@ -39,9 +40,16 @@ async function run(argv, opts = {}) {
     if (!args.model) return { code: 1, out: 'birth requires --model\n' };
     let input;
     try { input = JSON.parse(stdin); } catch { return { code: 1, out: 'birth: invalid JSON on stdin\n' }; }
-    const chart = computeChart(input.birth);
+    if (!input || !input.birth || !input.color || !input.color.name) {
+      return { code: 1, out: 'birth: requires birth and color{name} fields\n' };
+    }
+    const coords = resolveCoords(input.birth);
+    const birth = { ...input.birth, ...coords };
+    let chart;
+    try { chart = computeChart(birth); }
+    catch (e) { return { code: 1, out: 'birth: ' + e.message + '\n' }; }
     const data = {
-      birth: input.birth, chart, color: input.color,
+      birth, chart, color: input.color,
       persona: input.persona, traits: input.traits || [],
       born: new Date().toISOString().slice(0, 10),
     };
@@ -63,7 +71,9 @@ async function run(argv, opts = {}) {
 }
 
 if (require.main === module) {
-  run(process.argv.slice(2)).then((r) => { process.stdout.write(r.out); process.exit(r.code); });
+  run(process.argv.slice(2))
+    .then((r) => { process.stdout.write(r.out); process.exit(r.code); })
+    .catch((e) => { process.stderr.write((e && e.message ? e.message : String(e)) + '\n'); process.exit(1); });
 }
 
 module.exports = { run, parseArgs };
