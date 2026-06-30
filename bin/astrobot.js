@@ -3,12 +3,13 @@ const profile = require('../lib/profile.js');
 const { computeChart } = require('../lib/chart.js');
 const { resolveCoords } = require('../lib/places.js');
 const { composeMood } = require('../lib/mood.js');
-const { renderContextBlock } = require('../lib/persona.js');
+const { renderContextBlock, renderPortableBlock } = require('../lib/persona.js');
 
 function parseArgs(argv) {
   const args = { _: [] };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--model') args.model = argv[++i];
+    else if (argv[i] === '--seed') args.seed = argv[++i];
     else args._.push(argv[i]);
   }
   return args;
@@ -57,6 +58,13 @@ async function run(argv, opts = {}) {
     return { code: 0, out: `Born: a ${chart.sun.sign} (${chart.dominant.element}, ${chart.ascendant.sign} rising), color ${input.color.name}.\n` };
   }
 
+  if (cmd === 'export') {
+    const resolved = profile.resolve(args.model);
+    if (!resolved) return { code: 0, out: 'No astrobot identity yet.\n' };
+    const mood = composeMood(resolved.data.chart, new Date());
+    return { code: 0, out: renderPortableBlock(resolved.data, mood) + '\n' };
+  }
+
   if (cmd === 'show') {
     const resolved = profile.resolve(args.model);
     if (!resolved) return { code: 0, out: 'No astrobot identity yet.\n' };
@@ -67,7 +75,15 @@ async function run(argv, opts = {}) {
     return { code: 0, out };
   }
 
-  return { code: 1, out: 'usage: astrobot <today|birth|show> [--model <id>]\n' };
+  if (cmd === 'roll') {
+    const { roll } = require('../lib/roll.js');
+    const seeded = args.seed != null;
+    const { birth, colorHex } = roll(seeded ? Number(args.seed) : undefined, seeded ? undefined : new Date());
+    const chart = computeChart(birth);
+    return { code: 0, out: JSON.stringify({ birth, colorHex, chart }, null, 2) + '\n' };
+  }
+
+  return { code: 1, out: 'usage: astrobot <today|birth|show|export|roll> [--model <id>] [--seed <n>]\n' };
 }
 
 if (require.main === module) {

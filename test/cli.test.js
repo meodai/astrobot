@@ -56,6 +56,16 @@ test('birth with JSON missing color returns code 1 and does not throw', async ()
   assert.match(r.out, /requires birth and color/);
 });
 
+test('export prints a portable block for a born model, nothing-ish when absent', async () => {
+  const { run } = require('../bin/astrobot.js');
+  const none = await run(['export', '--model', 'x'], { stdin: '' });
+  assert.match(none.out, /No astrobot identity yet/);
+  await run(['birth', '--model', 'x'], { stdin: BIRTH_JSON });
+  const got = await run(['export', '--model', 'x'], { stdin: '' });
+  assert.ok(!got.out.includes('[astrobot]'));
+  assert.match(got.out, /tone only/i);
+});
+
 test('birth with place but no lat/lon resolves coords and stores a valid chart', async () => {
   const { run } = require('../bin/astrobot.js');
   const input = JSON.stringify({

@@ -2,6 +2,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert');
 const { computeChart, ascendantLongitude } = require('../lib/chart.js');
+const { houseOf } = require('../lib/houses.js');
 
 const BIRTH = { datetime: '2000-01-01T12:00:00', tzOffsetMinutes: 0, lat: 51.5, lon: -0.13 }; // London-ish
 
@@ -54,4 +55,25 @@ test('computeChart throws when birth has NaN lat', () => {
     () => computeChart({ datetime: '2000-01-01T12:00:00', tzOffsetMinutes: 0, lat: NaN, lon: 0 }),
     /requires numeric birth\.lat and birth\.lon/
   );
+});
+
+test('every chart placement has a house property in 1..12', () => {
+  const c = computeChart(BIRTH);
+  for (const key of ['sun','moon','mercury','venus','mars','jupiter','saturn','ascendant']) {
+    assert.ok(Number.isInteger(c[key].house), `${key}.house should be an integer`);
+    assert.ok(c[key].house >= 1 && c[key].house <= 12, `${key}.house should be 1..12, got ${c[key].house}`);
+  }
+});
+
+test('ascendant.house is always 1 (whole-sign houses)', () => {
+  const c = computeChart(BIRTH);
+  assert.strictEqual(c.ascendant.house, 1);
+});
+
+test('sun.house is consistent with houseOf using the ascendant sign index', () => {
+  const { signFromLongitude } = require('../lib/zodiac.js');
+  const c = computeChart(BIRTH);
+  const ascIndex = signFromLongitude(c.ascendant.lon).index;
+  const sunIndex = signFromLongitude(c.sun.lon).index;
+  assert.strictEqual(c.sun.house, houseOf(sunIndex, ascIndex));
 });
