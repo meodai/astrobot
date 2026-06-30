@@ -5,6 +5,7 @@ const { computeChart } = require('../lib/chart.js');
 const { resolveCoords } = require('../lib/places.js');
 const { composeMood } = require('../lib/mood.js');
 const { renderContextBlock, renderPortableBlock } = require('../lib/persona.js');
+const { renderBirthPrompt } = require('../lib/birthprompt.js');
 
 function parseArgs(argv) {
   const args = { _: [] };
@@ -84,7 +85,15 @@ async function run(argv, opts = {}) {
     return { code: 0, out: JSON.stringify({ birth, colorHex, chart }, null, 2) + '\n' };
   }
 
-  return { code: 1, out: 'usage: astrobot <today|birth|show|export|roll> [--model <id>] [--seed <n>]\n' };
+  if (cmd === 'birth-prompt') {
+    const { roll } = require('../lib/roll.js');
+    const seeded = args.seed != null;
+    const { birth, colorHex } = roll(seeded ? Number(args.seed) : undefined, seeded ? undefined : new Date());
+    const chart = computeChart(birth);
+    return { code: 0, out: renderBirthPrompt({ birth, colorHex, chart }) + '\n' };
+  }
+
+  return { code: 1, out: 'usage: astrobot <today|birth|birth-prompt|show|export|roll> [--model <id>] [--seed <n>]\n' };
 }
 
 if (require.main === module) {
