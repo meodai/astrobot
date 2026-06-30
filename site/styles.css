@@ -47,22 +47,99 @@ body {
   font-variant-emoji: text;
 }
 
-/* Faint star-chart wash over the whole ground. */
+/* ---- Starfield ------------------------------------------------------
+ * A faint, slow-drifting field of gilt and parchment stars over the
+ * midnight-vellum ground. Three parallax layers — their box-shadow star
+ * lists are generated in app.js (initStarfield) — drift at different
+ * speeds for depth. Each layer loops seamlessly: an ::after pseudo
+ * duplicates the same stars one field-height below, and the layer is
+ * translated up by exactly one field height. Two ambient nebula glows
+ * sit behind, unchanged from the original wash. Whisper, not glare.
+ * Sits behind everything (z-index:-1) so the body ground paints first,
+ * stars over it, all content above. Honors prefers-reduced-motion. */
 .starfield {
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
+  overflow: hidden;
   background:
-    radial-gradient(1px 1px at 18% 24%, rgba(233, 224, 203, .45) 50%, transparent 51%),
-    radial-gradient(1px 1px at 72% 14%, rgba(233, 224, 203, .35) 50%, transparent 51%),
-    radial-gradient(1.4px 1.4px at 42% 62%, rgba(201, 162, 75, .4) 50%, transparent 51%),
-    radial-gradient(1px 1px at 88% 48%, rgba(233, 224, 203, .3) 50%, transparent 51%),
-    radial-gradient(1px 1px at 32% 84%, rgba(233, 224, 203, .35) 50%, transparent 51%),
-    radial-gradient(1.4px 1.4px at 62% 92%, rgba(201, 162, 75, .35) 50%, transparent 51%),
     radial-gradient(1200px 700px at 50% -10%, rgba(63, 76, 140, .22), transparent 70%),
     radial-gradient(900px 600px at 90% 110%, rgba(127, 160, 138, .1), transparent 70%);
-  background-repeat: repeat;
+}
+
+/* Each layer is a single 1–3px dot at the origin; the whole field is
+   painted with box-shadow (set as --star-shadows in JS). */
+.starfield__layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--star-size, 1px);
+  height: var(--star-size, 1px);
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: var(--star-shadows);
+  will-change: transform;
+  animation: starfield-drift var(--drift, 160s) linear infinite;
+}
+/* Seamless loop: identical star set one field-height below. Custom props
+   (--star-shadows, --star-size, --field-h) inherit into the pseudo. */
+.starfield__layer::after {
+  content: "";
+  position: absolute;
+  top: var(--field-h, 2000px);
+  left: 0;
+  width: var(--star-size, 1px);
+  height: var(--star-size, 1px);
+  border-radius: 50%;
+  box-shadow: var(--star-shadows);
+}
+
+.starfield__layer--sm { --star-size: 1px; --drift: 120s; opacity: .85; }
+.starfield__layer--md { --star-size: 2px; --drift: 160s; opacity: .75; }
+.starfield__layer--lg {
+  --star-size: 3px;
+  --drift: 220s;
+  opacity: .65;
+  filter: drop-shadow(0 0 2px rgba(201, 162, 75, .35)); /* faint gilt halo on the nearest, largest stars */
+}
+
+@keyframes starfield-drift {
+  from { transform: translateY(0); }
+  to   { transform: translateY(calc(-1 * var(--field-h, 2000px))); }
+}
+
+/* An occasional, faint shooting star — long gaps, low opacity, diagonal.
+   Visible for only a sliver of the cycle so it stays a rare event. */
+.starfield__comet {
+  position: absolute;
+  top: 8%;
+  left: -160px;
+  width: 150px;
+  height: 1px;
+  opacity: 0;
+  transform: rotate(18deg);
+  background: linear-gradient(90deg,
+    rgba(231, 206, 132, 0) 0%,
+    rgba(201, 162, 75, .35) 65%,
+    rgba(233, 224, 203, .8) 100%);
+  filter: drop-shadow(0 0 3px rgba(201, 162, 75, .35));
+  animation: starfield-comet 23s ease-in infinite;
+  animation-delay: 7s;
+}
+
+@keyframes starfield-comet {
+  0%   { opacity: 0; transform: translate3d(0, 0, 0) rotate(18deg); }
+  3%   { opacity: .7; }
+  9%   { opacity: .55; }
+  12%  { opacity: 0; transform: translate3d(72vw, 40vh, 0) rotate(18deg); }
+  100% { opacity: 0; transform: translate3d(72vw, 40vh, 0) rotate(18deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Static field: no drift, no comet. Stars still render via box-shadow. */
+  .starfield__layer { animation: none; will-change: auto; }
+  .starfield__comet { display: none; }
 }
 
 a { color: var(--gold-bright); text-underline-offset: 3px; }
