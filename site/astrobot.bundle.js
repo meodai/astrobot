@@ -5971,7 +5971,13 @@ var Astrobot = (() => {
           decanCard: decanCard(chart.sun.sign, chart.sun.decan)
         };
       }
-      module.exports = { birthCard, decanCard, tarotFor, MAJOR_BY_SIGN };
+      function cardSlug(card) {
+        if (!card) return "";
+        const m = /^(\d{1,2}) of (Wands|Cups|Swords|Pentacles)$/.exec(card);
+        if (m) return m[2].toLowerCase() + "-" + String(m[1]).padStart(2, "0");
+        return "major-" + card.toLowerCase().replace(/^the\s+/, "").replace(/[^a-z]+/g, "");
+      }
+      module.exports = { birthCard, decanCard, tarotFor, cardSlug, MAJOR_BY_SIGN };
     }
   });
 
@@ -6210,7 +6216,7 @@ var Astrobot = (() => {
       var { colorLore } = require_colortone();
       var { SIGNS } = require_zodiac();
       var glyphs = require_glyphs();
-      var { tarotFor } = require_tarot();
+      var { tarotFor, cardSlug } = require_tarot();
       var CITIES = require_cities();
       module.exports = {
         computeChart,
@@ -6222,6 +6228,7 @@ var Astrobot = (() => {
         SIGNS,
         glyphs,
         tarotFor,
+        cardSlug,
         CITIES
       };
     }

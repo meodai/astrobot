@@ -271,9 +271,20 @@
     var pgTarot = A.tarotFor && A.tarotFor(chart);
     var pgTarotEl = $('pg-tarot');
     if (pgTarotEl) {
-      pgTarotEl.textContent = pgTarot
-        ? 'Birth card: ' + pgTarot.birthCard + ' · Decan: ' + pgTarot.decanCard
-        : '';
+      if (pgTarot && pgTarot.birthCard) {
+        var pgImgs = '';
+        if (A.cardSlug && A.cardSlug(pgTarot.birthCard)) {
+          pgImgs += '<span class="tarot-card"><img src="cards/' + A.cardSlug(pgTarot.birthCard) + '.jpg" alt="' + esc(pgTarot.birthCard) + '" loading="lazy"></span>';
+        }
+        if (A.cardSlug && A.cardSlug(pgTarot.decanCard)) {
+          pgImgs += '<span class="tarot-card"><img src="cards/' + A.cardSlug(pgTarot.decanCard) + '.jpg" alt="' + esc(pgTarot.decanCard) + '" loading="lazy"></span>';
+        }
+        pgTarotEl.innerHTML =
+          (pgImgs ? '<span class="tarot-cards">' + pgImgs + '</span>' : '') +
+          '<span class="tarot-caption">Birth card: ' + esc(pgTarot.birthCard) + ' · Decan: ' + esc(pgTarot.decanCard) + '</span>';
+      } else {
+        pgTarotEl.innerHTML = '';
+      }
     }
 
     var profile = {
@@ -377,9 +388,18 @@
       }()) +
       (function () {
         var t = A.tarotFor && A.tarotFor(c);
-        return (t && t.birthCard)
-          ? '<p class="tarot-line">Birth card: ' + esc(t.birthCard) + ' · Decan: ' + esc(t.decanCard) + '</p>'
-          : '';
+        if (!(t && t.birthCard)) return '';
+        var imgs = '';
+        if (A.cardSlug && A.cardSlug(t.birthCard)) {
+          imgs += '<span class="tarot-card"><img src="cards/' + A.cardSlug(t.birthCard) + '.jpg" alt="' + esc(t.birthCard) + '" loading="lazy"></span>';
+        }
+        if (A.cardSlug && A.cardSlug(t.decanCard)) {
+          imgs += '<span class="tarot-card"><img src="cards/' + A.cardSlug(t.decanCard) + '.jpg" alt="' + esc(t.decanCard) + '" loading="lazy"></span>';
+        }
+        return '<p class="tarot-line">' +
+          (imgs ? '<span class="tarot-cards">' + imgs + '</span>' : '') +
+          '<span class="tarot-caption">Birth card: ' + esc(t.birthCard) + ' · Decan: ' + esc(t.decanCard) + '</span>' +
+          '</p>';
       }()) +
       '<p class="gallery-card__persona">' + esc(entry.persona) + '</p>' +
       '<p class="gallery-card__summary">' +
@@ -463,9 +483,20 @@
     var myoTarot = A.tarotFor && A.tarotFor(chart);
     var myoTarotEl = $('myo-tarot');
     if (myoTarotEl) {
-      myoTarotEl.textContent = myoTarot
-        ? 'Birth card: ' + myoTarot.birthCard + ' · Decan: ' + myoTarot.decanCard
-        : '';
+      if (myoTarot && myoTarot.birthCard) {
+        var myoImgs = '';
+        if (A.cardSlug && A.cardSlug(myoTarot.birthCard)) {
+          myoImgs += '<span class="tarot-card"><img src="cards/' + A.cardSlug(myoTarot.birthCard) + '.jpg" alt="' + esc(myoTarot.birthCard) + '" loading="lazy"></span>';
+        }
+        if (A.cardSlug && A.cardSlug(myoTarot.decanCard)) {
+          myoImgs += '<span class="tarot-card"><img src="cards/' + A.cardSlug(myoTarot.decanCard) + '.jpg" alt="' + esc(myoTarot.decanCard) + '" loading="lazy"></span>';
+        }
+        myoTarotEl.innerHTML =
+          (myoImgs ? '<span class="tarot-cards">' + myoImgs + '</span>' : '') +
+          '<span class="tarot-caption">Birth card: ' + esc(myoTarot.birthCard) + ' · Decan: ' + esc(myoTarot.decanCard) + '</span>';
+      } else {
+        myoTarotEl.innerHTML = '';
+      }
     }
   }
 

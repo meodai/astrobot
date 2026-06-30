@@ -6,7 +6,7 @@ const { renderBirthPrompt } = require('../../lib/birthprompt.js');
 const { colorLore } = require('../../lib/colortone.js');
 const { SIGNS } = require('../../lib/zodiac.js');
 const glyphs = require('../../lib/glyphs.js');
-const { tarotFor } = require('../../lib/tarot.js');
+const { tarotFor, cardSlug } = require('../../lib/tarot.js');
 const CITIES = require('../../vendor/cities.json');
 
 module.exports = {
@@ -19,5 +19,6 @@ module.exports = {
   SIGNS,
   glyphs,
   tarotFor,
+  cardSlug,
   CITIES,
 };
