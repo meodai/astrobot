@@ -82,3 +82,13 @@ test('birth with place but no lat/lon resolves coords and stores a valid chart',
   assert.ok(!s.out.includes('undefined'), 'show output should not contain undefined');
   assert.match(s.out, /rising/, 'show output should include a rising sign');
 });
+
+test('non-birth commands resolve without reading stdin (regression: no hang)', async () => {
+  // Called WITHOUT an injected opts.stdin. Under the old code these awaited
+  // readAllStdin(), which never resolves in a non-TTY test runner — a hang.
+  const { run } = require('../bin/astrobot.js');
+  const bp = await run(['birth-prompt', '--seed', '7']);
+  assert.match(bp.out, /birth card/);
+  const t = await run(['today', '--model', 'nobody-here']);
+  assert.strictEqual(t.out, '');
+});

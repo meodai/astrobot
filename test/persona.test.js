@@ -70,3 +70,24 @@ test('portable block includes sun house number and meaning', () => {
   assert.match(block, /10th house/);
   assert.match(block, /vocation & public life/);
 });
+
+// Tarot: PROFILE uses Scorpio sun → birth card = Death; decan 1 → 6 of Cups.
+test('context block contains tarot birth card for the fixture sun sign', () => {
+  const block = renderContextBlock(PROFILE, MOOD);
+  assert.match(block, /birth card/i);
+  assert.match(block, /Death/);       // Scorpio → Death
+  assert.match(block, /6 of Cups/);   // Fixed Water, decan 1 → 6 of Cups
+});
+
+test('portable block contains tarot birth card for the fixture sun sign', () => {
+  const block = renderPortableBlock(PROFILE, MOOD);
+  assert.match(block, /birth card/i);
+  assert.match(block, /Death/);
+  assert.match(block, /6 of Cups/);
+});
+
+test('portable block does NOT gain an [astrobot] prefix after tarot addition', () => {
+  const block = renderPortableBlock(PROFILE, MOOD);
+  assert.ok(!block.startsWith('[astrobot]'));
+  assert.ok(!block.includes('[astrobot]'));
+});
