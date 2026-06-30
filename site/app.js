@@ -368,7 +368,6 @@
         '<span class="gallery-card__glyph">' + sg(c.sun.sign) + '</span>' +
         '<div>' +
           '<h3 class="gallery-card__name">' + esc(entry.label) + '</h3>' +
-          '<p class="gallery-card__model">' + esc(entry.model) + '</p>' +
         '</div>' +
       '</header>' +
       '<figure class="plate plate--compact">' +
