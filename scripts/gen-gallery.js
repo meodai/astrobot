@@ -82,7 +82,7 @@ const ENTRIES = [
 
 const out = ENTRIES.map((e) => {
   const chart = computeChart(e.birth);
-  const mood = composeMood(chart, SAMPLE_DATE);
+  const mood = composeMood(chart, SAMPLE_DATE, e.color.hex);
   return {
     label: e.label,
     model: e.model,

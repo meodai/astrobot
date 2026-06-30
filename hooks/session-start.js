@@ -8,7 +8,7 @@ function buildOutput(input) {
     const model = input && typeof input === 'object' ? input.model : undefined;
     const resolved = profile.resolve(model);
     if (!resolved || !resolved.data || !resolved.data.chart) return '';
-    const mood = composeMood(resolved.data.chart, new Date());
+    const mood = composeMood(resolved.data.chart, new Date(), resolved.data.color && resolved.data.color.hex);
     const additionalContext = renderContextBlock(resolved.data, mood);
     return JSON.stringify({
       hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext },

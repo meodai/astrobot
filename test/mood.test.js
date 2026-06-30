@@ -45,3 +45,29 @@ test('sun in its own season raises energy vs opposition', () => {
   assert.strictEqual(opp.sunAspect, 'opposition');
   assert.ok(home.dials.energy >= opp.dials.energy);
 });
+
+// Color integration tests
+test('warm-vivid color raises warmth & playfulness vs cool-muted color', () => {
+  const warmVivid = composeMood(CHART, D, '#ff5a1f'); // warm orange, vivid
+  const coolMuted = composeMood(CHART, D, '#b0c0c8'); // cool gray-blue, muted, Moon-nearest
+  assert.ok(
+    warmVivid.dials.warmth > coolMuted.dials.warmth,
+    `warmVivid warmth ${warmVivid.dials.warmth} should exceed coolMuted ${coolMuted.dials.warmth}`,
+  );
+  assert.ok(
+    warmVivid.dials.playfulness > coolMuted.dials.playfulness,
+    `warmVivid playfulness ${warmVivid.dials.playfulness} should exceed coolMuted ${coolMuted.dials.playfulness}`,
+  );
+});
+
+test('composeMood without colorHex matches prior behavior (backward compat)', () => {
+  const noColor = composeMood(CHART, D);
+  const withUndefined = composeMood(CHART, D, undefined);
+  assert.deepStrictEqual(noColor, withUndefined);
+});
+
+test('composeMood with colorHex is deterministic', () => {
+  const a = composeMood(CHART, D, '#ff5a1f');
+  const b = composeMood(CHART, D, '#ff5a1f');
+  assert.deepStrictEqual(a, b);
+});
