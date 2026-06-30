@@ -42,6 +42,9 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
+  /* Force monochrome text presentation for astrological glyphs (U+2648–U+2653,
+     planets, aspects) instead of color emoji — fits the engraved look. */
+  font-variant-emoji: text;
 }
 
 /* Faint star-chart wash over the whole ground. */
