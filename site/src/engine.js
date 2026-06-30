@@ -2,8 +2,9 @@
 const { computeChart } = require('../../lib/chart.js');
 const { composeMood } = require('../../lib/mood.js');
 const { renderContextBlock } = require('../../lib/persona.js');
+const { colorLore } = require('../../lib/colortone.js');
 const { SIGNS } = require('../../lib/zodiac.js');
 const glyphs = require('../../lib/glyphs.js');
 const CITIES = require('../../vendor/cities.json');
 
-module.exports = { computeChart, composeMood, renderContextBlock, SIGNS, glyphs, CITIES };
+module.exports = { computeChart, composeMood, renderContextBlock, colorLore, SIGNS, glyphs, CITIES };

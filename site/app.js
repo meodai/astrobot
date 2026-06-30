@@ -227,6 +227,18 @@
     return Math.max(280, Math.min(440, Math.round(w)));
   }
 
+  var HEX_RE = /^#[0-9a-fA-F]{3,8}$/;
+  function safeHex(hex) { return HEX_RE.test(hex) ? hex : '#888888'; }
+
+  function renderLore(containerId, hex) {
+    var el = $(containerId);
+    if (!el) return;
+    var lore = A.colorLore && A.colorLore(hex);
+    if (!lore) { el.textContent = ''; return; }
+    el.textContent = lore.warmCool + ' · ' + lore.vividMuted + ' · ' +
+      lore.planet + ' · ' + lore.chakra.name + ' chakra (' + lore.chakra.theme + ') · ' + lore.theosophy;
+  }
+
   function render() {
     var birth, chart;
     try {
@@ -237,8 +249,8 @@
       return;
     }
     lastChart = chart;
-    var mood = A.composeMood(chart, skyDate());
     var color = currentColor(chart);
+    var mood = A.composeMood(chart, skyDate(), color.hex);
 
     drawWheel('pg-wheel', chart, pgWheelSize());
     $('pg-caption').textContent = 'Fig. — Nativity, ' + sg(chart.sun.sign) + ' ' + chart.sun.sign +
@@ -246,8 +258,10 @@
 
     renderPlacements(chart);
 
-    $('pg-swatch').style.background = color.hex;
+    var validHex = safeHex(color.hex);
+    $('pg-swatch').style.setProperty('background', validHex);
     $('pg-swatch-name').textContent = color.name + '  ' + color.hex;
+    renderLore('pg-lore', color.hex);
     renderDials($('pg-dials'), mood.dials);
 
     var profile = {
@@ -337,9 +351,17 @@
         '<div class="wheel wheel--compact" id="' + wheelId + '" role="img" aria-label="Chart wheel for ' + esc(entry.label) + '"></div>' +
       '</figure>' +
       '<div class="swatch-row">' +
-        '<span class="swatch" style="background:' + esc(entry.color.hex) + '"></span>' +
+        '<span class="swatch" style="background:' + (HEX_RE.test(entry.color.hex) ? esc(entry.color.hex) : '#888888') + '"></span>' +
         '<span class="swatch__name">' + esc(entry.color.name) + '  ' + esc(entry.color.hex) + '</span>' +
       '</div>' +
+      (function () {
+        var lore = A.colorLore && A.colorLore(entry.color.hex);
+        return lore
+          ? '<p class="color-lore">' + esc(lore.warmCool) + ' · ' + esc(lore.vividMuted) + ' · ' +
+            esc(lore.planet) + ' · ' + esc(lore.chakra.name) + ' chakra (' + esc(lore.chakra.theme) + ') · ' +
+            esc(lore.theosophy) + '</p>'
+          : '';
+      }()) +
       '<p class="gallery-card__persona">' + esc(entry.persona) + '</p>' +
       '<p class="gallery-card__summary">' +
         pg('Sun') + ' ' + c.sun.sign + ' (' + ordinal(c.sun.house) + ') · ' +

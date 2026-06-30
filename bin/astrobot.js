@@ -33,7 +33,7 @@ async function run(argv, opts = {}) {
   if (cmd === 'today') {
     const resolved = profile.resolve(args.model);
     if (!resolved) return { code: 0, out: '' };
-    const mood = composeMood(resolved.data.chart, new Date());
+    const mood = composeMood(resolved.data.chart, new Date(), resolved.data.color && resolved.data.color.hex);
     return { code: 0, out: renderContextBlock(resolved.data, mood) + '\n' };
   }
 
@@ -61,7 +61,7 @@ async function run(argv, opts = {}) {
   if (cmd === 'export') {
     const resolved = profile.resolve(args.model);
     if (!resolved) return { code: 0, out: 'No astrobot identity yet.\n' };
-    const mood = composeMood(resolved.data.chart, new Date());
+    const mood = composeMood(resolved.data.chart, new Date(), resolved.data.color && resolved.data.color.hex);
     return { code: 0, out: renderPortableBlock(resolved.data, mood) + '\n' };
   }
 
@@ -69,7 +69,7 @@ async function run(argv, opts = {}) {
     const resolved = profile.resolve(args.model);
     if (!resolved) return { code: 0, out: 'No astrobot identity yet.\n' };
     const { data } = resolved;
-    const mood = composeMood(data.chart, new Date());
+    const mood = composeMood(data.chart, new Date(), data.color && data.color.hex);
     const out = `${data.chart.sun.sign} · Moon ${data.chart.moon.sign} · ${data.chart.ascendant.sign} rising · ${data.color.name}\n` +
       `Today: Sun ${mood.sunAspect} natal Sun; Moon ${mood.moon.phase} in ${mood.moon.sign} (${mood.moon.phaseEnergy}).\n`;
     return { code: 0, out };

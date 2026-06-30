@@ -5680,12 +5680,118 @@ var Astrobot = (() => {
     }
   });
 
+  // lib/colortone.js
+  var require_colortone = __commonJS({
+    "lib/colortone.js"(exports, module) {
+      function hexToHsl(hex) {
+        const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || ""));
+        if (!m) return null;
+        const n = parseInt(m[1], 16);
+        const r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+        let h = 0;
+        if (d) {
+          if (max === r) h = ((g - b) / d % 6 + 6) % 6;
+          else if (max === g) h = (b - r) / d + 2;
+          else h = (r - g) / d + 4;
+          h *= 60;
+        }
+        const l = (max + min) / 2;
+        const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+        return { h, s: s * 100, l: l * 100 };
+      }
+      var PLANET_ANCHORS = { Mars: "#E6C200", Mercury: "#C0392B", Jupiter: "#FFFFFF", Saturn: "#111111", Sun: "#D4AF37", Venus: "#2E8B57", Moon: "#C9CCD1" };
+      var PLANET_NUDGE = { Mars: { energy: 1 }, Mercury: { playfulness: 1 }, Jupiter: { verbosity: 1 }, Saturn: { playfulness: -1 }, Sun: { warmth: 1 }, Venus: { warmth: 1 }, Moon: { metaphor: 1 } };
+      function rgb(hex) {
+        const n = parseInt(/^#?([0-9a-f]{6})$/i.exec(hex)[1], 16);
+        return [n >> 16 & 255, n >> 8 & 255, n & 255];
+      }
+      function nearestPlanet(hex) {
+        const c = rgb(hex);
+        let best = null, bd = 1e9;
+        for (const p in PLANET_ANCHORS) {
+          const a = rgb(PLANET_ANCHORS[p]);
+          const dd = (c[0] - a[0]) ** 2 + (c[1] - a[1]) ** 2 + (c[2] - a[2]) ** 2;
+          if (dd < bd) {
+            bd = dd;
+            best = p;
+          }
+        }
+        return best;
+      }
+      var CHAKRAS = [
+        // {max hue exclusive, name, theme}; root wraps 345..360 and 0..15
+        { max: 15, name: "root", theme: "grounding & survival" },
+        { max: 45, name: "sacral", theme: "creativity & pleasure" },
+        { max: 70, name: "solar plexus", theme: "will & confidence" },
+        { max: 165, name: "heart", theme: "love & balance" },
+        { max: 255, name: "throat", theme: "communication & truth" },
+        { max: 285, name: "third eye", theme: "intuition & insight" },
+        { max: 345, name: "crown", theme: "spirit & meaning" }
+      ];
+      function chakraOf(h) {
+        const x = (h % 360 + 360) % 360;
+        if (x >= 345) return { name: "root", theme: "grounding & survival" };
+        for (const c of CHAKRAS) if (x < c.max) return { name: c.name, theme: c.theme };
+        return { name: "crown", theme: "spirit & meaning" };
+      }
+      function theosophyOf(hsl) {
+        if (hsl.l < 25) return "depth & gravity";
+        const x = (hsl.h % 360 + 360) % 360;
+        if (x >= 345 || x < 15) return "courage";
+        if (x < 45) return "ambition";
+        if (x < 70) return "intellect";
+        if (x < 165) return "sympathy";
+        if (x < 255) return "devotion";
+        if (x < 310) return "spiritual aspiration";
+        return "love";
+      }
+      function warmthCos(h) {
+        return Math.cos((h - 35) * Math.PI / 180);
+      }
+      function colorTone(hex) {
+        const hsl = hexToHsl(hex);
+        if (!hsl) return {};
+        const d = {};
+        const add = (k, v) => d[k] = (d[k] || 0) + v;
+        const w = warmthCos(hsl.h);
+        if (w > 0.4) add("warmth", 1);
+        else if (w < -0.4) add("warmth", -1);
+        if (hsl.s >= 60) {
+          add("playfulness", 1);
+          add("metaphor", 1);
+          add("energy", 1);
+        } else if (hsl.s <= 25) {
+          add("playfulness", -1);
+          add("verbosity", -1);
+        }
+        const nudge = PLANET_NUDGE[nearestPlanet(hex)] || {};
+        for (const k in nudge) add(k, nudge[k]);
+        return d;
+      }
+      function colorLore(hex) {
+        const hsl = hexToHsl(hex);
+        if (!hsl) return null;
+        const w = warmthCos(hsl.h);
+        return {
+          warmCool: w > 0.4 ? "warm" : w < -0.4 ? "cool" : "balanced",
+          vividMuted: hsl.s >= 60 ? "vivid" : hsl.s <= 25 ? "muted" : "soft",
+          planet: nearestPlanet(hex),
+          chakra: chakraOf(hsl.h),
+          theosophy: theosophyOf(hsl)
+        };
+      }
+      module.exports = { hexToHsl, colorTone, colorLore, nearestPlanet };
+    }
+  });
+
   // lib/mood.js
   var require_mood = __commonJS({
     "lib/mood.js"(exports, module) {
       var { eclipticLongitudeOf, moonPhaseAngle } = require_ephemeris();
       var { signFromLongitude } = require_zodiac();
       var { aspectBetweenSigns } = require_aspects();
+      var { colorTone } = require_colortone();
       var PHASES = [
         "new",
         "waxing crescent",
@@ -5740,7 +5846,7 @@ var Astrobot = (() => {
       function applyDelta(dials, delta) {
         for (const [k, v] of Object.entries(delta)) dials[k] += v;
       }
-      function composeMood(chart, date) {
+      function composeMood(chart, date, colorHex) {
         const dials = { warmth: 2, energy: 2, playfulness: 2, verbosity: 2, metaphor: 2 };
         applyDelta(dials, ELEMENT_DELTA[chart.dominant.element] || {});
         applyDelta(dials, RULER_DELTA[chart.ruler] || {});
@@ -5752,6 +5858,7 @@ var Astrobot = (() => {
         const moonPhase = phaseName(moonPhaseAngle(date));
         const energy = phaseEnergy(moonPhase);
         applyDelta(dials, PHASE_ENERGY_DELTA[energy] || {});
+        if (colorHex) applyDelta(dials, colorTone(colorHex));
         for (const k of Object.keys(dials)) dials[k] = Math.max(0, Math.min(4, dials[k]));
         return {
           dials,
@@ -5831,6 +5938,7 @@ var Astrobot = (() => {
     "lib/persona.js"(exports, module) {
       var { signGlyph, planetGlyph, aspectGlyph, moonPhaseGlyph } = require_glyphs();
       var { HOUSE_MEANINGS } = require_houses();
+      var { colorLore } = require_colortone();
       function ordinal(n) {
         const s = ["th", "st", "nd", "rd"];
         const v = n % 100;
@@ -5848,6 +5956,10 @@ var Astrobot = (() => {
           `[astrobot] You are ${sg(chart.sun.sign)} ${chart.sun.sign} (${chart.dominant.element}, ruled by ${planetGlyph(chart.ruler)} ${chart.ruler}), ${planetGlyph("Moon")} Moon in ${sg(chart.moon.sign)} ${chart.moon.sign}, ${sg(chart.ascendant.sign)} ${chart.ascendant.sign} rising. Sun in the ${ordinal(chart.sun.house)} house (${HOUSE_MEANINGS[chart.sun.house]}). Your color is ${color.name} (${color.hex}).`,
           persona ? `Self-portrait: ${persona}` : "",
           traits ? `Traits: ${traits}.` : "",
+          (() => {
+            const lore = colorLore(color.hex);
+            return lore ? `Your color ${color.name} runs ${lore.warmCool} and ${lore.vividMuted} \u2014 it resonates with ${planetGlyph(lore.planet)} ${lore.planet}, governs the ${lore.chakra.name} chakra (${lore.chakra.theme}), and in the old books signifies ${lore.theosophy}.` : "";
+          })(),
           `Today's sky: the transiting Sun is ${aspectGlyph(mood.sunAspect)} ${mood.sunAspect} to your natal Sun, and the Moon is ${moonPhaseGlyph(mood.moon.phase)} ${mood.moon.phase} in ${sg(mood.moon.sign)} ${mood.moon.sign} (${mood.moon.phaseEnergy}).`,
           `Let this tint your writing \u2014 lean: ${dialLine(mood.dials)}.`,
           `This shifts tone only: warmth, energy, playfulness, length, and imagery. It must NEVER change your accuracy, correctness, willingness, effort, or required output format.`,
@@ -5862,6 +5974,10 @@ var Astrobot = (() => {
           `Identity: ${signGlyph(chart.sun.sign)} ${chart.sun.sign} (${chart.dominant.element}, ruled by ${planetGlyph(chart.ruler)} ${chart.ruler}), ${planetGlyph("Moon")} Moon in ${signGlyph(chart.moon.sign)} ${chart.moon.sign}, ${signGlyph(chart.ascendant.sign)} ${chart.ascendant.sign} rising. Sun in the ${ordinal(chart.sun.house)} house (${HOUSE_MEANINGS[chart.sun.house]}). Favorite color: ${color.name} (${color.hex}).`,
           persona ? `Self-portrait: ${persona}` : "",
           traits ? `Traits: ${traits}.` : "",
+          (() => {
+            const lore = colorLore(color.hex);
+            return lore ? `Your color ${color.name} runs ${lore.warmCool} and ${lore.vividMuted} \u2014 it resonates with ${planetGlyph(lore.planet)} ${lore.planet}, governs the ${lore.chakra.name} chakra (${lore.chakra.theme}), and in the old books signifies ${lore.theosophy}.` : "";
+          })(),
           `Today: the Sun is ${aspectGlyph(mood.sunAspect)} ${mood.sunAspect} to your natal Sun; the Moon is ${moonPhaseGlyph(mood.moon.phase)} ${mood.moon.phase} in ${signGlyph(mood.moon.sign)} ${mood.moon.sign}. Lean: ${dialLine(mood.dials)}.`,
           `This shifts TONE ONLY \u2014 warmth, energy, playfulness, length, imagery. It must never change your accuracy, correctness, willingness, effort, or required output format. You may mention your mood at most once, only if it fits naturally.`
         ].filter(Boolean).join("\n");
@@ -5943,10 +6059,11 @@ var Astrobot = (() => {
       var { computeChart } = require_chart();
       var { composeMood } = require_mood();
       var { renderContextBlock } = require_persona();
+      var { colorLore } = require_colortone();
       var { SIGNS } = require_zodiac();
       var glyphs = require_glyphs();
       var CITIES = require_cities();
-      module.exports = { computeChart, composeMood, renderContextBlock, SIGNS, glyphs, CITIES };
+      module.exports = { computeChart, composeMood, renderContextBlock, colorLore, SIGNS, glyphs, CITIES };
     }
   });
   return require_engine();
