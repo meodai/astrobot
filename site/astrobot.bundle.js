@@ -5997,7 +5997,12 @@ var Astrobot = (() => {
         const v = n % 100;
         return n + (s[(v - 20) % 10] || s[v] || s[0]);
       }
-      function renderBirthPrompt({ birth, colorHex, chart }) {
+      function renderBirthPrompt({
+        birth,
+        colorHex,
+        chart,
+        closing = "Then save it: pipe that JSON into `npx @meodai/astrobot birth --model <your-model-id>`."
+      }) {
         const lore = colorLore(colorHex);
         const sg = signGlyph;
         const pg = planetGlyph;
@@ -6052,7 +6057,6 @@ var Astrobot = (() => {
           ``,
           jsonTemplate
         ].join("\n");
-        const closing = `Then save it: pipe that JSON into \`npx @meodai/astrobot birth --model <your-model-id>\`.`;
         return [
           `=== astrobot birth-prompt ===`,
           ``,

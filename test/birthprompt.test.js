@@ -142,6 +142,22 @@ test('CLI birth-prompt --seed 7 output contains birth --model instruction', () =
   assert.ok(out.includes('birth --model'), 'CLI output must include "birth --model"');
 });
 
+test('renderBirthPrompt default closing contains "npx @meodai/astrobot birth"', () => {
+  const { birth, colorHex } = roll(SEED);
+  const chart = computeChart(birth);
+  const out = renderBirthPrompt({ birth, colorHex, chart });
+  assert.ok(out.includes('npx @meodai/astrobot birth'), 'default closing must contain the npx CLI instruction');
+});
+
+test('renderBirthPrompt custom closing replaces CLI line and does not contain "npx"', () => {
+  const { birth, colorHex } = roll(SEED);
+  const chart = computeChart(birth);
+  const customClosing = 'Then paste the JSON the model returns back into step 3 of the panel below.';
+  const out = renderBirthPrompt({ birth, colorHex, chart, closing: customClosing });
+  assert.ok(out.includes(customClosing), 'output must contain the custom closing string');
+  assert.ok(!out.includes('npx @meodai/astrobot birth'), 'output must NOT contain the npx CLI instruction when custom closing is set');
+});
+
 test('usage string includes birth-prompt', () => {
   const { run } = require('../bin/astrobot.js');
   return run(['unknown-command'], { stdin: '' }).then((r) => {

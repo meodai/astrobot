@@ -435,7 +435,7 @@
 
     var validHex = safeHex(colorHex);
     $('myo-swatch').style.setProperty('background', validHex);
-    $('myo-swatch-name').textContent = colorHex.toUpperCase() + '  ' + colorHex;
+    $('myo-swatch-name').textContent = colorHex.toUpperCase();
     renderLore('myo-lore', colorHex);
 
     $('myo-rolled').hidden = false;
@@ -469,7 +469,7 @@
     myoState = { birth: birth, colorHex: colorHex, chart: chart };
     myoRenderRolled(chart, birth, colorHex);
 
-    $('myo-prompt').value = A.renderBirthPrompt({ birth: birth, colorHex: colorHex, chart: chart });
+    $('myo-prompt').value = A.renderBirthPrompt({ birth: birth, colorHex: colorHex, chart: chart, closing: 'Then paste the JSON the model returns back into step 3 of the panel below.' });
     $('myo-reply').value = '';
     myoHideError();
 
@@ -591,7 +591,8 @@
     myoRenderRolled(profile.chart, birth, profile.color.hex);
     if (birth.datetime) {
       $('myo-prompt').value = A.renderBirthPrompt({
-        birth: birth, colorHex: profile.color.hex, chart: profile.chart
+        birth: birth, colorHex: profile.color.hex, chart: profile.chart,
+        closing: 'Then paste the JSON the model returns back into step 3 of the panel below.'
       });
     }
     $('myo-reply').value = '';
