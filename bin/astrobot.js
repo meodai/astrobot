@@ -30,7 +30,8 @@ function readAllStdin() {
 async function run(argv, opts = {}) {
   const args = parseArgs(argv);
   const cmd = args._[0];
-  const stdin = opts.stdin !== undefined ? opts.stdin : await readAllStdin();
+  // Only `birth` consumes stdin; reading it for every command would hang
+  // non-`birth` invocations whose stdin is a non-TTY pipe that never closes.
 
   if (cmd === 'today') {
     const resolved = profile.resolve(args.model);
@@ -41,6 +42,7 @@ async function run(argv, opts = {}) {
 
   if (cmd === 'birth') {
     if (!args.model) return { code: 1, out: 'birth requires --model\n' };
+    const stdin = opts.stdin !== undefined ? opts.stdin : await readAllStdin();
     let input;
     try { input = JSON.parse(stdin); } catch { return { code: 1, out: 'birth: invalid JSON on stdin\n' }; }
     if (!input || !input.birth || !input.color || !input.color.name) {
