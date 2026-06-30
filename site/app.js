@@ -471,7 +471,7 @@
     myoState = { birth: birth, colorHex: colorHex, chart: chart };
     myoRenderRolled(chart, birth, colorHex);
 
-    $('myo-prompt').value = A.renderBirthPrompt({ birth: birth, colorHex: colorHex, chart: chart, closing: 'Then paste the JSON the model returns back into step 3 of the panel below.' });
+    $('myo-prompt').value = A.renderBirthPrompt({ birth: birth, colorHex: colorHex, chart: chart, closing: 'Return only the filled-in JSON object — no other text.' });
     $('myo-reply').value = '';
     myoHideError();
 
@@ -594,7 +594,7 @@
     if (birth.datetime) {
       $('myo-prompt').value = A.renderBirthPrompt({
         birth: birth, colorHex: profile.color.hex, chart: profile.chart,
-        closing: 'Then paste the JSON the model returns back into step 3 of the panel below.'
+        closing: 'Return only the filled-in JSON object — no other text.'
       });
     }
     $('myo-reply').value = '';
