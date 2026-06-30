@@ -63,3 +63,33 @@ test('CLI roll --seed 7 prints valid JSON with birth, colorHex, chart.sun.sign',
   assert.ok(parsed.colorHex, 'missing colorHex');
   assert.ok(parsed.chart && parsed.chart.sun && parsed.chart.sun.sign, 'missing chart.sun.sign');
 });
+
+test('roll(42) is still deterministic when no now is passed', () => {
+  const a = roll(42);
+  const b = roll(42);
+  assert.deepEqual(a, b, 'roll(42) must return identical results on two calls');
+});
+
+test('roll(42, now) replaces time but preserves date', () => {
+  const now = new Date('2020-01-01T13:37:00');
+  const withNow = roll(42, now);
+  const withoutNow = roll(42);
+  // datetime must end with T13:37:00
+  assert.ok(
+    withNow.birth.datetime.endsWith('T13:37:00'),
+    `expected datetime to end with T13:37:00, got: ${withNow.birth.datetime}`
+  );
+  // date portion must be preserved (same as without now)
+  assert.equal(
+    withNow.birth.datetime.slice(0, 10),
+    withoutNow.birth.datetime.slice(0, 10),
+    'date portion must not change when now is passed'
+  );
+});
+
+test('colorHex is identical with and without now for the same seed', () => {
+  const now = new Date('2020-06-15T08:30:00');
+  const withNow = roll(42, now);
+  const withoutNow = roll(42);
+  assert.equal(withNow.colorHex, withoutNow.colorHex, 'colorHex must not be affected by now');
+});

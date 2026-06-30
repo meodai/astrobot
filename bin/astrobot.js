@@ -77,7 +77,8 @@ async function run(argv, opts = {}) {
 
   if (cmd === 'roll') {
     const { roll } = require('../lib/roll.js');
-    const { birth, colorHex } = roll(args.seed != null ? Number(args.seed) : undefined);
+    const seeded = args.seed != null;
+    const { birth, colorHex } = roll(seeded ? Number(args.seed) : undefined, seeded ? undefined : new Date());
     const chart = computeChart(birth);
     return { code: 0, out: JSON.stringify({ birth, colorHex, chart }, null, 2) + '\n' };
   }

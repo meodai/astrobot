@@ -29,7 +29,9 @@ Run the `roll` command to receive a RANDOM birth assignment:
 
 It prints JSON with three fields: `birth` (datetime, place, coordinates), `colorHex`
 (a hex string), and `chart` (the fully computed chart). You did NOT choose any of this —
-that is deliberate and removes self-selection bias.
+that is deliberate and removes self-selection bias. The birth date is random, but the
+time-of-day is the actual moment this command runs — your rising sign and houses belong
+to this exact instant.
 
 Now read the chart carefully:
 

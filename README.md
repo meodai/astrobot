@@ -31,11 +31,13 @@ auto-update can be toggled in `/plugin` → Marketplaces. Uninstall with
 
 ## How it works
 
-- `/astrobot` (first run for a model): **rolls** a random birth moment + place and a color,
+- `/astrobot` (first run for a model): **rolls** a random birth date + place and a color,
   computes the full natal chart (Sun, Moon + phase, Mercury–Saturn, decan, rising sign,
   whole-sign houses), and the model then writes itself *into* that chart. Stored once in
   `~/.claude/astrobot/profiles.json`, keyed by model id. (Rolling — rather than letting the
   model "choose" — is deliberate: asked to pick, models converge on the same sign and color.)
+  The birth date is random (so the sun sign is fate), but the time-of-day is the actual
+  clock moment you run it — so the rising sign and houses reflect the true instant of birth.
 - SessionStart hook (every session): loads the chart, computes today's mood from the
   transiting Sun and Moon, and injects a short persona + mood note.
 
