@@ -273,7 +273,9 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 0 1.25rem; }
 .field__label strong { color: var(--gold-bright); font-style: normal; }
 
 .field-row { display: flex; gap: .8rem; }
-.field-row .field { flex: 1; margin-bottom: 0; }
+/* min-width:0 lets number/date inputs shrink below their intrinsic width
+   inside the flex row (iOS/Safari otherwise overflows the plate). */
+.field-row .field { flex: 1; min-width: 0; margin-bottom: 0; }
 .field-row--color { align-items: center; }
 
 input[type="date"],
@@ -281,6 +283,8 @@ input[type="time"],
 input[type="number"],
 select {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   font-family: var(--body);
   font-size: 1rem;
   color: var(--parchment);
