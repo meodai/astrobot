@@ -212,6 +212,11 @@ Sign of a body = `floor(eclipticLongitude / 30)`. Decan = which 10° third of th
 Antique planet→color flavor (birth narrative only): yellow=Mars, red=Mercury,
 white=Jupiter, black=Saturn; gold=Sun, green=Venus, silver=Moon (last three classical).
 
+**Unicode glyphs.** Signs (♈–♓), planets (☉ ☽ ☿ ♀ ♂ ♃ ♄), aspects (☌ ⚺ ⚹ □ △ ⚻ ☍),
+and moon phases (🌑🌒🌓🌔🌕🌖🌗🌘) use their real Unicode astrological symbols (see
+<https://en.wikipedia.org/wiki/Astrological_symbols>). A `lib/glyphs.js` module maps
+names → glyphs and is consumed by the persona block and the Phase 2 microsite.
+
 ## Packaging & distribution
 
 A GitHub repo that doubles as a **plugin marketplace**:

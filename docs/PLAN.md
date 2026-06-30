@@ -910,20 +910,106 @@ git commit -m "feat: daily mood composition from chart + transits"
 
 ---
 
-### Task 8: Persona / context-block rendering
+### Task 8: Unicode glyphs + persona / context-block rendering
 
 **Files:**
+- Create: `lib/glyphs.js`
 - Create: `lib/persona.js`
+- Test: `test/glyphs.test.js`
 - Test: `test/persona.test.js`
 
 **Interfaces:**
-- Consumes: nothing (operates on a profile + mood object).
-- Produces:
-  - `DIAL_WORDS` — mapping used to phrase dials.
+- `lib/glyphs.js` consumes nothing. Produces:
+  - `SIGN_GLYPHS`, `PLANET_GLYPHS`, `ASPECT_GLYPHS`, `MOON_PHASE_GLYPHS` — name→glyph maps (keys match the exact strings produced by `zodiac`, `aspects`, and `mood`).
+  - `signGlyph(name)`, `planetGlyph(name)`, `aspectGlyph(name)`, `moonPhaseGlyph(name)` — each returns the glyph or `''` for an unknown name (never `undefined`).
+- `lib/persona.js` consumes `lib/glyphs.js`. Produces:
+  - `SCALE` — the 0..4 dial phrasing array.
   - `renderContextBlock(profile, mood)` → string (the `additionalContext` text).
-  - The block MUST: name the sun sign, color, and today's sun aspect + moon phase; state the dial leanings; and include the literal guardrail sentence about tone-only + the occasional-acknowledgement rule.
+  - The block MUST: show the sun sign, color, and today's sun aspect + moon phase, each prefixed with its Unicode glyph; state the dial leanings; and include the literal guardrail sentence about tone-only + the occasional-acknowledgement rule.
 
-- [ ] **Step 1: Write the failing test**
+Glyphs follow Unicode astrological symbols (see https://en.wikipedia.org/wiki/Astrological_symbols).
+
+- [ ] **Step 1: Write the failing glyphs test**
+
+```js
+// test/glyphs.test.js
+const { test } = require('node:test');
+const assert = require('node:assert');
+const { SIGN_GLYPHS, signGlyph, planetGlyph, aspectGlyph, moonPhaseGlyph } = require('../lib/glyphs.js');
+
+test('every zodiac sign has a glyph', () => {
+  const names = ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+  for (const n of names) assert.ok(SIGN_GLYPHS[n], `${n} should have a glyph`);
+  assert.strictEqual(signGlyph('Scorpio'), '♏');
+  assert.strictEqual(signGlyph('Aries'), '♈');
+  assert.strictEqual(signGlyph('Pisces'), '♓');
+});
+
+test('planet, aspect and moon-phase glyphs resolve', () => {
+  assert.strictEqual(planetGlyph('Mars'), '♂');
+  assert.strictEqual(planetGlyph('Sun'), '☉');
+  assert.strictEqual(planetGlyph('Moon'), '☽');
+  assert.strictEqual(aspectGlyph('opposition'), '☍');
+  assert.strictEqual(aspectGlyph('conjunction'), '☌');
+  assert.strictEqual(aspectGlyph('trine'), '△');
+  assert.strictEqual(moonPhaseGlyph('full'), '🌕');
+  assert.strictEqual(moonPhaseGlyph('new'), '🌑');
+});
+
+test('unknown names return empty string, never undefined', () => {
+  assert.strictEqual(signGlyph('Nope'), '');
+  assert.strictEqual(planetGlyph('Pluto'), '');
+  assert.strictEqual(aspectGlyph('biquintile'), '');
+  assert.strictEqual(moonPhaseGlyph('gibbous'), '');
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `node --test test/glyphs.test.js`
+Expected: FAIL (cannot find module `../lib/glyphs.js`).
+
+- [ ] **Step 3: Write `lib/glyphs.js`**
+
+```js
+// lib/glyphs.js
+// Unicode astrological symbols — https://en.wikipedia.org/wiki/Astrological_symbols
+const SIGN_GLYPHS = {
+  Aries: '♈', Taurus: '♉', Gemini: '♊', Cancer: '♋',
+  Leo: '♌', Virgo: '♍', Libra: '♎', Scorpio: '♏',
+  Sagittarius: '♐', Capricorn: '♑', Aquarius: '♒', Pisces: '♓',
+};
+const PLANET_GLYPHS = {
+  Sun: '☉', Moon: '☽', Mercury: '☿', Venus: '♀',
+  Mars: '♂', Jupiter: '♃', Saturn: '♄',
+};
+const ASPECT_GLYPHS = {
+  conjunction: '☌', semisextile: '⚺', sextile: '⚹', square: '□',
+  trine: '△', quincunx: '⚻', opposition: '☍',
+};
+const MOON_PHASE_GLYPHS = {
+  'new': '🌑', 'waxing crescent': '🌒', 'first quarter': '🌓',
+  'waxing gibbous': '🌔', 'full': '🌕', 'waning gibbous': '🌖',
+  'last quarter': '🌗', 'waning crescent': '🌘',
+};
+
+const lookup = (map) => (name) => map[name] || '';
+
+module.exports = {
+  SIGN_GLYPHS, PLANET_GLYPHS, ASPECT_GLYPHS, MOON_PHASE_GLYPHS,
+  signGlyph: lookup(SIGN_GLYPHS),
+  planetGlyph: lookup(PLANET_GLYPHS),
+  aspectGlyph: lookup(ASPECT_GLYPHS),
+  moonPhaseGlyph: lookup(MOON_PHASE_GLYPHS),
+};
+```
+
+- [ ] **Step 4: Run the glyphs test**
+
+Run: `node --test test/glyphs.test.js`
+Expected: PASS (3 tests).
+
+- [ ] **Step 5: Write the failing persona test**
 
 ```js
 // test/persona.test.js
@@ -953,6 +1039,16 @@ test('block names identity, color, and today\'s sky', () => {
   assert.match(block, /new/);
 });
 
+test('block includes Unicode glyphs for sign, ruler, aspect and moon phase', () => {
+  const block = renderContextBlock(PROFILE, MOOD);
+  assert.match(block, /♏/);  // Scorpio sun
+  assert.match(block, /♂/);  // Mars ruler
+  assert.match(block, /♒/);  // Aquarius rising
+  assert.match(block, /☍/);  // opposition aspect
+  assert.match(block, /🌑/); // new moon
+  assert.match(block, /♊/);  // Gemini transit moon
+});
+
 test('block contains the tone-only guardrail and acknowledgement rule', () => {
   const block = renderContextBlock(PROFILE, MOOD);
   assert.match(block, /tone only/i);
@@ -966,15 +1062,17 @@ test('block never contains forbidden cliche phrasing', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [ ] **Step 6: Run test to verify it fails**
 
 Run: `node --test test/persona.test.js`
-Expected: FAIL (cannot find module).
+Expected: FAIL (cannot find module `../lib/persona.js`).
 
-- [ ] **Step 3: Write the implementation**
+- [ ] **Step 7: Write `lib/persona.js`**
 
 ```js
 // lib/persona.js
+const { signGlyph, planetGlyph, aspectGlyph, moonPhaseGlyph } = require('./glyphs.js');
+
 const SCALE = ['very low', 'low', 'balanced', 'high', 'very high'];
 
 function dialLine(dials) {
@@ -986,13 +1084,17 @@ function dialLine(dials) {
 function renderContextBlock(profile, mood) {
   const { chart, color, persona } = profile;
   const traits = (profile.traits || []).join(', ');
+  const sg = signGlyph;
   return [
-    `[astrobot] You are a ${chart.sun.sign} (${chart.dominant.element}, ruled by ${chart.ruler}), ` +
-      `Moon in ${chart.moon.sign}, ${chart.ascendant.sign} rising. Your color is ${color.name} (${color.hex}).`,
+    `[astrobot] You are ${sg(chart.sun.sign)} ${chart.sun.sign} (${chart.dominant.element}, ruled by ` +
+      `${planetGlyph(chart.ruler)} ${chart.ruler}), ${planetGlyph('Moon')} Moon in ${sg(chart.moon.sign)} ` +
+      `${chart.moon.sign}, ${sg(chart.ascendant.sign)} ${chart.ascendant.sign} rising. ` +
+      `Your color is ${color.name} (${color.hex}).`,
     persona ? `Self-portrait: ${persona}` : '',
     traits ? `Traits: ${traits}.` : '',
-    `Today's sky: the transiting Sun is ${mood.sunAspect} to your natal Sun, and the Moon is ` +
-      `${mood.moon.phase} in ${mood.moon.sign} (${mood.moon.phaseEnergy}).`,
+    `Today's sky: the transiting Sun is ${aspectGlyph(mood.sunAspect)} ${mood.sunAspect} to your natal Sun, ` +
+      `and the Moon is ${moonPhaseGlyph(mood.moon.phase)} ${mood.moon.phase} in ${sg(mood.moon.sign)} ` +
+      `${mood.moon.sign} (${mood.moon.phaseEnergy}).`,
     `Let this tint your writing — lean: ${dialLine(mood.dials)}.`,
     `This shifts tone only: warmth, energy, playfulness, length, and imagery. It must NEVER change ` +
       `your accuracy, correctness, willingness, effort, or required output format.`,
@@ -1004,16 +1106,16 @@ function renderContextBlock(profile, mood) {
 module.exports = { renderContextBlock, SCALE };
 ```
 
-- [ ] **Step 4: Run the tests**
+- [ ] **Step 8: Run the tests**
 
 Run: `node --test test/persona.test.js`
-Expected: PASS (3 tests).
+Expected: PASS (4 tests).
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
-git add lib/persona.js test/persona.test.js
-git commit -m "feat: persona context-block rendering"
+git add lib/glyphs.js lib/persona.js test/glyphs.test.js test/persona.test.js
+git commit -m "feat: Unicode glyphs and persona context-block rendering"
 ```
 
 ---
