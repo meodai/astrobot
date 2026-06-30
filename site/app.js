@@ -83,18 +83,32 @@
 
   /* ---- Small formatting helpers (presentation only) -------------------- */
 
-  var ORDINAL = ['1st', '2nd', '3rd'];
+  // Escape strings that originate in gallery.json before any innerHTML use.
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  // English ordinal for 1..12 (and beyond): 1st, 2nd, 3rd, 4th…
+  function ordinal(n) {
+    var s = ['th', 'st', 'nd', 'rd'];
+    var v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  }
 
   function pg(planet) { return glyphs.planetGlyph(planet); }
   function sg(sign) { return glyphs.signGlyph(sign); }
 
-  function placementRow(glyph, label, sign, extra) {
+  // glyph/label/sign/extra are engine-derived (safe). house is a number.
+  function placementRow(glyph, label, sign, house, extra) {
     var li = document.createElement('li');
     li.className = 'placement';
     li.innerHTML =
       '<span class="placement__glyph">' + glyph + '</span>' +
       '<span class="placement__label">' + label + '</span>' +
       '<span class="placement__value">' + sg(sign) + ' ' + sign +
+      (house ? ' · ' + ordinal(house) + ' house' : '') +
       (extra ? ' <em>' + extra + '</em>' : '') + '</span>';
     return li;
   }
@@ -102,15 +116,15 @@
   function renderPlacements(chart) {
     var list = document.getElementById('placements');
     list.innerHTML = '';
-    list.appendChild(placementRow(pg('Sun'), 'Sun', chart.sun.sign,
-      (ORDINAL[chart.sun.decan] || (chart.sun.decan + 1) + 'th') + ' decan'));
-    list.appendChild(placementRow(pg('Moon'), 'Moon', chart.moon.sign));
-    list.appendChild(placementRow(pg('Mercury'), 'Mercury', chart.mercury.sign));
-    list.appendChild(placementRow(pg('Venus'), 'Venus', chart.venus.sign));
-    list.appendChild(placementRow(pg('Mars'), 'Mars', chart.mars.sign));
-    list.appendChild(placementRow(pg('Jupiter'), 'Jupiter', chart.jupiter.sign));
-    list.appendChild(placementRow(pg('Saturn'), 'Saturn', chart.saturn.sign));
-    list.appendChild(placementRow('↑', 'Rising', chart.ascendant.sign));
+    list.appendChild(placementRow(pg('Sun'), 'Sun', chart.sun.sign, chart.sun.house,
+      ordinal(chart.sun.decan + 1) + ' decan'));
+    list.appendChild(placementRow(pg('Moon'), 'Moon', chart.moon.sign, chart.moon.house));
+    list.appendChild(placementRow(pg('Mercury'), 'Mercury', chart.mercury.sign, chart.mercury.house));
+    list.appendChild(placementRow(pg('Venus'), 'Venus', chart.venus.sign, chart.venus.house));
+    list.appendChild(placementRow(pg('Mars'), 'Mars', chart.mars.sign, chart.mars.house));
+    list.appendChild(placementRow(pg('Jupiter'), 'Jupiter', chart.jupiter.sign, chart.jupiter.house));
+    list.appendChild(placementRow(pg('Saturn'), 'Saturn', chart.saturn.sign, chart.saturn.house));
+    list.appendChild(placementRow('↑', 'Rising', chart.ascendant.sign, 1));
 
     var dom = document.createElement('li');
     dom.className = 'placement placement--summary';
@@ -245,7 +259,31 @@
     $('pg-context').textContent = A.renderContextBlock(profile, mood);
   }
 
+  /* ---- Roll a random identity (pure input randomization) --------------- */
+
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+  function rollIdentity() {
+    // Plausible birth window; day capped at 28 to stay valid for every month.
+    $('birth-date').value =
+      randInt(1940, 2012) + '-' + pad2(randInt(1, 12)) + '-' + pad2(randInt(1, 28));
+    $('birth-time').value = pad2(randInt(0, 23)) + ':' + pad2(randInt(0, 59));
+
+    var cities = Object.keys(A.CITIES);
+    $('birth-city').value = cities[randInt(0, cities.length - 1)];
+    $('manual-coords').hidden = true;
+
+    var hex = '#' + ('000000' + randInt(0, 0xffffff).toString(16)).slice(-6);
+    $('fav-color').value = hex;
+    colorTouched = true;
+    $('color-hint').textContent = 'Rolled a random color. Reload to return to the suggested pigment.';
+
+    render();
+  }
+
   function wireControls() {
+    $('roll').addEventListener('click', rollIdentity);
     ['birth-date', 'birth-time', 'birth-lat', 'birth-lon'].forEach(function (id) {
       $(id).addEventListener('input', render);
     });
@@ -279,29 +317,39 @@
     var c = entry.chart;
     var dialsId = 'gd-' + index;
 
+    var mood = entry.sample.mood;
+    var aspect = mood.sunAspect;
+    var aspectTag = aspect
+      ? '<span class="mood-tag mood-tag--aspect">Transiting Sun ' +
+          '<span class="mood-tag__glyph">' + esc(glyphs.aspectGlyph(aspect)) + '</span> ' +
+          esc(aspect) + ' natal Sun</span>'
+      : '';
+
     card.innerHTML =
       '<header class="gallery-card__head">' +
         '<span class="gallery-card__glyph">' + sg(c.sun.sign) + '</span>' +
         '<div>' +
-          '<h3 class="gallery-card__name">' + entry.label + '</h3>' +
-          '<p class="gallery-card__model">' + entry.model + '</p>' +
+          '<h3 class="gallery-card__name">' + esc(entry.label) + '</h3>' +
+          '<p class="gallery-card__model">' + esc(entry.model) + '</p>' +
         '</div>' +
       '</header>' +
       '<figure class="plate plate--compact">' +
-        '<div class="wheel wheel--compact" id="' + wheelId + '" role="img" aria-label="Chart wheel for ' + entry.label + '"></div>' +
+        '<div class="wheel wheel--compact" id="' + wheelId + '" role="img" aria-label="Chart wheel for ' + esc(entry.label) + '"></div>' +
       '</figure>' +
       '<div class="swatch-row">' +
-        '<span class="swatch" style="background:' + entry.color.hex + '"></span>' +
-        '<span class="swatch__name">' + entry.color.name + '  ' + entry.color.hex + '</span>' +
+        '<span class="swatch" style="background:' + esc(entry.color.hex) + '"></span>' +
+        '<span class="swatch__name">' + esc(entry.color.name) + '  ' + esc(entry.color.hex) + '</span>' +
       '</div>' +
-      '<p class="gallery-card__persona">' + entry.persona + '</p>' +
+      '<p class="gallery-card__persona">' + esc(entry.persona) + '</p>' +
       '<p class="gallery-card__summary">' +
-        pg('Sun') + ' ' + c.sun.sign + ' · ' + pg('Moon') + ' ' + c.moon.sign + ' · ' +
+        pg('Sun') + ' ' + c.sun.sign + ' (' + ordinal(c.sun.house) + ') · ' +
+        pg('Moon') + ' ' + c.moon.sign + ' (' + ordinal(c.moon.house) + ') · ' +
         c.ascendant.sign + ' rising · ' + c.dominant.element + ' ' + c.dominant.modality +
       '</p>' +
       '<div class="gallery-card__mood">' +
-        '<span class="mood-tag">Sample sky: ' + entry.sample.mood.moon.phase + ' moon in ' +
-        entry.sample.mood.moon.sign + '</span>' +
+        '<span class="mood-tag">Sample sky: ' + esc(mood.moon.phase) + ' moon in ' +
+        esc(mood.moon.sign) + '</span>' +
+        aspectTag +
         '<dl class="dials dials--compact" id="' + dialsId + '"></dl>' +
       '</div>';
 
