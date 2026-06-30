@@ -13,35 +13,43 @@
       "sun": {
         "sign": "Scorpio",
         "lon": 225.99521972342427,
-        "decan": 1
+        "decan": 1,
+        "house": 3
       },
       "moon": {
         "sign": "Libra",
-        "lon": 189.2308564139796
+        "lon": 189.2308564139796,
+        "house": 2
       },
       "mercury": {
         "sign": "Scorpio",
-        "lon": 229.70877531834708
+        "lon": 229.70877531834708,
+        "house": 3
       },
       "venus": {
         "sign": "Libra",
-        "lon": 191.6830145120622
+        "lon": 191.6830145120622,
+        "house": 2
       },
       "mars": {
         "sign": "Virgo",
-        "lon": 154.83023897708517
+        "lon": 154.83023897708517,
+        "house": 1
       },
       "jupiter": {
         "sign": "Capricorn",
-        "lon": 283.98601790624116
+        "lon": 283.98601790624116,
+        "house": 5
       },
       "saturn": {
         "sign": "Aries",
-        "lon": 1.1714741112222669
+        "lon": 1.1714741112222669,
+        "house": 8
       },
       "ascendant": {
         "sign": "Virgo",
-        "lon": 170.91211861708666
+        "lon": 170.91211861708666,
+        "house": 1
       },
       "dominant": {
         "element": "Water",
@@ -92,35 +100,43 @@
       "sun": {
         "sign": "Aries",
         "lon": 12.095157766303942,
-        "decan": 1
+        "decan": 1,
+        "house": 12
       },
       "moon": {
         "sign": "Scorpio",
-        "lon": 227.94010632779168
+        "lon": 227.94010632779168,
+        "house": 7
       },
       "mercury": {
         "sign": "Aries",
-        "lon": 28.681277938015285
+        "lon": 28.681277938015285,
+        "house": 12
       },
       "venus": {
         "sign": "Taurus",
-        "lon": 47.36528397983909
+        "lon": 47.36528397983909,
+        "house": 1
       },
       "mars": {
         "sign": "Gemini",
-        "lon": 89.63716573777583
+        "lon": 89.63716573777583,
+        "house": 2
       },
       "jupiter": {
         "sign": "Leo",
-        "lon": 123.56159798059338
+        "lon": 123.56159798059338,
+        "house": 4
       },
       "saturn": {
         "sign": "Aquarius",
-        "lon": 305.250285895553
+        "lon": 305.250285895553,
+        "house": 10
       },
       "ascendant": {
         "sign": "Taurus",
-        "lon": 54.2931761304244
+        "lon": 54.2931761304244,
+        "house": 1
       },
       "dominant": {
         "element": "Fire",
@@ -171,35 +187,43 @@
       "sun": {
         "sign": "Gemini",
         "lon": 72.8405026093443,
-        "decan": 1
+        "decan": 1,
+        "house": 8
       },
       "moon": {
         "sign": "Scorpio",
-        "lon": 220.02271414639245
+        "lon": 220.02271414639245,
+        "house": 1
       },
       "mercury": {
         "sign": "Gemini",
-        "lon": 89.93507608227281
+        "lon": 89.93507608227281,
+        "house": 8
       },
       "venus": {
         "sign": "Aries",
-        "lon": 27.134591959335523
+        "lon": 27.134591959335523,
+        "house": 6
       },
       "mars": {
         "sign": "Sagittarius",
-        "lon": 265.87536463653487
+        "lon": 265.87536463653487,
+        "house": 2
       },
       "jupiter": {
         "sign": "Gemini",
-        "lon": 80.94081221117938
+        "lon": 80.94081221117938,
+        "house": 8
       },
       "saturn": {
         "sign": "Gemini",
-        "lon": 65.50680258498551
+        "lon": 65.50680258498551,
+        "house": 8
       },
       "ascendant": {
         "sign": "Scorpio",
-        "lon": 239.76886168337128
+        "lon": 239.76886168337128,
+        "house": 1
       },
       "dominant": {
         "element": "Air",
@@ -250,35 +274,43 @@
       "sun": {
         "sign": "Pisces",
         "lon": 345.80828134498597,
-        "decan": 1
+        "decan": 1,
+        "house": 4
       },
       "moon": {
         "sign": "Libra",
-        "lon": 193.43849699503767
+        "lon": 193.43849699503767,
+        "house": 11
       },
       "mercury": {
         "sign": "Aquarius",
-        "lon": 318.545795851717
+        "lon": 318.545795851717,
+        "house": 3
       },
       "venus": {
         "sign": "Aries",
-        "lon": 29.710470876232876
+        "lon": 29.710470876232876,
+        "house": 5
       },
       "mars": {
         "sign": "Capricorn",
-        "lon": 278.5940535559819
+        "lon": 278.5940535559819,
+        "house": 2
       },
       "jupiter": {
         "sign": "Aries",
-        "lon": 29.487545295699533
+        "lon": 29.487545295699533,
+        "house": 5
       },
       "saturn": {
         "sign": "Capricorn",
-        "lon": 271.5077178794245
+        "lon": 271.5077178794245,
+        "house": 2
       },
       "ascendant": {
         "sign": "Sagittarius",
-        "lon": 246.2330543066372
+        "lon": 246.2330543066372,
+        "house": 1
       },
       "dominant": {
         "element": "Air",
@@ -329,35 +361,43 @@
       "sun": {
         "sign": "Capricorn",
         "lon": 286.3153962430878,
-        "decan": 1
+        "decan": 1,
+        "house": 2
       },
       "moon": {
         "sign": "Taurus",
-        "lon": 37.68474078514623
+        "lon": 37.68474078514623,
+        "house": 6
       },
       "mercury": {
         "sign": "Sagittarius",
-        "lon": 267.57033067878956
+        "lon": 267.57033067878956,
+        "house": 1
       },
       "venus": {
         "sign": "Scorpio",
-        "lon": 239.9572351644298
+        "lon": 239.9572351644298,
+        "house": 12
       },
       "mars": {
         "sign": "Capricorn",
-        "lon": 289.51494986952673
+        "lon": 289.51494986952673,
+        "house": 2
       },
       "jupiter": {
         "sign": "Leo",
-        "lon": 126.2856861562388
+        "lon": 126.2856861562388,
+        "house": 9
       },
       "saturn": {
         "sign": "Virgo",
-        "lon": 163.7737552583618
+        "lon": 163.7737552583618,
+        "house": 10
       },
       "ascendant": {
         "sign": "Sagittarius",
-        "lon": 260.4707109925697
+        "lon": 260.4707109925697,
+        "house": 1
       },
       "dominant": {
         "element": "Earth",
@@ -408,35 +448,43 @@
       "sun": {
         "sign": "Leo",
         "lon": 132.76052486302467,
-        "decan": 1
+        "decan": 1,
+        "house": 10
       },
       "moon": {
         "sign": "Cancer",
-        "lon": 108.83166414227838
+        "lon": 108.83166414227838,
+        "house": 9
       },
       "mercury": {
         "sign": "Leo",
-        "lon": 124.37204479904244
+        "lon": 124.37204479904244,
+        "house": 10
       },
       "venus": {
         "sign": "Virgo",
-        "lon": 177.68033385357808
+        "lon": 177.68033385357808,
+        "house": 11
       },
       "mars": {
         "sign": "Gemini",
-        "lon": 82.45193172055946
+        "lon": 82.45193172055946,
+        "house": 8
       },
       "jupiter": {
         "sign": "Scorpio",
-        "lon": 216.46676398829334
+        "lon": 216.46676398829334,
+        "house": 1
       },
       "saturn": {
         "sign": "Pisces",
-        "lon": 340.9579338815837
+        "lon": 340.9579338815837,
+        "house": 5
       },
       "ascendant": {
         "sign": "Scorpio",
-        "lon": 218.7950159278749
+        "lon": 218.7950159278749,
+        "house": 1
       },
       "dominant": {
         "element": "Water",
@@ -487,35 +535,43 @@
       "sun": {
         "sign": "Libra",
         "lon": 192.24599250870733,
-        "decan": 1
+        "decan": 1,
+        "house": 10
       },
       "moon": {
         "sign": "Gemini",
-        "lon": 83.67277319424448
+        "lon": 83.67277319424448,
+        "house": 6
       },
       "mercury": {
         "sign": "Libra",
-        "lon": 201.66024020402244
+        "lon": 201.66024020402244,
+        "house": 10
       },
       "venus": {
         "sign": "Virgo",
-        "lon": 166.43908719519982
+        "lon": 166.43908719519982,
+        "house": 9
       },
       "mars": {
         "sign": "Virgo",
-        "lon": 166.1185797426433
+        "lon": 166.1185797426433,
+        "house": 9
       },
       "jupiter": {
         "sign": "Aquarius",
-        "lon": 307.1285495678494
+        "lon": 307.1285495678494,
+        "house": 2
       },
       "saturn": {
         "sign": "Scorpio",
-        "lon": 235.29232333269624
+        "lon": 235.29232333269624,
+        "house": 11
       },
       "ascendant": {
         "sign": "Capricorn",
-        "lon": 294.0287686040438
+        "lon": 294.0287686040438,
+        "house": 1
       },
       "dominant": {
         "element": "Air",
@@ -566,35 +622,43 @@
       "sun": {
         "sign": "Sagittarius",
         "lon": 250.83976260250188,
-        "decan": 1
+        "decan": 1,
+        "house": 6
       },
       "moon": {
         "sign": "Aries",
-        "lon": 12.095707472723177
+        "lon": 12.095707472723177,
+        "house": 10
       },
       "mercury": {
         "sign": "Capricorn",
-        "lon": 270.71321464797427
+        "lon": 270.71321464797427,
+        "house": 7
       },
       "venus": {
         "sign": "Capricorn",
-        "lon": 277.93854048919854
+        "lon": 277.93854048919854,
+        "house": 7
       },
       "mars": {
         "sign": "Pisces",
-        "lon": 352.6296322803739
+        "lon": 352.6296322803739,
+        "house": 9
       },
       "jupiter": {
         "sign": "Virgo",
-        "lon": 167.36165772075265
+        "lon": 167.36165772075265,
+        "house": 3
       },
       "saturn": {
         "sign": "Cancer",
-        "lon": 101.93076256185975
+        "lon": 101.93076256185975,
+        "house": 1
       },
       "ascendant": {
         "sign": "Cancer",
-        "lon": 95.73285401613032
+        "lon": 95.73285401613032,
+        "house": 1
       },
       "dominant": {
         "element": "Earth",

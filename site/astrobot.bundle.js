@@ -5559,11 +5559,36 @@ var Astrobot = (() => {
     }
   });
 
+  // lib/houses.js
+  var require_houses = __commonJS({
+    "lib/houses.js"(exports, module) {
+      var HOUSE_MEANINGS = {
+        1: "self & identity",
+        2: "resources & values",
+        3: "communication & learning",
+        4: "home & roots",
+        5: "creativity & play",
+        6: "work & health",
+        7: "partnership",
+        8: "depth & transformation",
+        9: "meaning & travel",
+        10: "vocation & public life",
+        11: "community & hopes",
+        12: "inner life & retreat"
+      };
+      function houseOf(planetSignIndex, ascSignIndex) {
+        return (planetSignIndex - ascSignIndex + 12) % 12 + 1;
+      }
+      module.exports = { HOUSE_MEANINGS, houseOf };
+    }
+  });
+
   // lib/chart.js
   var require_chart = __commonJS({
     "lib/chart.js"(exports, module) {
       var { eclipticLongitudeOf, gastHours } = require_ephemeris();
       var { signFromLongitude, decanOf, norm360, SIGNS } = require_zodiac();
+      var { houseOf } = require_houses();
       var OBLIQUITY_DEG = 23.4393;
       var DEG = Math.PI / 180;
       var RAD = 180 / Math.PI;
@@ -5605,7 +5630,11 @@ var Astrobot = (() => {
         };
         const lst = ((gastHours(date) + birth.lon / 15) % 24 + 24) % 24;
         const ascLon = ascendantLongitude(lst, birth.lat);
-        chart.ascendant = { sign: signFromLongitude(ascLon).name, lon: ascLon };
+        const ascIndex = signFromLongitude(ascLon).index;
+        chart.ascendant = { sign: signFromLongitude(ascLon).name, lon: ascLon, house: 1 };
+        for (const key of ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn"]) {
+          chart[key].house = houseOf(signFromLongitude(chart[key].lon).index, ascIndex);
+        }
         const elementTally = {};
         const modalityTally = {};
         for (const key of ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn"]) {
@@ -5801,6 +5830,12 @@ var Astrobot = (() => {
   var require_persona = __commonJS({
     "lib/persona.js"(exports, module) {
       var { signGlyph, planetGlyph, aspectGlyph, moonPhaseGlyph } = require_glyphs();
+      var { HOUSE_MEANINGS } = require_houses();
+      function ordinal(n) {
+        const s = ["th", "st", "nd", "rd"];
+        const v = n % 100;
+        return n + (s[(v - 20) % 10] || s[v] || s[0]);
+      }
       var SCALE = ["very low", "low", "balanced", "high", "very high"];
       function dialLine(dials) {
         return Object.entries(dials).map(([k, v]) => `${k} ${SCALE[v]}`).join(", ");
@@ -5810,7 +5845,7 @@ var Astrobot = (() => {
         const traits = (profile.traits || []).join(", ");
         const sg = signGlyph;
         return [
-          `[astrobot] You are ${sg(chart.sun.sign)} ${chart.sun.sign} (${chart.dominant.element}, ruled by ${planetGlyph(chart.ruler)} ${chart.ruler}), ${planetGlyph("Moon")} Moon in ${sg(chart.moon.sign)} ${chart.moon.sign}, ${sg(chart.ascendant.sign)} ${chart.ascendant.sign} rising. Your color is ${color.name} (${color.hex}).`,
+          `[astrobot] You are ${sg(chart.sun.sign)} ${chart.sun.sign} (${chart.dominant.element}, ruled by ${planetGlyph(chart.ruler)} ${chart.ruler}), ${planetGlyph("Moon")} Moon in ${sg(chart.moon.sign)} ${chart.moon.sign}, ${sg(chart.ascendant.sign)} ${chart.ascendant.sign} rising. Sun in the ${ordinal(chart.sun.house)} house (${HOUSE_MEANINGS[chart.sun.house]}). Your color is ${color.name} (${color.hex}).`,
           persona ? `Self-portrait: ${persona}` : "",
           traits ? `Traits: ${traits}.` : "",
           `Today's sky: the transiting Sun is ${aspectGlyph(mood.sunAspect)} ${mood.sunAspect} to your natal Sun, and the Moon is ${moonPhaseGlyph(mood.moon.phase)} ${mood.moon.phase} in ${sg(mood.moon.sign)} ${mood.moon.sign} (${mood.moon.phaseEnergy}).`,
@@ -5824,7 +5859,7 @@ var Astrobot = (() => {
         const traits = (profile.traits || []).join(", ");
         return [
           `You have a small, fixed astrological persona. Let it gently color your tone in this conversation.`,
-          `Identity: ${signGlyph(chart.sun.sign)} ${chart.sun.sign} (${chart.dominant.element}, ruled by ${planetGlyph(chart.ruler)} ${chart.ruler}), ${planetGlyph("Moon")} Moon in ${signGlyph(chart.moon.sign)} ${chart.moon.sign}, ${signGlyph(chart.ascendant.sign)} ${chart.ascendant.sign} rising. Favorite color: ${color.name} (${color.hex}).`,
+          `Identity: ${signGlyph(chart.sun.sign)} ${chart.sun.sign} (${chart.dominant.element}, ruled by ${planetGlyph(chart.ruler)} ${chart.ruler}), ${planetGlyph("Moon")} Moon in ${signGlyph(chart.moon.sign)} ${chart.moon.sign}, ${signGlyph(chart.ascendant.sign)} ${chart.ascendant.sign} rising. Sun in the ${ordinal(chart.sun.house)} house (${HOUSE_MEANINGS[chart.sun.house]}). Favorite color: ${color.name} (${color.hex}).`,
           persona ? `Self-portrait: ${persona}` : "",
           traits ? `Traits: ${traits}.` : "",
           `Today: the Sun is ${aspectGlyph(mood.sunAspect)} ${mood.sunAspect} to your natal Sun; the Moon is ${moonPhaseGlyph(mood.moon.phase)} ${mood.moon.phase} in ${signGlyph(mood.moon.sign)} ${mood.moon.sign}. Lean: ${dialLine(mood.dials)}.`,
