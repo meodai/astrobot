@@ -27,6 +27,18 @@ Astronomy by the vendored [Astronomy Engine](https://github.com/cosinekitty/astr
 (MIT). Flavor grounded in Boll & Bezold, *Sternglaube und Sterndeutung* (1926) — see
 [`docs/DESIGN.md`](docs/DESIGN.md).
 
+## Use with other LLMs
+
+astrobot's identity is portable. After a model is born, print a paste-able persona block:
+
+```
+node bin/astrobot.js export --model <id>
+```
+
+Paste the output into any assistant's system prompt (ChatGPT, Gemini, etc.). The block is
+self-contained and carries the same tone-only guardrail. (Automatic per-session application
+is Claude Code-only, via the plugin's hook.)
+
 ## Development
 
 ```

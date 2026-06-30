@@ -1,7 +1,7 @@
 // test/persona.test.js
 const { test } = require('node:test');
 const assert = require('node:assert');
-const { renderContextBlock } = require('../lib/persona.js');
+const { renderContextBlock, renderPortableBlock } = require('../lib/persona.js');
 
 const PROFILE = {
   chart: { sun: { sign: 'Scorpio', lon: 220, decan: 1 }, ruler: 'Mars',
@@ -45,4 +45,14 @@ test('block contains the tone-only guardrail and acknowledgement rule', () => {
 test('block never contains forbidden cliche phrasing', () => {
   const block = renderContextBlock(PROFILE, MOOD).toLowerCase();
   assert.ok(!block.includes('the stars compel'));
+});
+
+test('portable block carries identity, mood, glyphs and the tone-only guardrail, without [astrobot] framing', () => {
+  const block = renderPortableBlock(PROFILE, MOOD);
+  assert.match(block, /Scorpio/);
+  assert.match(block, /♏/);
+  assert.match(block, /opposition/);
+  assert.match(block, /tone only/i);
+  assert.match(block, /never.*(accuracy|correctness)/i);
+  assert.ok(!block.includes('[astrobot]'));
 });
