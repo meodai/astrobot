@@ -422,6 +422,10 @@
   }
 
   function myoRenderRolled(chart, birth, colorHex) {
+    // Reveal BEFORE drawing: AstroChart needs a laid-out (non-display:none)
+    // container, or the SVG/text measures at zero and the wheel renders blank.
+    $('myo-rolled').hidden = false;
+
     var born = $('myo-born');
     born.textContent = 'Born ' + birth.datetime.replace('T', ' ').slice(0, 16) +
       ' · ' + birth.place + ' (' + birth.lat + ', ' + birth.lon + ')';
@@ -437,8 +441,6 @@
     $('myo-swatch').style.setProperty('background', validHex);
     $('myo-swatch-name').textContent = colorHex.toUpperCase();
     renderLore('myo-lore', colorHex);
-
-    $('myo-rolled').hidden = false;
   }
 
   function myoRoll() {
