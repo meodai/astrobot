@@ -1,9 +1,35 @@
 {
-  "name": "astrobot",
-  "version": "0.1.0",
-  "private": true,
+  "name": "@meodai/astrobot",
+  "version": "0.2.0",
   "description": "Give each Claude model a permanent astrological identity that subtly tints its tone day by day.",
   "license": "MIT",
+  "bin": {
+    "astrobot": "bin/astrobot.js"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "vendor/astronomy.js",
+    "vendor/cities.json",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/meodai/astrobot.git"
+  },
+  "homepage": "https://github.com/meodai/astrobot#readme",
+  "bugs": "https://github.com/meodai/astrobot/issues",
+  "keywords": [
+    "astrology",
+    "llm",
+    "persona",
+    "claude",
+    "cli",
+    "chart"
+  ],
   "scripts": {
     "test": "node --test",
     "vendor": "cp node_modules/astronomy-engine/astronomy.js vendor/astronomy.js",

@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // bin/astrobot.js
 const profile = require('../lib/profile.js');
 const { computeChart } = require('../lib/chart.js');

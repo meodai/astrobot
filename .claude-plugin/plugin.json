@@ -1,6 +1,6 @@
 {
   "name": "astrobot",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Gives each Claude model a permanent astrological identity that subtly tints its tone day by day.",
   "author": { "name": "meodai" },
   "homepage": "https://github.com/meodai/astrobot",
