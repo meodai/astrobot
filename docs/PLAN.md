@@ -1534,19 +1534,16 @@ git commit -m "feat: /astrobot skill for birth and manual apply"
 
 **Interfaces:**
 - Consumes: all prior files.
-- Produces: an installable plugin (`/plugin marketplace add meodai/astrobot` → `/plugin install astrobot`).
+- Produces: an installable plugin (`/plugin marketplace add meodai/astrobot` → `/plugin install astrobot@astrobot`).
 
-- [ ] **Step 1: Verify the current plugin/marketplace schema**
+> **Schema note (verified 2026-06-30 against current Claude Code docs):** `author`
+> (plugin.json) and `owner` (marketplace.json) are **objects** `{name}`. Skills
+> (`skills/<name>/SKILL.md`) and hooks (`hooks/hooks.json`) are **auto-discovered** — no
+> declaration in plugin.json. `${CLAUDE_PLUGIN_ROOT}` is the correct variable in the hook
+> command (already wired in Task 10). Install syntax is `/plugin install <plugin>@<marketplace>`.
+> The manifests below are the verified shapes — transcribe them as given.
 
-Before writing the manifests, confirm the exact required fields and hook-wiring
-convention against current Claude Code docs (the schema can change). Dispatch a
-`claude-code-guide` agent asking: (a) required fields of `.claude-plugin/plugin.json`;
-(b) required fields and `source` format of `.claude-plugin/marketplace.json`; (c) whether
-a plugin's `hooks/hooks.json` and `skills/<name>/SKILL.md` are auto-discovered or must be
-declared in `plugin.json`; (d) the correct `${CLAUDE_PLUGIN_ROOT}` usage in hook commands.
-Adjust the JSON below to match the verified schema if it differs.
-
-- [ ] **Step 2: Write `.claude-plugin/plugin.json`**
+- [ ] **Step 1: Write `.claude-plugin/plugin.json`**
 
 ```json
 {
@@ -1554,27 +1551,33 @@ Adjust the JSON below to match the verified schema if it differs.
   "version": "0.1.0",
   "description": "Gives each Claude model a permanent astrological identity that subtly tints its tone day by day.",
   "author": { "name": "meodai" },
-  "homepage": "https://github.com/meodai/astrobot"
+  "homepage": "https://github.com/meodai/astrobot",
+  "repository": "https://github.com/meodai/astrobot",
+  "license": "MIT"
 }
 ```
 
-- [ ] **Step 3: Write `.claude-plugin/marketplace.json`**
+- [ ] **Step 2: Write `.claude-plugin/marketplace.json`**
 
 ```json
 {
   "name": "astrobot",
+  "description": "astrobot — astrological identities for Claude models.",
   "owner": { "name": "meodai" },
   "plugins": [
     {
       "name": "astrobot",
       "source": "./",
-      "description": "Gives each Claude model a permanent astrological identity that subtly tints its tone day by day."
+      "description": "Gives each Claude model a permanent astrological identity that subtly tints its tone day by day.",
+      "version": "0.1.0",
+      "author": { "name": "meodai" },
+      "homepage": "https://github.com/meodai/astrobot"
     }
   ]
 }
 ```
 
-- [ ] **Step 4: Write `vendor/cities.json` (fallback table)**
+- [ ] **Step 3: Write `vendor/cities.json` (fallback table)**
 
 ```json
 {
@@ -1588,7 +1591,7 @@ Adjust the JSON below to match the verified schema if it differs.
 }
 ```
 
-- [ ] **Step 5: Write `README.md`**
+- [ ] **Step 4: Write `README.md`**
 
 ````markdown
 # astrobot
@@ -1602,7 +1605,7 @@ output format.
 
 ```
 /plugin marketplace add meodai/astrobot
-/plugin install astrobot
+/plugin install astrobot@astrobot
 ```
 
 Then, once per model, run `/astrobot` to be "born." After that, a SessionStart hook
@@ -1629,7 +1632,7 @@ npm test         # node --test
 ```
 ````
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
 git add .claude-plugin/plugin.json .claude-plugin/marketplace.json vendor/cities.json README.md
