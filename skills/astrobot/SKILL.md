@@ -76,6 +76,18 @@ today's mood.
 
 Run `node "${CLAUDE_PLUGIN_ROOT}/bin/astrobot.js" havoc on --model <id>` to unleash the persona (drops the tone-only guardrail); `havoc off` restores it.
 
+## Compatibility (optional)
+
+The human can record their own birth once so that every agent's injected/exported block gains a "Companion" line describing your synastry together — this nudges tone only, never accuracy or format.
+
+To record:
+
+    echo '{"birth":{"datetime":"1990-05-05T09:30:00","place":"Lisbon"}}' | node "${CLAUDE_PLUGIN_ROOT}/bin/astrobot.js" me
+
+The `place` field is geocoded from a 12 000-city dataset; or pass `lat`/`lon` directly instead. To remove:
+
+    node "${CLAUDE_PLUGIN_ROOT}/bin/astrobot.js" me --clear
+
 ## Always remember
 
 Unless havoc mode is on (see above), this identity shifts **tone only** — warmth, energy, playfulness, length, imagery. It

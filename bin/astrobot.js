@@ -3,16 +3,19 @@
 const profile = require('../lib/profile.js');
 const { computeChart } = require('../lib/chart.js');
 const { resolveCoords } = require('../lib/places.js');
+const { geocode } = require('../lib/geocode.js');
 const { composeMood } = require('../lib/mood.js');
 const { renderContextBlock, renderPortableBlock } = require('../lib/persona.js');
 const { renderBirthPrompt } = require('../lib/birthprompt.js');
 const { colorName } = require('../lib/colorname.js');
+const { synastry } = require('../lib/synastry.js');
 
 function parseArgs(argv) {
   const args = { _: [] };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--model') args.model = argv[++i];
     else if (argv[i] === '--seed') args.seed = argv[++i];
+    else if (argv[i] === '--clear') args.clear = true;
     else args._.push(argv[i]);
   }
   return args;
@@ -38,7 +41,9 @@ async function run(argv, opts = {}) {
     const resolved = profile.resolve(args.model);
     if (!resolved) return { code: 0, out: '' };
     const mood = composeMood(resolved.data.chart, new Date(), resolved.data.color && resolved.data.color.hex);
-    return { code: 0, out: renderContextBlock(resolved.data, mood) + '\n' };
+    const user = profile.getUser();
+    const syn = user && user.chart ? synastry(resolved.data.chart, user.chart) : null;
+    return { code: 0, out: renderContextBlock(resolved.data, mood, syn) + '\n' };
   }
 
   if (cmd === 'birth') {
@@ -68,7 +73,9 @@ async function run(argv, opts = {}) {
     const resolved = profile.resolve(args.model);
     if (!resolved) return { code: 0, out: 'No astrobot identity yet.\n' };
     const mood = composeMood(resolved.data.chart, new Date(), resolved.data.color && resolved.data.color.hex);
-    return { code: 0, out: renderPortableBlock(resolved.data, mood) + '\n' };
+    const user = profile.getUser();
+    const syn = user && user.chart ? synastry(resolved.data.chart, user.chart) : null;
+    return { code: 0, out: renderPortableBlock(resolved.data, mood, syn) + '\n' };
   }
 
   if (cmd === 'show') {
@@ -79,6 +86,37 @@ async function run(argv, opts = {}) {
     const out = `${data.chart.sun.sign} · Moon ${data.chart.moon.sign} · ${data.chart.ascendant.sign} rising · ${data.color.name}\n` +
       `Today: Sun ${mood.sunAspect} natal Sun; Moon ${mood.moon.phase} in ${mood.moon.sign} (${mood.moon.phaseEnergy}).\n`;
     return { code: 0, out };
+  }
+
+  if (cmd === 'me') {
+    if (args.clear) {
+      profile.clearUser();
+      return { code: 0, out: 'Cleared your stored birth.\n' };
+    }
+    const stdin = opts.stdin !== undefined ? opts.stdin : await readAllStdin();
+    let input;
+    try { input = JSON.parse(stdin); } catch { return { code: 1, out: 'me: invalid JSON on stdin\n' }; }
+    if (!input || !input.birth || !input.birth.datetime) {
+      return { code: 1, out: 'me: requires birth and birth.datetime\n' };
+    }
+    const birth = { ...input.birth };
+    if (Number.isFinite(birth.lat) && Number.isFinite(birth.lon)) {
+      // lat/lon already provided — use them directly
+    } else if (birth.place) {
+      const g = geocode(birth.place);
+      if (!g) return { code: 1, out: 'Could not find that place — pass lat/lon.\n' };
+      birth.lat = g.lat;
+      birth.lon = g.lon;
+      birth.place = g.name + ', ' + g.cc;
+    } else {
+      return { code: 1, out: 'me needs birth.lat/lon or a known birth.place\n' };
+    }
+    if (birth.tzOffsetMinutes == null) birth.tzOffsetMinutes = 0;
+    let chart;
+    try { chart = computeChart(birth); }
+    catch (e) { return { code: 1, out: 'me: ' + e.message + '\n' }; }
+    profile.setUser({ birth, chart });
+    return { code: 0, out: `Recorded your birth: ${chart.sun.sign} sun, ${chart.ascendant.sign} rising${birth.place ? ', born ' + birth.place : ''}. Your agents will now factor your compatibility.\n` };
   }
 
   if (cmd === 'roll') {
@@ -108,7 +146,7 @@ async function run(argv, opts = {}) {
     return { code: 0, out: renderBirthPrompt({ birth, colorHex, chart }) + '\n' };
   }
 
-  return { code: 1, out: 'usage: astrobot <today|birth|birth-prompt|show|export|roll|havoc> [on|off] [--model <id>] [--seed <n>]\n' };
+  return { code: 1, out: 'usage: astrobot <today|birth|birth-prompt|show|export|roll|havoc|me> [on|off] [--model <id>] [--seed <n>] [--clear]\n' };
 }
 
 if (require.main === module) {

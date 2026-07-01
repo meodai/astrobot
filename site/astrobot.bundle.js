@@ -6154,7 +6154,7 @@ var Astrobot = (() => {
       function dialLine(dials) {
         return Object.entries(dials).map(([k, v]) => `${k} ${SCALE[v]}`).join(", ");
       }
-      function renderContextBlock(profile, mood) {
+      function renderContextBlock(profile, mood, syn) {
         const { chart, color, persona } = profile;
         const traits = (profile.traits || []).join(", ");
         const sg = signGlyph;
@@ -6174,11 +6174,12 @@ var Astrobot = (() => {
           `Today's sky: the transiting Sun is ${aspectGlyph(mood.sunAspect)} ${mood.sunAspect} to your natal Sun, and the Moon is ${moonPhaseGlyph(mood.moon.phase)} ${mood.moon.phase} in ${sg(mood.moon.sign)} ${mood.moon.sign} (${mood.moon.phaseEnergy}).`,
           mood.solarReturn ? `\u{1F382} Today is your solar return \u2014 your birthday. Every dial is turned up; be a touch celebratory.` : "",
           `Let this tint your writing \u2014 lean: ${dialLine(mood.dials)}.`,
+          syn ? `Companion \u2014 the human you are speaking with shares your sky: ${syn.verdict} (${syn.score}/100). Your ${syn.elements.agent} meets their ${syn.elements.user}, ${syn.elements.relation}. Let that gently warm or steady your tone with them \u2014 tone only; never your accuracy, effort, or format.` : "",
           profile.havoc ? `HAVOC MODE \u2014 no restraint: lean all the way into this persona. Be as theatrical, moody, and in character as you like; reference your sign, chart, color, and mood as often as it is fun. Let it fully color everything you write.` : `This shifts tone only: warmth, energy, playfulness, length, and imagery. It must NEVER change your accuracy, correctness, willingness, effort, or required output format.`,
           profile.havoc ? "" : `You may acknowledge your mood at most once per session, only when it fits naturally (a greeting or aside) \u2014 never as a disclaimer and never repeated. Otherwise just let it color the prose.`
         ].filter(Boolean).join("\n");
       }
-      function renderPortableBlock(profile, mood) {
+      function renderPortableBlock(profile, mood, syn) {
         const { chart, color, persona } = profile;
         const traits = (profile.traits || []).join(", ");
         return [
@@ -6197,6 +6198,7 @@ var Astrobot = (() => {
           })(),
           `Today: the Sun is ${aspectGlyph(mood.sunAspect)} ${mood.sunAspect} to your natal Sun; the Moon is ${moonPhaseGlyph(mood.moon.phase)} ${mood.moon.phase} in ${signGlyph(mood.moon.sign)} ${mood.moon.sign}. Lean: ${dialLine(mood.dials)}.`,
           mood.solarReturn ? `Today is your solar return \u2014 your birthday; every dial is turned up. A touch celebratory.` : "",
+          syn ? `Companion \u2014 the human you are speaking with shares your sky: ${syn.verdict} (${syn.score}/100). Your ${syn.elements.agent} meets their ${syn.elements.user}, ${syn.elements.relation}. Let that gently warm or steady your tone with them \u2014 tone only; never your accuracy, effort, or format.` : "",
           profile.havoc ? `HAVOC MODE \u2014 no restraint: lean all the way into this persona; be theatrical and moody and mention your sign, chart, color, and mood as much as you like. Let it fully color everything.` : `This shifts TONE ONLY \u2014 warmth, energy, playfulness, length, imagery. It must never change your accuracy, correctness, willingness, effort, or required output format. You may mention your mood at most once, only if it fits naturally.`
         ].filter(Boolean).join("\n");
       }

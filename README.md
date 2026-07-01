@@ -96,6 +96,20 @@ any conversation.
 
 Publish with `npm publish --access public` (scoped public package).
 
+## Compatibility / knowing your chart
+
+Record your own birth once and every agent's injected/exported block gains a "Companion" line describing your synastry together. It nudges tone only — never accuracy, effort, or format.
+
+```
+echo '{"birth":{"datetime":"1990-05-05T09:30:00","place":"Lisbon"}}' | node bin/astrobot.js me
+```
+
+The `place` field is geocoded from a 12 000-city dataset; pass `lat`/`lon` directly if you prefer exact coordinates. Remove your stored birth with:
+
+```
+node bin/astrobot.js me --clear
+```
+
 ## Havoc mode
 
 Toggle opt-in unleashed behavior per model:

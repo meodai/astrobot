@@ -147,3 +147,84 @@ test('non-birth commands resolve without reading stdin (regression: no hang)', a
   const t = await run(['today', '--model', 'nobody-here']);
   assert.strictEqual(t.out, '');
 });
+
+// --- me command ---
+
+test('me with place geocodes and stores user chart', async () => {
+  const { run } = require('../bin/astrobot.js');
+  const meInput = JSON.stringify({ birth: { datetime: '1990-05-05T09:30:00', place: 'Lisbon' } });
+  const r = await run(['me'], { stdin: meInput });
+  assert.strictEqual(r.code, 0, 'me should return code 0: ' + r.out);
+  assert.match(r.out, /Recorded your birth/);
+  assert.match(r.out, /Lisbon/);
+  const profile = require('../lib/profile.js');
+  const user = profile.getUser();
+  assert.ok(user && user.chart, 'profile.getUser() should have a chart after me');
+  assert.ok(user.chart.sun && user.chart.sun.sign, 'chart.sun.sign should be set');
+});
+
+test('me with lat/lon directly stores user chart', async () => {
+  const { run } = require('../bin/astrobot.js');
+  const meInput = JSON.stringify({ birth: { datetime: '1990-05-05T09:30:00', lat: 38.725, lon: -9.15 } });
+  const r = await run(['me'], { stdin: meInput });
+  assert.strictEqual(r.code, 0, 'me with lat/lon should return code 0: ' + r.out);
+  assert.match(r.out, /Recorded your birth/);
+});
+
+test('export after me contains Companion line', async () => {
+  const { run } = require('../bin/astrobot.js');
+  await run(['birth', '--model', 't'], { stdin: BIRTH_JSON });
+  const meInput = JSON.stringify({ birth: { datetime: '1990-05-05T09:30:00', place: 'Lisbon' } });
+  await run(['me'], { stdin: meInput });
+  const got = await run(['export', '--model', 't'], { stdin: '' });
+  assert.match(got.out, /Companion —/);
+});
+
+test('me --clear removes user and export no longer has Companion', async () => {
+  const { run } = require('../bin/astrobot.js');
+  await run(['birth', '--model', 't'], { stdin: BIRTH_JSON });
+  const meInput = JSON.stringify({ birth: { datetime: '1990-05-05T09:30:00', place: 'Lisbon' } });
+  await run(['me'], { stdin: meInput });
+  const clearResult = await run(['me', '--clear'], { stdin: '' });
+  assert.strictEqual(clearResult.code, 0);
+  assert.match(clearResult.out, /Cleared/);
+  const profile = require('../lib/profile.js');
+  assert.strictEqual(profile.getUser(), null);
+  const got = await run(['export', '--model', 't'], { stdin: '' });
+  assert.ok(!got.out.includes('Companion —'), 'export should not have Companion after clear');
+});
+
+test('me with invalid JSON returns code 1', async () => {
+  const { run } = require('../bin/astrobot.js');
+  const r = await run(['me'], { stdin: 'not json' });
+  assert.strictEqual(r.code, 1);
+});
+
+test('me with missing birth field returns code 1', async () => {
+  const { run } = require('../bin/astrobot.js');
+  const r = await run(['me'], { stdin: JSON.stringify({ foo: 'bar' }) });
+  assert.strictEqual(r.code, 1);
+});
+
+test('me with unknown place returns code 1 mentioning the place issue', async () => {
+  const { run } = require('../bin/astrobot.js');
+  const r = await run(['me'], { stdin: JSON.stringify({ birth: { datetime: '1990-01-01T00:00:00', place: 'Zzzfakecity99999' } }) });
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /Could not find/);
+});
+
+test('me --clear without prior user still returns code 0', async () => {
+  const { run } = require('../bin/astrobot.js');
+  const r = await run(['me', '--clear'], { stdin: '' });
+  assert.strictEqual(r.code, 0);
+  assert.match(r.out, /Cleared/);
+});
+
+test('today after me contains Companion line', async () => {
+  const { run } = require('../bin/astrobot.js');
+  await run(['birth', '--model', 't'], { stdin: BIRTH_JSON });
+  const meInput = JSON.stringify({ birth: { datetime: '1990-05-05T09:30:00', place: 'Lisbon' } });
+  await run(['me'], { stdin: meInput });
+  const got = await run(['today', '--model', 't'], { stdin: '' });
+  assert.match(got.out, /Companion —/);
+});
