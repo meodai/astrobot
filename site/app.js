@@ -218,11 +218,13 @@
   function currentColor(chart) {
     if (colorTouched) {
       var hex = $('fav-color').value;
-      return { name: hex.toUpperCase(), hex: hex };
+      var name = (A.colorName && A.colorName(hex)) || hex.toUpperCase();
+      return { name: name, hex: hex };
     }
     var ruler = RULER_COLORS[chart.ruler] || { name: 'Old Gold', hex: '#C9A227' };
     $('fav-color').value = ruler.hex;
-    return ruler;
+    var rulerName = (A.colorName && A.colorName(ruler.hex)) || ruler.name;
+    return { name: rulerName, hex: ruler.hex };
   }
 
   function pgWheelSize() {
@@ -476,7 +478,8 @@
 
     var validHex = safeHex(colorHex);
     $('myo-swatch').style.setProperty('background', validHex);
-    $('myo-swatch-name').textContent = colorHex.toUpperCase();
+    var myoColorName = (A.colorName && A.colorName(colorHex)) || colorHex.toUpperCase();
+    $('myo-swatch-name').textContent = myoColorName + '  ' + colorHex.toUpperCase();
     renderLore('myo-lore', colorHex);
 
     var myoTarot = A.tarotFor && A.tarotFor(chart);
@@ -549,6 +552,7 @@
   }
 
   // Accept the full birth object or a bare { persona, color, traits } reply.
+  // color.name is always auto-derived from the hex via colorName — any name in the JSON is ignored.
   function myoParseReply(raw, colorHex) {
     var data = JSON.parse(raw);                 // throws on bad JSON
     if (!data || typeof data !== 'object') throw new Error('not an object');
@@ -556,10 +560,7 @@
     var persona = typeof data.persona === 'string' ? data.persona.trim() : '';
     if (!persona) throw new Error('no persona');
 
-    var name = '';
-    if (data.color && typeof data.color === 'object' && data.color.name) name = String(data.color.name);
-    else if (typeof data.color === 'string') name = data.color;
-    if (!name) name = colorHex.toUpperCase();
+    var name = (A.colorName && A.colorName(colorHex)) || colorHex.toUpperCase();
 
     var traits = Array.isArray(data.traits)
       ? data.traits.filter(function (t) { return typeof t === 'string' && t.trim(); })

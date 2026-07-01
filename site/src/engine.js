@@ -4,6 +4,7 @@ const { composeMood } = require('../../lib/mood.js');
 const { renderContextBlock, renderPortableBlock } = require('../../lib/persona.js');
 const { renderBirthPrompt } = require('../../lib/birthprompt.js');
 const { colorLore } = require('../../lib/colortone.js');
+const { colorName } = require('../../lib/colorname.js');
 const { SIGNS } = require('../../lib/zodiac.js');
 const glyphs = require('../../lib/glyphs.js');
 const { tarotFor, cardSlug } = require('../../lib/tarot.js');
@@ -16,6 +17,7 @@ module.exports = {
   renderPortableBlock,
   renderBirthPrompt,
   colorLore,
+  colorName,
   SIGNS,
   glyphs,
   tarotFor,
