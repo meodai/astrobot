@@ -372,6 +372,7 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 0 1.25rem; }
 input[type="date"],
 input[type="time"],
 input[type="number"],
+input[type="text"],
 select {
   width: 100%;
   max-width: 100%;
@@ -1066,42 +1067,70 @@ textarea.rite-textarea:focus {
 
 .compat-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: .6rem;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: .7rem;
   margin: 1rem 0;
 }
 
 .compat-aspect {
   border: 1px solid var(--gold-dim);
-  border-radius: 2px;
-  padding: .5rem .6rem;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, .5);
-  display: flex;
-  flex-direction: column;
-  gap: .2rem;
-  border-left-width: 3px;
+  border-radius: 2px;
+  padding: .6rem .5rem;
+  text-align: center;
+  background: var(--ink-raised);
 }
-.compat-aspect--good    { border-left-color: var(--verdigris); }
-.compat-aspect--neutral { border-left-color: var(--parchment-dim); }
-.compat-aspect--hard    { border-left-color: var(--clash); }
+.compat-aspect--good    { border-top: 2px solid var(--verdigris); }
+.compat-aspect--hard    { border-top: 2px solid var(--clash); }
+.compat-aspect--neutral { border-top: 2px solid var(--gold-dim); }
 
 .compat-aspect__pair {
   font-family: var(--sc);
-  letter-spacing: .04em;
   font-size: var(--fs-label);
+  letter-spacing: .1em;
   color: var(--verdigris);
+  display: block;
+  margin-bottom: .4rem;
   text-transform: uppercase;
 }
-.compat-aspect__glyphs {
-  font-size: var(--fs-lg);
-  color: var(--gold-bright);
-  line-height: 1.2;
+.compat-aspect__row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .3rem;
+}
+.compat-aspect__side,
+.compat-aspect__link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .1rem;
+  flex: 1;
+}
+.compat-aspect__glyph { font-size: var(--fs-lg); line-height: 1; }
+.compat-aspect__glyph--agent { color: var(--gold-bright); }
+.compat-aspect__glyph--you   { color: var(--verdigris); }
+.compat-aspect__glyph--asp   { color: var(--parchment-dim); font-size: var(--fs-body); }
+.compat-aspect__who {
+  font-family: var(--sc);
+  font-size: .68rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--parchment-dim);
 }
 .compat-aspect__tone {
-  font-size: var(--fs-label);
-  color: var(--parchment-dim);
-  font-style: italic;
+  display: inline-block;
+  margin-top: .45rem;
+  font-family: var(--sc);
+  font-size: .7rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: .12rem .5rem;
+  border-radius: 999px;
 }
+.compat-aspect--good .compat-aspect__tone    { color: var(--verdigris); background: rgba(127, 160, 138, .14); }
+.compat-aspect--hard .compat-aspect__tone    { color: var(--clash); background: rgba(193, 123, 107, .15); }
+.compat-aspect--neutral .compat-aspect__tone { color: var(--parchment-dim); background: rgba(201, 162, 75, .10); }
 
 .compat-romance {
   border: 1px solid var(--gold-dim);
@@ -1121,4 +1150,45 @@ textarea.rite-textarea:focus {
   margin: 0 0 .7rem;
 }
 
-.compat-legend { text-align: center; font-size: var(--fs-label); color: var(--parchment-dim); font-style: italic; margin: 0 0 .6rem; }
+/* ---- Typeahead (offline city search) -------------------------------- */
+
+.field--typeahead { position: relative; }
+.typeahead-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 15rem;
+  overflow-y: auto;
+  z-index: 30;
+  background: var(--ink-raised);
+  border: 1px solid var(--gold-dim);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .5);
+  list-style: none;
+  margin: 0;
+  padding: .25rem 0;
+  border-radius: 2px;
+}
+.typeahead-list li { padding: .4rem .7rem; cursor: pointer; font-size: var(--fs-sm); color: var(--parchment); }
+.typeahead-list li.is-active,
+.typeahead-list li:hover { background: rgba(201, 162, 75, .14); color: var(--gold-bright); }
+
+/* ---- How-It-Works step IV: optional badge + link -------------------- */
+
+.rite-step__tag {
+  font-family: var(--sc);
+  font-size: .62rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--gold);
+  padding: .1rem .45rem;
+  border-radius: 999px;
+  vertical-align: middle;
+  margin-left: .5rem;
+}
+.rite-step__link { color: var(--verdigris); white-space: nowrap; }
+
+/* ---- Colophon credit ------------------------------------------------ */
+
+.colophon__credit { margin-top: .4rem; }

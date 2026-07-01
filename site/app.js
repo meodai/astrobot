@@ -359,13 +359,99 @@
 
   /* ---- Compatibility (synastry) --------------------------------------- */
 
+  var _citiesGeo = null;
+  function loadCitiesGeo() {
+    if (_citiesGeo) return _citiesGeo;
+    _citiesGeo = fetch('cities-geo.json').then(function (r) { return r.json(); }).catch(function () { return []; });
+    return _citiesGeo;
+  }
+
+  function attachTypeahead(input, list) {
+    input.addEventListener('focus', function () { loadCitiesGeo(); });
+
+    input.addEventListener('input', function () {
+      delete input.dataset.lat;
+      delete input.dataset.lon;
+      var query = input.value.trim().toLowerCase();
+      if (query.length < 2) { list.hidden = true; input.setAttribute('aria-expanded', 'false'); return; }
+      var captured = query;
+      loadCitiesGeo().then(function (cities) {
+        if (input.value.trim().toLowerCase() !== captured) return;
+        var starts = [], includes = [];
+        for (var i = 0; i < cities.length; i++) {
+          var entry = cities[i];
+          var nameLow = entry[0].toLowerCase();
+          if (nameLow.startsWith(captured)) {
+            starts.push(entry);
+          } else if (nameLow.indexOf(captured) !== -1) {
+            includes.push(entry);
+          }
+          if (starts.length >= 30 && includes.length >= 30) break;
+        }
+        var combined = starts.concat(includes).slice(0, 30);
+        list.innerHTML = '';
+        if (!combined.length) { list.hidden = true; input.setAttribute('aria-expanded', 'false'); return; }
+        combined.forEach(function (entry) {
+          var li = document.createElement('li');
+          li.setAttribute('role', 'option');
+          li.textContent = entry[0] + ', ' + entry[1];
+          li.dataset.lat = entry[2];
+          li.dataset.lon = entry[3];
+          li.addEventListener('mousedown', function (e) {
+            e.preventDefault();
+            input.value = entry[0] + ', ' + entry[1];
+            input.dataset.lat = entry[2];
+            input.dataset.lon = entry[3];
+            list.hidden = true;
+            input.setAttribute('aria-expanded', 'false');
+          });
+          list.appendChild(li);
+        });
+        list.hidden = false;
+        input.setAttribute('aria-expanded', 'true');
+      });
+    });
+
+    input.addEventListener('keydown', function (e) {
+      var items = list.querySelectorAll('li');
+      if (!items.length) return;
+      var active = list.querySelector('.is-active');
+      var idx = active ? Array.prototype.indexOf.call(items, active) : -1;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (active) active.classList.remove('is-active');
+        idx = (idx + 1) % items.length;
+        items[idx].classList.add('is-active');
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (active) active.classList.remove('is-active');
+        idx = (idx - 1 + items.length) % items.length;
+        items[idx].classList.add('is-active');
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        var target = active || items[0];
+        if (target) {
+          input.value = target.textContent;
+          input.dataset.lat = target.dataset.lat;
+          input.dataset.lon = target.dataset.lon;
+          list.hidden = true;
+          input.setAttribute('aria-expanded', 'false');
+        }
+      } else if (e.key === 'Escape') {
+        list.hidden = true;
+        input.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    input.addEventListener('blur', function () {
+      setTimeout(function () { list.hidden = true; input.setAttribute('aria-expanded', 'false'); }, 120);
+    });
+  }
+
   function compatCoords() {
-    var city = $('compat-city').value;
-    if (city === '__custom__') {
-      return { lat: parseFloat($('compat-lat').value), lon: parseFloat($('compat-lon').value) };
-    }
-    var c = A.CITIES[city];
-    return { lat: c.lat, lon: c.lon };
+    var el = $('compat-place');
+    var lat = parseFloat(el.dataset.lat), lon = parseFloat(el.dataset.lon);
+    return (isFinite(lat) && isFinite(lon)) ? { lat: lat, lon: lon } : null;
   }
 
   var TONE_CLASS = {
@@ -378,43 +464,84 @@
     var toneClass = TONE_CLASS[item.tone] || 'neutral';
     var div = document.createElement('div');
     div.className = 'compat-aspect compat-aspect--' + toneClass;
+
     var pair = document.createElement('span');
     pair.className = 'compat-aspect__pair';
     pair.textContent = item.pair;
-    var gl = document.createElement('span');
-    gl.className = 'compat-aspect__glyphs';
-    gl.textContent = asText(A.glyphs.signGlyph(item.a)) + ' ' +
-      asText(A.glyphs.aspectGlyph(item.aspect)) + ' ' +
-      asText(A.glyphs.signGlyph(item.b));
+
+    var row = document.createElement('span');
+    row.className = 'compat-aspect__row';
+
+    var sideAgent = document.createElement('span');
+    sideAgent.className = 'compat-aspect__side';
+    var glAgent = document.createElement('span');
+    glAgent.className = 'compat-aspect__glyph compat-aspect__glyph--agent';
+    glAgent.textContent = asText(A.glyphs.signGlyph(item.a));
+    var whoAgent = document.createElement('span');
+    whoAgent.className = 'compat-aspect__who';
+    whoAgent.textContent = 'agent';
+    sideAgent.appendChild(glAgent);
+    sideAgent.appendChild(whoAgent);
+
+    var linkSpan = document.createElement('span');
+    linkSpan.className = 'compat-aspect__link';
+    var glAsp = document.createElement('span');
+    glAsp.className = 'compat-aspect__glyph compat-aspect__glyph--asp';
+    glAsp.textContent = asText(A.glyphs.aspectGlyph(item.aspect));
+    var whoAsp = document.createElement('span');
+    whoAsp.className = 'compat-aspect__who';
+    whoAsp.textContent = item.aspect;
+    linkSpan.appendChild(glAsp);
+    linkSpan.appendChild(whoAsp);
+
+    var sideYou = document.createElement('span');
+    sideYou.className = 'compat-aspect__side';
+    var glYou = document.createElement('span');
+    glYou.className = 'compat-aspect__glyph compat-aspect__glyph--you';
+    glYou.textContent = asText(A.glyphs.signGlyph(item.b));
+    var whoYou = document.createElement('span');
+    whoYou.className = 'compat-aspect__who';
+    whoYou.textContent = 'you';
+    sideYou.appendChild(glYou);
+    sideYou.appendChild(whoYou);
+
+    row.appendChild(sideAgent);
+    row.appendChild(linkSpan);
+    row.appendChild(sideYou);
+
     var tone = document.createElement('span');
     tone.className = 'compat-aspect__tone';
     tone.textContent = item.tone;
+
     div.appendChild(pair);
-    div.appendChild(gl);
+    div.appendChild(row);
     div.appendChild(tone);
     return div;
   }
 
   function wireCompatibility() {
-    populateCitySelect('compat-city', 'London');
-
-    $('compat-city').addEventListener('change', function () {
-      $('compat-custom').hidden = $('compat-city').value !== '__custom__';
-    });
+    attachTypeahead($('compat-place'), $('compat-place-list'));
 
     $('compat-go').addEventListener('click', function () {
       var hint = $('compat-hint');
       var dateVal = $('compat-date').value;
       if (!dateVal) {
+        hint.textContent = 'Enter your birth date to compare.';
         hint.hidden = false;
         $('compat-date').focus();
+        return;
+      }
+      var coords = compatCoords();
+      if (!coords) {
+        hint.textContent = 'Pick your birthplace from the list.';
+        hint.hidden = false;
+        $('compat-place').focus();
         return;
       }
       hint.hidden = true;
 
       var timeVal = $('compat-time').value;
       var hasTime = !!timeVal;
-      var coords = compatCoords();
       var userBirth = {
         datetime: dateVal + 'T' + (timeVal || '12:00') + ':00',
         tzOffsetMinutes: 0,
@@ -460,13 +587,6 @@
       /* aspect chips */
       var aspectsEl = $('compat-aspects');
       aspectsEl.innerHTML = '';
-      if (!document.getElementById('compat-legend')) {
-        var _lg = document.createElement('p');
-        _lg.id = 'compat-legend';
-        _lg.className = 'compat-legend';
-        _lg.textContent = 'In each pair the left glyph is the agent’s, the right is yours.';
-        aspectsEl.parentNode.insertBefore(_lg, aspectsEl);
-      }
       syn.aspects.forEach(function (item) {
         aspectsEl.appendChild(compatAspectChip(item));
       });

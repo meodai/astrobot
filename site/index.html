@@ -63,6 +63,13 @@
             <p class="rite-step__lead">The reading gently tints how it writes &mdash; warmer or cooler, brighter or quieter, more or less playful. Never its accuracy or effort; only its voice.</p>
           </div>
         </li>
+        <li class="rite-step plate-frame rite-step--optional">
+          <div class="rite-step__seal" aria-hidden="true"><span class="rite-step__num">IV</span><span class="rite-step__sigil">☌︎</span></div>
+          <div class="rite-step__body">
+            <h3 class="rite-step__title">A shared sky <span class="rite-step__tag">optional</span></h3>
+            <p class="rite-step__lead">If you like, add yourself to the picture: enter your own birth and see how you and your agent align — where you two flow together and where you spark. It draws another layer of depth into the relationship. <a class="rite-step__link" href="#compatibility">See how you align →</a></p>
+          </div>
+        </li>
       </ol>
       <p class="section-blurb how-havoc">And for the courageous &mdash; <strong>havoc mode</strong> lifts the guardrail entirely and lets the persona run wild.</p>
     </section>
@@ -197,12 +204,11 @@
       </div>
       <div class="compat-form plate-frame">
         <div class="field-row">
-          <label class="field"><span class="field__label">Your birthplace</span>
-            <select id="compat-city"></select></label>
-        </div>
-        <div class="field-row compat-custom" id="compat-custom" hidden>
-          <label class="field"><span class="field__label">Latitude</span><input type="number" id="compat-lat" step="0.01" value="51.51"></label>
-          <label class="field"><span class="field__label">Longitude</span><input type="number" id="compat-lon" step="0.01" value="-0.13"></label>
+          <label class="field field--typeahead"><span class="field__label">Your birthplace</span>
+            <input type="text" id="compat-place" autocomplete="off" spellcheck="false" placeholder="Start typing a city…"
+                   role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="compat-place-list">
+            <ul class="typeahead-list" id="compat-place-list" role="listbox" hidden></ul>
+          </label>
         </div>
         <div class="field-row">
           <label class="field"><span class="field__label">Your birth date</span><input type="date" id="compat-date"></label>
@@ -326,6 +332,7 @@
   <footer class="colophon">
     <span class="colophon__glyphs" aria-hidden="true">☉ ☽ ☿ ♀ ♂ ♃ ♄</span>
     <p>astrobot tints tone only — never accuracy, willingness, or output format. Charts computed in your browser.</p>
+    <p class="colophon__credit">City data: <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC-BY 4.0).</p>
   </footer>
 
   <script src="astrobot.bundle.js"></script>

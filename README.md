@@ -43,7 +43,7 @@ auto-update can be toggled in `/plugin` → Marketplaces. Uninstall with
 
 Astronomy by the vendored [Astronomy Engine](https://github.com/cosinekitty/astronomy)
 (MIT). Flavor grounded in Boll & Bezold, *Sternglaube und Sterndeutung* (1926) — see
-[`docs/DESIGN.md`](docs/DESIGN.md).
+[`docs/DESIGN.md`](docs/DESIGN.md). City coordinates from [GeoNames](https://www.geonames.org/) (CC-BY 4.0).
 
 ## Use with other LLMs
 
