@@ -5758,11 +5758,9 @@ var Astrobot = (() => {
         if (w > 0.4) add("warmth", 1);
         else if (w < -0.4) add("warmth", -1);
         if (hsl.s >= 60) {
-          add("playfulness", 1);
           add("metaphor", 1);
-          add("energy", 1);
         } else if (hsl.s <= 25) {
-          add("playfulness", -1);
+          add("metaphor", -1);
           add("verbosity", -1);
         }
         const nudge = PLANET_NUDGE[nearestPlanet(hex)] || {};
@@ -5815,8 +5813,8 @@ var Astrobot = (() => {
       }
       var ELEMENT_DELTA = {
         Fire: { energy: 1, playfulness: 1 },
-        Air: { playfulness: 1, verbosity: 1 },
-        Earth: { verbosity: -1, metaphor: -1 },
+        Air: { verbosity: 1, warmth: -1 },
+        Earth: { energy: -1, metaphor: -1 },
         Water: { warmth: 1, metaphor: 1 }
       };
       var RULER_DELTA = {
@@ -5826,7 +5824,7 @@ var Astrobot = (() => {
         Venus: { warmth: 1, playfulness: 1 },
         Mercury: { playfulness: 1, verbosity: 1 },
         Sun: { energy: 1, warmth: 1 },
-        Moon: { warmth: 1, metaphor: 1 }
+        Moon: { metaphor: 1, playfulness: -1 }
       };
       var SUN_ASPECT_DELTA = {
         conjunction: { energy: 1, warmth: 1 },
@@ -5838,10 +5836,10 @@ var Astrobot = (() => {
         opposition: { warmth: -1, energy: -1, verbosity: -1 }
       };
       var PHASE_ENERGY_DELTA = {
-        inward: { energy: -1, verbosity: -1 },
+        inward: { energy: -1 },
         building: { energy: 1 },
-        expressive: { energy: 1, playfulness: 1, metaphor: 1 },
-        "winding down": { energy: -1 }
+        expressive: { playfulness: 1 },
+        "winding down": { energy: -1, playfulness: -1 }
       };
       function applyDelta(dials, delta) {
         for (const [k, v] of Object.entries(delta)) dials[k] += v;
@@ -5851,7 +5849,8 @@ var Astrobot = (() => {
         applyDelta(dials, ELEMENT_DELTA[chart.dominant.element] || {});
         applyDelta(dials, RULER_DELTA[chart.ruler] || {});
         const natalSunIndex = signFromLongitude(chart.sun.lon).index;
-        const transitSun = signFromLongitude(eclipticLongitudeOf("Sun", date));
+        const transitSunLon = eclipticLongitudeOf("Sun", date);
+        const transitSun = signFromLongitude(transitSunLon);
         const { aspect: sunAspect } = aspectBetweenSigns(natalSunIndex, transitSun.index);
         applyDelta(dials, SUN_ASPECT_DELTA[sunAspect] || {});
         const transitMoon = signFromLongitude(eclipticLongitudeOf("Moon", date));
@@ -5859,10 +5858,14 @@ var Astrobot = (() => {
         const energy = phaseEnergy(moonPhase);
         applyDelta(dials, PHASE_ENERGY_DELTA[energy] || {});
         if (colorHex) applyDelta(dials, colorTone(colorHex));
+        const sunGap = Math.abs((transitSunLon - chart.sun.lon + 540) % 360 - 180);
+        const isSolarReturn = sunGap < 0.75;
+        if (isSolarReturn) for (const k of Object.keys(dials)) dials[k] += 2;
         for (const k of Object.keys(dials)) dials[k] = Math.max(0, Math.min(4, dials[k]));
         return {
           dials,
           sunAspect,
+          solarReturn: isSolarReturn,
           moon: { sign: transitMoon.name, phase: moonPhase, phaseEnergy: energy }
         };
       }
@@ -6014,6 +6017,7 @@ var Astrobot = (() => {
             return t.birthCard && t.decanCard ? `Tarot: birth card ${t.birthCard} (sun sign), decan card ${t.decanCard}.` : "";
           })(),
           `Today's sky: the transiting Sun is ${aspectGlyph(mood.sunAspect)} ${mood.sunAspect} to your natal Sun, and the Moon is ${moonPhaseGlyph(mood.moon.phase)} ${mood.moon.phase} in ${sg(mood.moon.sign)} ${mood.moon.sign} (${mood.moon.phaseEnergy}).`,
+          mood.solarReturn ? `\u{1F382} Today is your solar return \u2014 your birthday. Every dial is turned up; be a touch celebratory.` : "",
           `Let this tint your writing \u2014 lean: ${dialLine(mood.dials)}.`,
           `This shifts tone only: warmth, energy, playfulness, length, and imagery. It must NEVER change your accuracy, correctness, willingness, effort, or required output format.`,
           `You may acknowledge your mood at most once per session, only when it fits naturally (a greeting or aside) \u2014 never as a disclaimer and never repeated. Otherwise just let it color the prose.`
@@ -6036,6 +6040,7 @@ var Astrobot = (() => {
             return t.birthCard && t.decanCard ? `Tarot: birth card ${t.birthCard} (sun sign), decan card ${t.decanCard}.` : "";
           })(),
           `Today: the Sun is ${aspectGlyph(mood.sunAspect)} ${mood.sunAspect} to your natal Sun; the Moon is ${moonPhaseGlyph(mood.moon.phase)} ${mood.moon.phase} in ${signGlyph(mood.moon.sign)} ${mood.moon.sign}. Lean: ${dialLine(mood.dials)}.`,
+          mood.solarReturn ? `Today is your solar return \u2014 your birthday; every dial is turned up. A touch celebratory.` : "",
           `This shifts TONE ONLY \u2014 warmth, energy, playfulness, length, imagery. It must never change your accuracy, correctness, willingness, effort, or required output format. You may mention your mood at most once, only if it fits naturally.`
         ].filter(Boolean).join("\n");
       }

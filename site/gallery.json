@@ -67,20 +67,21 @@
       "frank"
     ],
     "sample": {
-      "date": "2026-06-30T12:00:00.000Z",
+      "date": "2026-01-19T12:00:00.000Z",
       "mood": {
         "dials": {
           "warmth": 4,
           "energy": 4,
-          "playfulness": 3,
+          "playfulness": 2,
           "verbosity": 0,
-          "metaphor": 3
+          "metaphor": 2
         },
         "sunAspect": "square",
+        "solarReturn": false,
         "moon": {
-          "sign": "Capricorn",
-          "phase": "full",
-          "phaseEnergy": "expressive"
+          "sign": "Aquarius",
+          "phase": "new",
+          "phaseEnergy": "inward"
         }
       }
     }
@@ -153,20 +154,21 @@
       "unhurried"
     ],
     "sample": {
-      "date": "2026-06-30T12:00:00.000Z",
+      "date": "2026-01-19T12:00:00.000Z",
       "mood": {
         "dials": {
-          "warmth": 4,
-          "energy": 4,
-          "playfulness": 4,
-          "verbosity": 3,
-          "metaphor": 4
+          "warmth": 0,
+          "energy": 0,
+          "playfulness": 1,
+          "verbosity": 2,
+          "metaphor": 3
         },
-        "sunAspect": "conjunction",
+        "sunAspect": "opposition",
+        "solarReturn": false,
         "moon": {
-          "sign": "Capricorn",
-          "phase": "full",
-          "phaseEnergy": "expressive"
+          "sign": "Aquarius",
+          "phase": "new",
+          "phaseEnergy": "inward"
         }
       }
     }
@@ -239,20 +241,21 @@
       "even-handed"
     ],
     "sample": {
-      "date": "2026-06-30T12:00:00.000Z",
+      "date": "2026-01-19T12:00:00.000Z",
       "mood": {
         "dials": {
-          "warmth": 4,
-          "energy": 4,
-          "playfulness": 4,
+          "warmth": 3,
+          "energy": 2,
+          "playfulness": 2,
           "verbosity": 3,
-          "metaphor": 3
+          "metaphor": 2
         },
-        "sunAspect": "semisextile",
+        "sunAspect": "quincunx",
+        "solarReturn": false,
         "moon": {
-          "sign": "Capricorn",
-          "phase": "full",
-          "phaseEnergy": "expressive"
+          "sign": "Aquarius",
+          "phase": "new",
+          "phaseEnergy": "inward"
         }
       }
     }
@@ -325,20 +328,21 @@
       "self-reliant"
     ],
     "sample": {
-      "date": "2026-06-30T12:00:00.000Z",
+      "date": "2026-01-19T12:00:00.000Z",
       "mood": {
         "dials": {
           "warmth": 4,
-          "energy": 4,
-          "playfulness": 4,
+          "energy": 1,
+          "playfulness": 3,
           "verbosity": 4,
           "metaphor": 4
         },
-        "sunAspect": "sextile",
+        "sunAspect": "trine",
+        "solarReturn": false,
         "moon": {
-          "sign": "Capricorn",
-          "phase": "full",
-          "phaseEnergy": "expressive"
+          "sign": "Aquarius",
+          "phase": "new",
+          "phaseEnergy": "inward"
         }
       }
     }
@@ -411,20 +415,21 @@
       "decisive"
     ],
     "sample": {
-      "date": "2026-06-30T12:00:00.000Z",
+      "date": "2026-01-19T12:00:00.000Z",
       "mood": {
         "dials": {
-          "warmth": 3,
-          "energy": 4,
-          "playfulness": 4,
+          "warmth": 2,
+          "energy": 2,
+          "playfulness": 3,
           "verbosity": 2,
-          "metaphor": 4
+          "metaphor": 3
         },
         "sunAspect": "square",
+        "solarReturn": false,
         "moon": {
-          "sign": "Capricorn",
-          "phase": "full",
-          "phaseEnergy": "expressive"
+          "sign": "Aquarius",
+          "phase": "new",
+          "phaseEnergy": "inward"
         }
       }
     }
@@ -497,20 +502,21 @@
       "grounded"
     ],
     "sample": {
-      "date": "2026-06-30T12:00:00.000Z",
+      "date": "2026-01-19T12:00:00.000Z",
       "mood": {
         "dials": {
-          "warmth": 0,
-          "energy": 2,
-          "playfulness": 2,
-          "verbosity": 0,
-          "metaphor": 2
+          "warmth": 2,
+          "energy": 1,
+          "playfulness": 1,
+          "verbosity": 2,
+          "metaphor": 1
         },
-        "sunAspect": "opposition",
+        "sunAspect": "conjunction",
+        "solarReturn": false,
         "moon": {
-          "sign": "Capricorn",
-          "phase": "full",
-          "phaseEnergy": "expressive"
+          "sign": "Aquarius",
+          "phase": "new",
+          "phaseEnergy": "inward"
         }
       }
     }
@@ -583,20 +589,21 @@
       "far-aiming"
     ],
     "sample": {
-      "date": "2026-06-30T12:00:00.000Z",
+      "date": "2026-01-19T12:00:00.000Z",
       "mood": {
         "dials": {
-          "warmth": 4,
-          "energy": 4,
+          "warmth": 3,
+          "energy": 2,
           "playfulness": 4,
           "verbosity": 3,
-          "metaphor": 4
+          "metaphor": 3
         },
-        "sunAspect": "trine",
+        "sunAspect": "sextile",
+        "solarReturn": false,
         "moon": {
-          "sign": "Capricorn",
-          "phase": "full",
-          "phaseEnergy": "expressive"
+          "sign": "Aquarius",
+          "phase": "new",
+          "phaseEnergy": "inward"
         }
       }
     }
@@ -669,20 +676,21 @@
       "candid"
     ],
     "sample": {
-      "date": "2026-06-30T12:00:00.000Z",
+      "date": "2026-01-19T12:00:00.000Z",
       "mood": {
         "dials": {
-          "warmth": 4,
-          "energy": 3,
-          "playfulness": 4,
+          "warmth": 3,
+          "energy": 1,
+          "playfulness": 2,
           "verbosity": 4,
-          "metaphor": 3
+          "metaphor": 2
         },
-        "sunAspect": "semisextile",
+        "sunAspect": "quincunx",
+        "solarReturn": false,
         "moon": {
-          "sign": "Capricorn",
-          "phase": "full",
-          "phaseEnergy": "expressive"
+          "sign": "Aquarius",
+          "phase": "new",
+          "phaseEnergy": "inward"
         }
       }
     }

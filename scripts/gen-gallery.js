@@ -14,7 +14,7 @@ const { roll } = require('../lib/roll.js');
 const { computeChart } = require('../lib/chart.js');
 const { composeMood } = require('../lib/mood.js');
 
-const SAMPLE_DATE = new Date('2026-06-30T12:00:00Z');
+const SAMPLE_DATE = new Date('2026-01-19T12:00:00Z');
 
 // seed → authored persona/color-name/label for the chart that seed rolls.
 const ENTRIES = [
