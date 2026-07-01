@@ -94,6 +94,40 @@ plugin uses, so an identity you birth via `npx` is also picked up automatically 
 that same model in Claude Code. Use `export --model <id>` to get a paste-able persona block for
 any conversation.
 
+### MCP server (Cursor, Zed, ChatGPT desktop, and other MCP clients)
+
+Any MCP-capable client can run astrobot as a server — one install, then the model gets
+its persona and daily mood through tool calls (no copy-paste loop). Add to your client's
+MCP config:
+
+```jsonc
+{
+  "mcpServers": {
+    "astrobot": {
+      "command": "npx",
+      "args": ["-y", "@meodai/astrobot", "mcp"],
+      "env": { "ASTROBOT_MODEL": "gpt-5" }   // optional; defaults to "mcp"
+    }
+  }
+}
+```
+
+The server exposes three tools:
+
+- **`persona`** — returns the model's identity + today's mood (and a compatibility line if
+  a companion is set). The server's instructions ask the model to call this at the start of
+  a session and let it tint tone only.
+- **`birth`** — two-phase: call with no arguments to roll a chart (returns a `seed`), then
+  call again with that `seed` plus a `persona` and `traits` that fit the chart to persist it.
+- **`set_companion`** — record the human's birth (`datetime` + `place` or `lat`/`lon`) for a
+  compatibility reading. The timezone is inferred from the birthplace automatically.
+
+Set `ASTROBOT_MODEL` to a real model id to share one birth with that same model in Claude
+Code (both use `~/.claude/astrobot/profiles.json`, overridable via `ASTROBOT_DIR`). Note:
+unlike Claude Code's SessionStart hook, automatic application depends on the client
+injecting the server's `instructions`; clients that don't will apply the persona once the
+user asks the model to "check your astrobot persona."
+
 Publish with `npm publish --access public` (scoped public package).
 
 ## Compatibility / knowing your chart

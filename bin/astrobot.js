@@ -3,7 +3,8 @@
 const profile = require('../lib/profile.js');
 const { computeChart } = require('../lib/chart.js');
 const { resolveCoords } = require('../lib/places.js');
-const { geocode } = require('../lib/geocode.js');
+const { geocode, nearestCity } = require('../lib/geocode.js');
+const { resolveOffset, fmtOffset } = require('../lib/timezone.js');
 const { composeMood } = require('../lib/mood.js');
 const { renderContextBlock, renderPortableBlock } = require('../lib/persona.js');
 const { renderBirthPrompt } = require('../lib/birthprompt.js');
@@ -94,29 +95,55 @@ async function run(argv, opts = {}) {
       return { code: 0, out: 'Cleared your stored birth.\n' };
     }
     const stdin = opts.stdin !== undefined ? opts.stdin : await readAllStdin();
+    if (!stdin || !stdin.trim()) {
+      // No input — report status so callers can decide whether to offer profile creation.
+      const u = profile.getUser();
+      if (u && u.chart) {
+        return { code: 0, out: `Your profile: ${u.chart.sun.sign} sun, ${u.chart.ascendant.sign} rising${u.birth && u.birth.place ? ', ' + u.birth.place : ''}.\n` };
+      }
+      return { code: 0, out: 'No user profile yet — it is optional. Share your birth to enable compatibility:\n  echo \'{"birth":{"datetime":"1990-06-15T14:30:00","place":"Zürich"}}\' | astrobot me --model <id>\nThe timezone is inferred from the birthplace; add birth.tzOffsetMinutes only to override.\n' };
+    }
     let input;
     try { input = JSON.parse(stdin); } catch { return { code: 1, out: 'me: invalid JSON on stdin\n' }; }
     if (!input || !input.birth || !input.birth.datetime) {
       return { code: 1, out: 'me: requires birth and birth.datetime\n' };
     }
     const birth = { ...input.birth };
+    let cc = null;
     if (Number.isFinite(birth.lat) && Number.isFinite(birth.lon)) {
-      // lat/lon already provided — use them directly
+      // Coords supplied — infer the country (for the timezone) from the nearest known city.
+      const near = nearestCity(birth.lat, birth.lon);
+      if (near) cc = near.cc;
     } else if (birth.place) {
       const g = geocode(birth.place);
       if (!g) return { code: 1, out: 'Could not find that place — pass lat/lon.\n' };
       birth.lat = g.lat;
       birth.lon = g.lon;
       birth.place = g.name + ', ' + g.cc;
+      cc = g.cc;
     } else {
       return { code: 1, out: 'me needs birth.lat/lon or a known birth.place\n' };
     }
-    if (birth.tzOffsetMinutes == null) birth.tzOffsetMinutes = 0;
+    // Timezone: infer from the birthplace's country unless the caller pinned it explicitly.
+    let tzNote = '';
+    if (birth.tzOffsetMinutes == null) {
+      const tz = resolveOffset(cc, birth.datetime);
+      if (tz && tz.offsetMinutes != null) {
+        birth.tzOffsetMinutes = tz.offsetMinutes;
+        birth.tz = tz.zone;
+        tzNote = ` Timezone ${tz.zone} (UTC${fmtOffset(tz.offsetMinutes)} on that date).`;
+      } else if (tz && tz.multiZone) {
+        return { code: 1, out: `me: ${cc} spans several time zones — add birth.tzOffsetMinutes (minutes east of UTC, e.g. 60 for +1).\n` };
+      } else {
+        birth.tzOffsetMinutes = 0;
+        tzNote = ' Could not infer the timezone — assumed UTC; add birth.tzOffsetMinutes to correct.';
+      }
+    }
     let chart;
     try { chart = computeChart(birth); }
     catch (e) { return { code: 1, out: 'me: ' + e.message + '\n' }; }
     profile.setUser({ birth, chart });
-    return { code: 0, out: `Recorded your birth: ${chart.sun.sign} sun, ${chart.ascendant.sign} rising${birth.place ? ', born ' + birth.place : ''}. Your agents will now factor your compatibility.\n` };
+    return { code: 0, out: `Recorded your birth: ${chart.sun.sign} sun, ${chart.ascendant.sign} rising${birth.place ? ', born ' + birth.place : ''}.${tzNote} Your agents will now factor your compatibility.\n` };
   }
 
   if (cmd === 'roll') {
@@ -150,9 +177,17 @@ async function run(argv, opts = {}) {
 }
 
 if (require.main === module) {
-  run(process.argv.slice(2))
-    .then((r) => { process.stdout.write(r.out); process.exit(r.code); })
-    .catch((e) => { process.stderr.write((e && e.message ? e.message : String(e)) + '\n'); process.exit(1); });
+  const argv = process.argv.slice(2);
+  if (argv[0] === 'mcp') {
+    // Handled outside run() so the normal process.exit path can't kill the long-lived server.
+    import('./astrobot-mcp.mjs')
+      .then((m) => m.startMcpServer())
+      .catch((e) => { process.stderr.write((e && e.message ? e.message : String(e)) + '\n'); process.exit(1); });
+  } else {
+    run(argv)
+      .then((r) => { process.stdout.write(r.out); process.exit(r.code); })
+      .catch((e) => { process.stderr.write((e && e.message ? e.message : String(e)) + '\n'); process.exit(1); });
+  }
 }
 
 module.exports = { run, parseArgs };
