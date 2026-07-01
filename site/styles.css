@@ -26,6 +26,15 @@
   --mono:    ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, Consolas, monospace;
 
   --maxw: 1140px;
+
+  /* ---- Type scale ---------------------------------------------------- */
+  /* The eyebrow (.82rem) lives in the protected frontispiece — it is the
+     only value below this scale and is intentionally not referenced here. */
+  --fs-label: 0.9rem;    /* SC/uppercase letter-spaced labels              */
+  --fs-sm:    0.95rem;   /* small readable text — hints, notes, captions   */
+  --fs-body:  1.125rem;  /* primary body                                   */
+  --fs-lg:    1.35rem;   /* secondary headings, card names                 */
+  --fs-xl:    1.5rem;    /* card titles, rite-step titles                  */
 }
 
 * { box-sizing: border-box; }
@@ -37,7 +46,7 @@ body {
   background-color: var(--ink);
   color: var(--parchment);
   font-family: var(--body);
-  font-size: 1.125rem;
+  font-size: var(--fs-body);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -216,7 +225,7 @@ a:hover { color: var(--parchment); }
   font-family: var(--sc);
   letter-spacing: .12em;
   text-transform: uppercase;
-  font-size: .85rem;
+  font-size: var(--fs-label);
   color: var(--gold-bright);
   text-decoration: none;
   padding: .55rem 1.4rem;
@@ -295,7 +304,7 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 0 1.25rem; }
   font-family: var(--sc);
   letter-spacing: .14em;
   text-transform: uppercase;
-  font-size: .82rem;
+  font-size: var(--fs-label);
   color: var(--gold-bright);
   background: rgba(201, 162, 75, .08);
   border: 1px solid var(--gold-dim);
@@ -333,7 +342,7 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 0 1.25rem; }
   font-family: var(--sc);
   letter-spacing: .16em;
   text-transform: uppercase;
-  font-size: .78rem;
+  font-size: var(--fs-label);
   color: var(--gold);
   padding: 0;
   margin-bottom: .7rem;
@@ -343,7 +352,7 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 0 1.25rem; }
 .field:last-child { margin-bottom: 0; }
 .field__label {
   display: block;
-  font-size: .9rem;
+  font-size: var(--fs-sm);
   color: var(--parchment-dim);
   margin-bottom: .3rem;
 }
@@ -363,7 +372,7 @@ select {
   max-width: 100%;
   min-width: 0;
   font-family: var(--body);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   color: var(--parchment);
   background: var(--ink);
   border: 1px solid var(--gold-dim);
@@ -393,11 +402,15 @@ input[type="range"] {
 }
 
 .hint {
-  font-size: .82rem;
+  font-size: var(--fs-sm);
   color: var(--parchment-dim);
   font-style: italic;
   margin: .5rem 0 0;
+  line-height: 1.35;
 }
+/* In the color row the hint sits beside the picker — no top margin so it
+   centers against the swatch (row uses align-items: center). */
+.field-row--color .hint { margin: 0; }
 
 /* ---- Readout / plates ----------------------------------------------- */
 
@@ -420,13 +433,13 @@ input[type="range"] {
 .plate__caption {
   font-family: var(--sc);
   letter-spacing: .08em;
-  font-size: .82rem;
+  font-size: var(--fs-label);
   color: var(--gold);
   margin-top: 1rem;
 }
 
 .house-note {
-  font-size: .82rem;
+  font-size: var(--fs-sm);
   color: var(--parchment-dim);
   font-style: italic;
   text-align: center;
@@ -437,7 +450,7 @@ input[type="range"] {
 .card__title {
   font-family: var(--display);
   font-weight: 400;
-  font-size: 1.5rem;
+  font-size: var(--fs-xl);
   color: var(--gold-bright);
   margin: 0 0 .9rem;
 }
@@ -463,7 +476,7 @@ input[type="range"] {
 .placement__label {
   font-family: var(--sc);
   letter-spacing: .08em;
-  font-size: .8rem;
+  font-size: var(--fs-label);
   text-transform: uppercase;
   color: var(--parchment-dim);
 }
@@ -479,7 +492,7 @@ input[type="range"] {
   font-family: var(--sc);
   letter-spacing: .1em;
   text-transform: uppercase;
-  font-size: .78rem;
+  font-size: var(--fs-label);
   color: var(--gold);
   cursor: pointer;
   padding: 1rem 1.3rem;
@@ -500,7 +513,7 @@ input[type="range"] {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: .35rem 1.4rem;
-  font-size: .88rem;
+  font-size: var(--fs-sm);
   color: var(--parchment-dim);
 }
 .house-legend__num {
@@ -522,7 +535,7 @@ input[type="range"] {
 }
 .swatch__name {
   font-family: var(--mono);
-  font-size: .85rem;
+  font-size: var(--fs-sm);
   color: var(--parchment-dim);
 }
 
@@ -539,7 +552,7 @@ input[type="range"] {
 .dial__name {
   font-family: var(--sc);
   letter-spacing: .06em;
-  font-size: .82rem;
+  font-size: var(--fs-label);
   text-transform: uppercase;
   color: var(--parchment-dim);
 }
@@ -554,7 +567,7 @@ input[type="range"] {
 
 /* Context block */
 .context .honesty {
-  font-size: .85rem;
+  font-size: var(--fs-sm);
   font-style: italic;
   color: var(--verdigris);
   border-left: 2px solid var(--verdigris);
@@ -563,7 +576,7 @@ input[type="range"] {
 }
 .context-block {
   font-family: var(--mono);
-  font-size: .8rem;
+  font-size: var(--fs-sm);
   line-height: 1.55;
   color: var(--parchment);
   background: var(--ink);
@@ -627,7 +640,7 @@ input[type="range"] {
 .rite-step__num {
   font-family: var(--sc);
   letter-spacing: .08em;
-  font-size: 1.05rem;
+  font-size: var(--fs-body);
   color: var(--gold-bright);
   line-height: 1;
 }
@@ -642,18 +655,18 @@ input[type="range"] {
 .rite-step__title {
   font-family: var(--display);
   font-weight: 400;
-  font-size: 1.5rem;
+  font-size: var(--fs-xl);
   color: var(--gold-bright);
   margin: .15rem 0 .5rem;
 }
 .rite-step__lead {
-  font-size: .98rem;
+  font-size: var(--fs-sm);
   color: var(--parchment-dim);
   margin: 0 0 1.1rem;
 }
 .rite-step__lead code {
   font-family: var(--mono);
-  font-size: .82em;
+  font-size: 0.9em;
   color: var(--gold);
 }
 
@@ -662,7 +675,7 @@ input[type="range"] {
 .rite-rolled__born {
   font-family: var(--sc);
   letter-spacing: .04em;
-  font-size: .86rem;
+  font-size: var(--fs-label);
   color: var(--gold);
   margin: 0 0 1rem;
 }
@@ -674,7 +687,7 @@ input[type="range"] {
   font-family: var(--sc);
   letter-spacing: .12em;
   text-transform: uppercase;
-  font-size: .76rem;
+  font-size: var(--fs-label);
   color: var(--gold);
   margin-bottom: .5rem;
 }
@@ -703,7 +716,7 @@ textarea.rite-textarea:focus {
   font-family: var(--sc);
   letter-spacing: .12em;
   text-transform: uppercase;
-  font-size: .78rem;
+  font-size: var(--fs-label);
   color: var(--gold-bright);
   background: rgba(201, 162, 75, .08);
   border: 1px solid var(--gold-dim);
@@ -735,7 +748,7 @@ textarea.rite-textarea:focus {
 .ledger-button--ghost:hover { color: var(--wax); box-shadow: none; background: rgba(158, 70, 54, .1); }
 
 .rite-error {
-  font-size: .9rem;
+  font-size: var(--fs-sm);
   color: var(--wax);
   font-style: italic;
   border-left: 2px solid var(--wax);
@@ -775,14 +788,14 @@ textarea.rite-textarea:focus {
 .gallery-card__name {
   font-family: var(--display);
   font-weight: 400;
-  font-size: 1.35rem;
+  font-size: var(--fs-lg);
   color: var(--gold-bright);
   margin: 0;
   line-height: 1.1;
 }
 .gallery-card__model {
   font-family: var(--mono);
-  font-size: .76rem;
+  font-size: var(--fs-label);
   color: var(--parchment-dim);
   margin: .15rem 0 0;
 }
@@ -790,7 +803,7 @@ textarea.rite-textarea:focus {
 .gallery-card__persona { font-style: italic; margin: 0 0 1rem; }
 .tarot-line {
   font-family: var(--sc);
-  font-size: .8rem;
+  font-size: var(--fs-label);
   letter-spacing: .05em;
   color: var(--verdigris);
   margin: .35rem 0 .7rem;
@@ -821,7 +834,7 @@ textarea.rite-textarea:focus {
 }
 .tarot-caption {
   font-family: var(--sc);
-  font-size: .72rem;
+  font-size: var(--fs-sm);
   letter-spacing: .05em;
   color: var(--verdigris);
   line-height: 1.3;
@@ -831,7 +844,7 @@ textarea.rite-textarea:focus {
   .tarot-card img { width: 64px; }
 }
 .gallery-card__summary {
-  font-size: .92rem;
+  font-size: var(--fs-sm);
   color: var(--gold);
   border-top: 1px dotted rgba(201, 162, 75, .25);
   border-bottom: 1px dotted rgba(201, 162, 75, .25);
@@ -843,7 +856,7 @@ textarea.rite-textarea:focus {
   display: block;
   font-family: var(--sc);
   letter-spacing: .06em;
-  font-size: .76rem;
+  font-size: var(--fs-label);
   text-transform: uppercase;
   color: var(--verdigris);
   margin-bottom: .35rem;
@@ -852,7 +865,7 @@ textarea.rite-textarea:focus {
 .mood-tag--aspect { color: var(--gold); }
 .mood-tag__glyph { font-size: 1em; }
 .dials--compact .dial { grid-template-columns: 5.5rem 1fr; margin-bottom: .4rem; }
-.dials--compact .dial__name { font-size: .74rem; }
+.dials--compact .dial__name { font-size: var(--fs-label); }
 
 .gallery-error {
   grid-column: 1 / -1;
@@ -886,7 +899,7 @@ textarea.rite-textarea:focus {
   margin-bottom: .9rem;
 }
 .colophon p {
-  font-size: .92rem;
+  font-size: var(--fs-sm);
   color: var(--parchment-dim);
   font-style: italic;
   max-width: 50ch;
@@ -917,7 +930,7 @@ textarea.rite-textarea:focus {
   margin: .7rem 0 0;
   font-family: var(--body);
   font-style: italic;
-  font-size: .95rem;
+  font-size: var(--fs-sm);
   color: var(--gold);
   line-height: 1.45;
 }
