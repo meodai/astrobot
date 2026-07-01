@@ -544,16 +544,18 @@ input[type="range"] {
 }
 
 /* Mood dials */
-/* Rating lines are only as wide as they need to be (name + pips), not full width. */
-.dials { margin: 0; width: fit-content; max-width: 100%; }
-.dial {
+/* One grid for all rows: names share a column sized to the longest ("playfulness")
+   so nothing overflows into the bars, and the pip gauges align. Content-width. */
+.dials {
+  margin: 0;
   display: grid;
-  grid-template-columns: 6.5rem auto;
+  grid-template-columns: max-content 1fr;   /* name | flexible gap → bars far right */
   align-items: center;
-  gap: .6rem;
-  margin: 0 0 .55rem;
+  column-gap: .8rem;
+  row-gap: .5rem;
+  max-width: 100%;
 }
-.dial:last-child { margin-bottom: 0; }
+.dial { display: contents; }
 .dial__name {
   font-family: var(--sc);
   letter-spacing: .06em;
@@ -561,9 +563,9 @@ input[type="range"] {
   text-transform: uppercase;
   color: var(--parchment-dim);
 }
-.dial__gauge { margin: 0; display: flex; gap: .3rem; }
+.dial__gauge { margin: 0; display: flex; gap: .3rem; justify-self: end; }
 .pip {
-  flex: 1;
+  width: 1.5rem;
   height: .55rem;
   border: 1px solid var(--gold-dim);
   background: transparent;
@@ -829,23 +831,53 @@ textarea.rite-textarea:focus {
 }
 .tarot-cards {
   display: flex;
-  flex-wrap: wrap;
-  gap: .45rem;
+  gap: 1.5rem;               /* the pair spans the full width with a clear gap */
+  align-items: flex-start;
 }
 .tarot-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 80px;
-  flex-shrink: 0;
+  flex: 1;                   /* each card grows to fill half the row */
+  min-width: 0;
 }
 .tarot-card img {
   display: block;
-  width: 80px;
+  width: 100%;
+  max-width: 240px;
   height: auto;
   border: 1px solid rgba(201, 162, 75, .65);
   box-shadow: 0 0 0 1px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.4);
   background: #1a1510;
+}
+.tarot-plaque {
+  width: 100%;
+  margin-bottom: .5rem;
+  padding: .3rem .4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  border: 1px solid rgba(201, 162, 75, .65);   /* double outline, matching the cards */
+  border-radius: 2px;
+  background: linear-gradient(180deg, #1b1610, #100d08);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(201, 162, 75, .15), 0 1px 3px rgba(0, 0, 0, .4);
+  text-align: center;
+}
+.tarot-plaque__role {
+  font-family: var(--sc);
+  font-size: .72rem;            /* small plaque label */
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  line-height: 1.1;
+  color: var(--verdigris);
+}
+.tarot-plaque__name {
+  font-family: var(--sc);
+  font-size: var(--fs-label);
+  letter-spacing: .02em;
+  color: var(--gold-bright);
+  line-height: 1.15;
 }
 .tarot-caption {
   font-family: var(--sc);
@@ -854,10 +886,7 @@ textarea.rite-textarea:focus {
   color: var(--verdigris);
   line-height: 1.3;
 }
-@media (max-width: 480px) {
-  .tarot-card { width: 64px; }
-  .tarot-card img { width: 64px; }
-}
+/* pair stays full-width and flexes on mobile too */
 .gallery-card__summary {
   font-size: var(--fs-sm);
   color: var(--gold);
@@ -879,7 +908,8 @@ textarea.rite-textarea:focus {
 .mood-tag:last-of-type { margin-bottom: .7rem; }
 .mood-tag--aspect { color: var(--gold); }
 .mood-tag__glyph { font-size: 1em; }
-.dials--compact .dial { grid-template-columns: 5.5rem auto; margin-bottom: .4rem; }
+.dials--compact { column-gap: .6rem; row-gap: .35rem; }
+.dials--compact .pip { width: 1.15rem; height: .5rem; }
 .dials--compact .dial__name { font-size: var(--fs-label); }
 
 .gallery-error {
@@ -949,3 +979,6 @@ textarea.rite-textarea:focus {
   color: var(--gold);
   line-height: 1.45;
 }
+
+/* Havoc note in How It Works — breathing room above */
+.how-havoc { margin-top: 1.75rem; }

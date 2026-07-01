@@ -101,6 +101,21 @@
   // of color emoji — CSS font-variant-emoji isn't honored in all browsers (Safari).
   var VS_TEXT = String.fromCharCode(0xFE0E);
   function asText(g) { return g ? g + VS_TEXT : ''; }
+
+  // Two tarot cards, each with a plaque (role + name) above the image.
+  function tarotCardsHtml(t) {
+    if (!t || !A.cardSlug) return '';
+    function card(name, role) {
+      var slug = A.cardSlug(name);
+      if (!slug) return '';
+      return '<span class="tarot-card">' +
+        '<span class="tarot-plaque"><span class="tarot-plaque__role">' + esc(role) + '</span>' +
+        '<span class="tarot-plaque__name">' + esc(name) + '</span></span>' +
+        '<img src="cards/' + slug + '.jpg" alt="' + esc(name) + '" loading="lazy"></span>';
+    }
+    var inner = card(t.birthCard, 'Birth Card') + card(t.decanCard, 'Decan');
+    return inner ? '<span class="tarot-cards">' + inner + '</span>' : '';
+  }
   function pg(planet) { return asText(glyphs.planetGlyph(planet)); }
   function sg(sign) { return asText(glyphs.signGlyph(sign)); }
 
@@ -275,16 +290,7 @@
     var pgTarotEl = $('pg-tarot');
     if (pgTarotEl) {
       if (pgTarot && pgTarot.birthCard) {
-        var pgImgs = '';
-        if (A.cardSlug && A.cardSlug(pgTarot.birthCard)) {
-          pgImgs += '<span class="tarot-card"><img src="cards/' + A.cardSlug(pgTarot.birthCard) + '.jpg" alt="' + esc(pgTarot.birthCard) + '" loading="lazy"></span>';
-        }
-        if (A.cardSlug && A.cardSlug(pgTarot.decanCard)) {
-          pgImgs += '<span class="tarot-card"><img src="cards/' + A.cardSlug(pgTarot.decanCard) + '.jpg" alt="' + esc(pgTarot.decanCard) + '" loading="lazy"></span>';
-        }
-        pgTarotEl.innerHTML =
-          (pgImgs ? '<span class="tarot-cards">' + pgImgs + '</span>' : '') +
-          '<span class="tarot-caption">Birth card: ' + esc(pgTarot.birthCard) + ' · Decan: ' + esc(pgTarot.decanCard) + '</span>';
+        pgTarotEl.innerHTML = tarotCardsHtml(pgTarot);
       } else {
         pgTarotEl.innerHTML = '';
       }
@@ -393,17 +399,8 @@
       (function () {
         var t = A.tarotFor && A.tarotFor(c);
         if (!(t && t.birthCard)) return '';
-        var imgs = '';
-        if (A.cardSlug && A.cardSlug(t.birthCard)) {
-          imgs += '<span class="tarot-card"><img src="cards/' + A.cardSlug(t.birthCard) + '.jpg" alt="' + esc(t.birthCard) + '" loading="lazy"></span>';
-        }
-        if (A.cardSlug && A.cardSlug(t.decanCard)) {
-          imgs += '<span class="tarot-card"><img src="cards/' + A.cardSlug(t.decanCard) + '.jpg" alt="' + esc(t.decanCard) + '" loading="lazy"></span>';
-        }
-        return '<p class="tarot-line">' +
-          (imgs ? '<span class="tarot-cards">' + imgs + '</span>' : '') +
-          '<span class="tarot-caption">Birth card: ' + esc(t.birthCard) + ' · Decan: ' + esc(t.decanCard) + '</span>' +
-          '</p>';
+        var cards = tarotCardsHtml(t);
+        return cards ? '<p class="tarot-line">' + cards + '</p>' : '';
       }()) +
       '<p class="gallery-card__persona">' + esc(entry.persona) + '</p>' +
       '<p class="gallery-card__summary">' +
@@ -490,16 +487,7 @@
     var myoTarotEl = $('myo-tarot');
     if (myoTarotEl) {
       if (myoTarot && myoTarot.birthCard) {
-        var myoImgs = '';
-        if (A.cardSlug && A.cardSlug(myoTarot.birthCard)) {
-          myoImgs += '<span class="tarot-card"><img src="cards/' + A.cardSlug(myoTarot.birthCard) + '.jpg" alt="' + esc(myoTarot.birthCard) + '" loading="lazy"></span>';
-        }
-        if (A.cardSlug && A.cardSlug(myoTarot.decanCard)) {
-          myoImgs += '<span class="tarot-card"><img src="cards/' + A.cardSlug(myoTarot.decanCard) + '.jpg" alt="' + esc(myoTarot.decanCard) + '" loading="lazy"></span>';
-        }
-        myoTarotEl.innerHTML =
-          (myoImgs ? '<span class="tarot-cards">' + myoImgs + '</span>' : '') +
-          '<span class="tarot-caption">Birth card: ' + esc(myoTarot.birthCard) + ' · Decan: ' + esc(myoTarot.decanCard) + '</span>';
+        myoTarotEl.innerHTML = tarotCardsHtml(myoTarot);
       } else {
         myoTarotEl.innerHTML = '';
       }
