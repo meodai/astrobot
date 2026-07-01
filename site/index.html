@@ -210,6 +210,12 @@
             <ul class="typeahead-list" id="compat-place-list" role="listbox" hidden></ul>
           </label>
         </div>
+        <p class="compat-nomatch"><button type="button" class="linklike" id="compat-usecoords">Can't find your city? Enter coordinates</button></p>
+        <div class="field-row compat-coords" id="compat-coords" hidden>
+          <label class="field"><span class="field__label">Latitude</span><input type="number" id="compat-lat" step="0.0001" placeholder="e.g. 41.3874"></label>
+          <label class="field"><span class="field__label">Longitude</span><input type="number" id="compat-lon" step="0.0001" placeholder="e.g. 2.1686"></label>
+          <p class="hint">Don't know them? <a href="https://www.latlong.net/" target="_blank" rel="noopener noreferrer">Find your coordinates ↗</a></p>
+        </div>
         <div class="field-row">
           <label class="field"><span class="field__label">Your birth date</span><input type="date" id="compat-date"></label>
           <label class="field"><span class="field__label">Time (if you know it)</span><input type="time" id="compat-time"></label>

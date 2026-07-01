@@ -208,9 +208,12 @@
     var date = $('birth-date').value || '1996-11-08';
     var time = $('birth-time').value || '12:00';
     var coords = currentCoords();
+    var cityVal = $('birth-city').value;
+    var place = (cityVal === '__custom__') ? 'Custom coordinates' : cityVal;
     return {
       datetime: date + 'T' + time + ':00',
       tzOffsetMinutes: 0,
+      place: place,
       lat: coords.lat,
       lon: coords.lon
     };
@@ -275,7 +278,7 @@
 
     drawWheel('pg-wheel', chart, pgWheelSize());
     $('pg-caption').textContent = 'Fig. — Nativity, ' + sg(chart.sun.sign) + ' ' + chart.sun.sign +
-      ' with ' + chart.ascendant.sign + ' rising';
+      ' with ' + chart.ascendant.sign + ' rising · born in ' + esc(birth.place);
 
     renderPlacements(chart);
 
@@ -297,6 +300,7 @@
     }
 
     var profile = {
+      birth: birth,
       chart: chart,
       color: color,
       persona: '(placeholder — a real persona is written by the model)',
@@ -451,7 +455,10 @@
   function compatCoords() {
     var el = $('compat-place');
     var lat = parseFloat(el.dataset.lat), lon = parseFloat(el.dataset.lon);
-    return (isFinite(lat) && isFinite(lon)) ? { lat: lat, lon: lon } : null;
+    if (isFinite(lat) && isFinite(lon)) return { lat: lat, lon: lon };
+    var manualLat = parseFloat($('compat-lat').value);
+    var manualLon = parseFloat($('compat-lon').value);
+    return (isFinite(manualLat) && isFinite(manualLon)) ? { lat: manualLat, lon: manualLon } : null;
   }
 
   var TONE_CLASS = {
@@ -522,6 +529,11 @@
   function wireCompatibility() {
     attachTypeahead($('compat-place'), $('compat-place-list'));
 
+    $('compat-usecoords').addEventListener('click', function () {
+      $('compat-coords').hidden = false;
+      $('compat-lat').focus();
+    });
+
     $('compat-go').addEventListener('click', function () {
       var hint = $('compat-hint');
       var dateVal = $('compat-date').value;
@@ -533,7 +545,7 @@
       }
       var coords = compatCoords();
       if (!coords) {
-        hint.textContent = 'Pick your birthplace from the list.';
+        hint.textContent = 'Pick your birthplace from the list, or enter coordinates below.';
         hint.hidden = false;
         $('compat-place').focus();
         return;
@@ -751,38 +763,41 @@
   function myoRoll() {
     var date = randInt(1940, 2012) + '-' + pad2(randInt(1, 12)) + '-' + pad2(randInt(1, 28));
     var time = pad2(randInt(0, 23)) + ':' + pad2(randInt(0, 59));
-    var cities = Object.keys(A.CITIES);
-    var cityName = cities[randInt(0, cities.length - 1)];
-    var c = A.CITIES[cityName];
     var colorHex = '#' + ('000000' + randInt(0, 0xffffff).toString(16)).slice(-6);
 
-    var birth = {
-      datetime: date + 'T' + time + ':00',
-      tzOffsetMinutes: 0,
-      place: cityName,
-      lat: c.lat,
-      lon: c.lon
-    };
+    loadCitiesGeo().then(function (cities) {
+      var entry = (cities && cities.length)
+        ? cities[randInt(0, cities.length - 1)]
+        : ['Greenwich', 'GB', 51.48, 0];
 
-    var chart;
-    try {
-      chart = A.computeChart(birth);
-    } catch (err) {
-      $('myo-born').textContent = 'The ephemeris stumbled on that roll — try rolling again.';
-      $('myo-rolled').hidden = false;
-      return;
-    }
+      var birth = {
+        datetime: date + 'T' + time + ':00',
+        tzOffsetMinutes: 0,
+        place: entry[0] + ', ' + entry[1],
+        lat: entry[2],
+        lon: entry[3]
+      };
 
-    myoState = { birth: birth, colorHex: colorHex, chart: chart };
-    myoRenderRolled(chart, birth, colorHex);
+      var chart;
+      try {
+        chart = A.computeChart(birth);
+      } catch (err) {
+        $('myo-born').textContent = 'The ephemeris stumbled on that roll — try rolling again.';
+        $('myo-rolled').hidden = false;
+        return;
+      }
 
-    $('myo-prompt').value = A.renderBirthPrompt({ birth: birth, colorHex: colorHex, chart: chart, closing: 'Return only the filled-in JSON object — no other text.' });
-    $('myo-reply').value = '';
-    myoHideError();
+      myoState = { birth: birth, colorHex: colorHex, chart: chart };
+      myoRenderRolled(chart, birth, colorHex);
 
-    myoShow('myo-step-prompt', true);
-    myoShow('myo-step-reply', true);
-    myoShow('myo-step-result', false);
+      $('myo-prompt').value = A.renderBirthPrompt({ birth: birth, colorHex: colorHex, chart: chart, closing: 'Return only the filled-in JSON object — no other text.' });
+      $('myo-reply').value = '';
+      myoHideError();
+
+      myoShow('myo-step-prompt', true);
+      myoShow('myo-step-reply', true);
+      myoShow('myo-step-result', false);
+    });
   }
 
   function myoHideError() {

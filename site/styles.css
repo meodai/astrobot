@@ -418,6 +418,21 @@ input[type="range"] {
    centers against the swatch (row uses align-items: center). */
 .field-row--color .hint { margin: 0; }
 
+.linklike {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--verdigris);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.compat-nomatch {
+  margin: .35rem 0 .2rem;
+  font-size: var(--fs-sm);
+}
+
 /* ---- Readout / plates ----------------------------------------------- */
 
 .readout { display: flex; flex-direction: column; gap: 1.25rem; }

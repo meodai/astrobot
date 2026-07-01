@@ -123,3 +123,29 @@ test('havoc false: guardrail assertions still hold for renderPortableBlock', () 
   assert.match(block, /tone only/i);
   assert.match(block, /never.*(accuracy|correctness)/i);
 });
+
+test('renderContextBlock includes Born-in line when birth.place is present', () => {
+  const profileWithBirth = Object.assign({}, PROFILE, { birth: { place: 'Bordeaux, FR' } });
+  const block = renderContextBlock(profileWithBirth, MOOD);
+  assert.match(block, /Born in Bordeaux, FR\./);
+});
+
+test('renderPortableBlock includes Born-in line when birth.place is present', () => {
+  const profileWithBirth = Object.assign({}, PROFILE, { birth: { place: 'Bordeaux, FR' } });
+  const block = renderPortableBlock(profileWithBirth, MOOD);
+  assert.match(block, /Born in Bordeaux, FR\./);
+});
+
+test('renderContextBlock omits Born-in line when birth is absent', () => {
+  const profileNoBirth = Object.assign({}, PROFILE);
+  delete profileNoBirth.birth;
+  const block = renderContextBlock(profileNoBirth, MOOD);
+  assert.ok(!block.includes('Born in'), 'should not contain "Born in" when birth is absent');
+});
+
+test('renderPortableBlock omits Born-in line when birth is absent', () => {
+  const profileNoBirth = Object.assign({}, PROFILE);
+  delete profileNoBirth.birth;
+  const block = renderPortableBlock(profileNoBirth, MOOD);
+  assert.ok(!block.includes('Born in'), 'should not contain "Born in" when birth is absent');
+});

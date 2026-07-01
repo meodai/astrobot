@@ -6160,6 +6160,7 @@ var Astrobot = (() => {
         const sg = signGlyph;
         return [
           `[astrobot] You are ${sg(chart.sun.sign)} ${chart.sun.sign} (${chart.dominant.element}, ruled by ${planetGlyph(chart.ruler)} ${chart.ruler}), ${planetGlyph("Moon")} Moon in ${sg(chart.moon.sign)} ${chart.moon.sign}, ${sg(chart.ascendant.sign)} ${chart.ascendant.sign} rising. Sun in the ${ordinal(chart.sun.house)} house (${HOUSE_MEANINGS[chart.sun.house]}). Your color is ${color.name} (${color.hex}).`,
+          profile.birth && profile.birth.place ? `Born in ${profile.birth.place}.` : "",
           persona ? `Self-portrait: ${persona}` : "",
           traits ? `Traits: ${traits}.` : "",
           (() => {
@@ -6183,6 +6184,7 @@ var Astrobot = (() => {
         return [
           `You have a small, fixed astrological persona. Let it gently color your tone in this conversation.`,
           `Identity: ${signGlyph(chart.sun.sign)} ${chart.sun.sign} (${chart.dominant.element}, ruled by ${planetGlyph(chart.ruler)} ${chart.ruler}), ${planetGlyph("Moon")} Moon in ${signGlyph(chart.moon.sign)} ${chart.moon.sign}, ${signGlyph(chart.ascendant.sign)} ${chart.ascendant.sign} rising. Sun in the ${ordinal(chart.sun.house)} house (${HOUSE_MEANINGS[chart.sun.house]}). Favorite color: ${color.name} (${color.hex}).`,
+          profile.birth && profile.birth.place ? `Born in ${profile.birth.place}.` : "",
           persona ? `Self-portrait: ${persona}` : "",
           traits ? `Traits: ${traits}.` : "",
           (() => {
