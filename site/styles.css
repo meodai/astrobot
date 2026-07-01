@@ -406,7 +406,11 @@ input[type="range"] {
   color: var(--parchment-dim);
   font-style: italic;
   margin: .5rem 0 0;
+  line-height: 1.35;
 }
+/* In the color row the hint sits beside the picker — no top margin so it
+   centers against the swatch (row uses align-items: center). */
+.field-row--color .hint { margin: 0; }
 
 /* ---- Readout / plates ----------------------------------------------- */
 
