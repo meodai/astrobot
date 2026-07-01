@@ -39,6 +39,10 @@
 
 * { box-sizing: border-box; }
 
+/* Text selection in the title gilt. */
+::selection { background: var(--gold-bright); color: var(--ink); }
+::-moz-selection { background: var(--gold-bright); color: var(--ink); }
+
 html { scroll-behavior: smooth; }
 
 body {
@@ -540,10 +544,11 @@ input[type="range"] {
 }
 
 /* Mood dials */
-.dials { margin: 0; }
+/* Rating lines are only as wide as they need to be (name + pips), not full width. */
+.dials { margin: 0; width: fit-content; max-width: 100%; }
 .dial {
   display: grid;
-  grid-template-columns: 6.5rem 1fr;
+  grid-template-columns: 6.5rem auto;
   align-items: center;
   gap: .6rem;
   margin: 0 0 .55rem;
@@ -864,7 +869,7 @@ textarea.rite-textarea:focus {
 .mood-tag:last-of-type { margin-bottom: .7rem; }
 .mood-tag--aspect { color: var(--gold); }
 .mood-tag__glyph { font-size: 1em; }
-.dials--compact .dial { grid-template-columns: 5.5rem 1fr; margin-bottom: .4rem; }
+.dials--compact .dial { grid-template-columns: 5.5rem auto; margin-bottom: .4rem; }
 .dials--compact .dial__name { font-size: var(--fs-label); }
 
 .gallery-error {
