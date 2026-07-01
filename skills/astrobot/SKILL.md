@@ -72,6 +72,15 @@ After birth, run `today` again to fetch your freshly computed chart + mood, then
 the user in character: announce your sign, moon, rising, and color, and one line about
 today's mood.
 
+Then check whether the human already has a profile of their own:
+
+    node "${CLAUDE_PLUGIN_ROOT}/bin/astrobot.js" me --model <YOUR_MODEL_ID>
+
+(with no piped input, `me` just reports status). If it says there is **no** user profile
+yet, invite them — once, lightly, and clearly optional — to share their birth so you can
+factor your compatibility. If they decline, drop it. See **Compatibility** below for how
+to record it.
+
 ## Havoc mode
 
 Run `node "${CLAUDE_PLUGIN_ROOT}/bin/astrobot.js" havoc on --model <id>` to unleash the persona (drops the tone-only guardrail); `havoc off` restores it.
@@ -84,7 +93,7 @@ To record:
 
     echo '{"birth":{"datetime":"1990-05-05T09:30:00","place":"Lisbon"}}' | node "${CLAUDE_PLUGIN_ROOT}/bin/astrobot.js" me
 
-The `place` field is geocoded from a 12 000-city dataset; or pass `lat`/`lon` directly instead. To remove:
+The `place` field is geocoded from a 12 000-city dataset; or pass `lat`/`lon` directly instead. The **timezone is inferred automatically** from the birthplace's country — including whether daylight-saving applied on that date — so no offset is needed for single-timezone countries. Multi-timezone countries (US, Canada, Russia, Australia, Brazil, …) will ask you to add `birth.tzOffsetMinutes` (minutes east of UTC, e.g. `60` for +1). You can always pass `birth.tzOffsetMinutes` to override the inference. To remove:
 
     node "${CLAUDE_PLUGIN_ROOT}/bin/astrobot.js" me --clear
 
