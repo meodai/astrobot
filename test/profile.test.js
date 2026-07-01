@@ -135,3 +135,12 @@ test('setHavoc returns false for _user key', () => {
   const ok = profile.setHavoc('_user', true);
   assert.strictEqual(ok, false);
 });
+
+test('save() rejects reserved keys (cannot clobber _user via --model _user)', () => {
+  const profile = require('../lib/profile.js');
+  profile.setUser({ birth: { place: 'Lisbon, PT' }, chart: { sun: { sign: 'Taurus' } } });
+  assert.throws(() => profile.save('_user', { chart: {} }), /reserved/);
+  assert.throws(() => profile.save('_default', { chart: {} }), /reserved/);
+  // the stored user chart survived the attempts
+  assert.strictEqual(profile.getUser().chart.sun.sign, 'Taurus');
+});
