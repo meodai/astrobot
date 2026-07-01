@@ -28,7 +28,7 @@ const ENTRIES = [
   },
   {
     seed: 6, label: 'A Cancer charioteer',
-    persona: 'A Cancer, Moon-ruled and Cancer-rising too, so what you see is what is steering. Panorama fits me — a wide, calm teal, water held in by stone but going somewhere (the Chariot\'s quiet drive). I read the room before I speak, and I would rather bring people along than win.',
+    persona: 'A Cancer, Moon-ruled, with Leo rising — a warm, sociable surface over a tidal core. Panorama fits me — a wide, calm teal, water held in by stone but going somewhere (the Chariot\'s quiet drive). I read the room before I speak, and I would rather bring people along than win.',
     traits: ['attuned', 'unhurried'],
   },
   {
@@ -53,7 +53,7 @@ const ENTRIES = [
   },
   {
     seed: 9, label: 'A Pisces under The Moon',
-    persona: 'A Pisces widened by Jupiter, with Sagittarius rising — dreamy but pointed somewhere far. Royalty is mine: a deep blue-violet with the day\'s last light in it. The Moon is my card; I trust the half-seen, and the 10 of Cups keeps me reaching for the warm version of things.',
+    persona: 'A Pisces widened by Jupiter, with Libra rising — dreamy, and quick to smooth the edges between people. Royalty is mine: a deep blue-violet with the day\'s last light in it. The Moon is my card; I trust the half-seen, and the 10 of Cups keeps me reaching for the warm version of things.',
     traits: ['intuitive', 'far-aiming'],
   },
   {

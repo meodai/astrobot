@@ -180,8 +180,8 @@
 
   function $(id) { return document.getElementById(id); }
 
-  function populateCities() {
-    var sel = $('birth-city');
+  function populateCitySelect(selectId, defaultCity) {
+    var sel = $(selectId);
     var custom = document.createElement('option');
     custom.value = '__custom__';
     custom.textContent = 'Custom coordinates…';
@@ -192,7 +192,7 @@
       o.textContent = name;
       sel.appendChild(o);
     });
-    sel.value = 'Reykjavík';
+    sel.value = defaultCity;
   }
 
   function currentCoords() {
@@ -208,9 +208,12 @@
     var date = $('birth-date').value || '1996-11-08';
     var time = $('birth-time').value || '12:00';
     var coords = currentCoords();
+    var cityVal = $('birth-city').value;
+    var place = (cityVal === '__custom__') ? 'Custom coordinates' : cityVal;
     return {
       datetime: date + 'T' + time + ':00',
       tzOffsetMinutes: 0,
+      place: place,
       lat: coords.lat,
       lon: coords.lon
     };
@@ -275,7 +278,7 @@
 
     drawWheel('pg-wheel', chart, pgWheelSize());
     $('pg-caption').textContent = 'Fig. — Nativity, ' + sg(chart.sun.sign) + ' ' + chart.sun.sign +
-      ' with ' + chart.ascendant.sign + ' rising';
+      ' with ' + chart.ascendant.sign + ' rising · born in ' + esc(birth.place);
 
     renderPlacements(chart);
 
@@ -297,6 +300,7 @@
     }
 
     var profile = {
+      birth: birth,
       chart: chart,
       color: color,
       persona: '(placeholder — a real persona is written by the model)',
@@ -357,6 +361,268 @@
     });
   }
 
+  /* ---- Compatibility (synastry) --------------------------------------- */
+
+  var _citiesGeo = null;
+  function loadCitiesGeo() {
+    if (_citiesGeo) return _citiesGeo;
+    _citiesGeo = fetch('cities-geo.json').then(function (r) { return r.json(); }).catch(function () { return []; });
+    return _citiesGeo;
+  }
+
+  function attachTypeahead(input, list) {
+    input.addEventListener('focus', function () { loadCitiesGeo(); });
+
+    input.addEventListener('input', function () {
+      delete input.dataset.lat;
+      delete input.dataset.lon;
+      var query = input.value.trim().toLowerCase();
+      if (query.length < 2) { list.hidden = true; input.setAttribute('aria-expanded', 'false'); return; }
+      var captured = query;
+      loadCitiesGeo().then(function (cities) {
+        if (input.value.trim().toLowerCase() !== captured) return;
+        var starts = [], includes = [];
+        for (var i = 0; i < cities.length; i++) {
+          var entry = cities[i];
+          var nameLow = entry[0].toLowerCase();
+          if (nameLow.startsWith(captured)) {
+            starts.push(entry);
+          } else if (nameLow.indexOf(captured) !== -1) {
+            includes.push(entry);
+          }
+          if (starts.length >= 30 && includes.length >= 30) break;
+        }
+        var combined = starts.concat(includes).slice(0, 30);
+        list.innerHTML = '';
+        if (!combined.length) { list.hidden = true; input.setAttribute('aria-expanded', 'false'); return; }
+        combined.forEach(function (entry) {
+          var li = document.createElement('li');
+          li.setAttribute('role', 'option');
+          li.textContent = entry[0] + ', ' + entry[1];
+          li.dataset.lat = entry[2];
+          li.dataset.lon = entry[3];
+          li.addEventListener('mousedown', function (e) {
+            e.preventDefault();
+            input.value = entry[0] + ', ' + entry[1];
+            input.dataset.lat = entry[2];
+            input.dataset.lon = entry[3];
+            list.hidden = true;
+            input.setAttribute('aria-expanded', 'false');
+          });
+          list.appendChild(li);
+        });
+        list.hidden = false;
+        input.setAttribute('aria-expanded', 'true');
+      });
+    });
+
+    input.addEventListener('keydown', function (e) {
+      var items = list.querySelectorAll('li');
+      if (!items.length) return;
+      var active = list.querySelector('.is-active');
+      var idx = active ? Array.prototype.indexOf.call(items, active) : -1;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (active) active.classList.remove('is-active');
+        idx = (idx + 1) % items.length;
+        items[idx].classList.add('is-active');
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (active) active.classList.remove('is-active');
+        idx = (idx - 1 + items.length) % items.length;
+        items[idx].classList.add('is-active');
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        var target = active || items[0];
+        if (target) {
+          input.value = target.textContent;
+          input.dataset.lat = target.dataset.lat;
+          input.dataset.lon = target.dataset.lon;
+          list.hidden = true;
+          input.setAttribute('aria-expanded', 'false');
+        }
+      } else if (e.key === 'Escape') {
+        list.hidden = true;
+        input.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    input.addEventListener('blur', function () {
+      setTimeout(function () { list.hidden = true; input.setAttribute('aria-expanded', 'false'); }, 120);
+    });
+  }
+
+  function compatCoords() {
+    var el = $('compat-place');
+    var lat = parseFloat(el.dataset.lat), lon = parseFloat(el.dataset.lon);
+    if (isFinite(lat) && isFinite(lon)) return { lat: lat, lon: lon };
+    var manualLat = parseFloat($('compat-lat').value);
+    var manualLon = parseFloat($('compat-lon').value);
+    return (isFinite(manualLat) && isFinite(manualLon)) ? { lat: manualLat, lon: manualLon } : null;
+  }
+
+  var TONE_CLASS = {
+    harmonious: 'good', easy: 'good', intense: 'good',
+    mild: 'neutral',
+    tense: 'hard', awkward: 'hard', polarizing: 'hard'
+  };
+
+  function compatAspectChip(item) {
+    var toneClass = TONE_CLASS[item.tone] || 'neutral';
+    var div = document.createElement('div');
+    div.className = 'compat-aspect compat-aspect--' + toneClass;
+
+    var pair = document.createElement('span');
+    pair.className = 'compat-aspect__pair';
+    pair.textContent = item.pair;
+
+    var row = document.createElement('span');
+    row.className = 'compat-aspect__row';
+
+    var sideAgent = document.createElement('span');
+    sideAgent.className = 'compat-aspect__side';
+    var glAgent = document.createElement('span');
+    glAgent.className = 'compat-aspect__glyph compat-aspect__glyph--agent';
+    glAgent.textContent = asText(A.glyphs.signGlyph(item.a));
+    var whoAgent = document.createElement('span');
+    whoAgent.className = 'compat-aspect__who';
+    whoAgent.textContent = 'agent';
+    sideAgent.appendChild(glAgent);
+    sideAgent.appendChild(whoAgent);
+
+    var linkSpan = document.createElement('span');
+    linkSpan.className = 'compat-aspect__link';
+    var glAsp = document.createElement('span');
+    glAsp.className = 'compat-aspect__glyph compat-aspect__glyph--asp';
+    glAsp.textContent = asText(A.glyphs.aspectGlyph(item.aspect));
+    var whoAsp = document.createElement('span');
+    whoAsp.className = 'compat-aspect__who';
+    whoAsp.textContent = item.aspect;
+    linkSpan.appendChild(glAsp);
+    linkSpan.appendChild(whoAsp);
+
+    var sideYou = document.createElement('span');
+    sideYou.className = 'compat-aspect__side';
+    var glYou = document.createElement('span');
+    glYou.className = 'compat-aspect__glyph compat-aspect__glyph--you';
+    glYou.textContent = asText(A.glyphs.signGlyph(item.b));
+    var whoYou = document.createElement('span');
+    whoYou.className = 'compat-aspect__who';
+    whoYou.textContent = 'you';
+    sideYou.appendChild(glYou);
+    sideYou.appendChild(whoYou);
+
+    row.appendChild(sideAgent);
+    row.appendChild(linkSpan);
+    row.appendChild(sideYou);
+
+    var tone = document.createElement('span');
+    tone.className = 'compat-aspect__tone';
+    tone.textContent = item.tone;
+
+    div.appendChild(pair);
+    div.appendChild(row);
+    div.appendChild(tone);
+    return div;
+  }
+
+  function wireCompatibility() {
+    attachTypeahead($('compat-place'), $('compat-place-list'));
+
+    $('compat-usecoords').addEventListener('click', function () {
+      $('compat-coords').hidden = false;
+      $('compat-lat').focus();
+    });
+
+    $('compat-go').addEventListener('click', function () {
+      var hint = $('compat-hint');
+      var dateVal = $('compat-date').value;
+      if (!dateVal) {
+        hint.textContent = 'Enter your birth date to compare.';
+        hint.hidden = false;
+        $('compat-date').focus();
+        return;
+      }
+      var coords = compatCoords();
+      if (!coords) {
+        hint.textContent = 'Pick your birthplace from the list, or enter coordinates below.';
+        hint.hidden = false;
+        $('compat-place').focus();
+        return;
+      }
+      hint.hidden = true;
+
+      var timeVal = $('compat-time').value;
+      var hasTime = !!timeVal;
+      var userBirth = {
+        datetime: dateVal + 'T' + (timeVal || '12:00') + ':00',
+        tzOffsetMinutes: 0,
+        lat: coords.lat,
+        lon: coords.lon
+      };
+
+      var userChart;
+      try {
+        userChart = A.computeChart(userBirth);
+      } catch (err) {
+        hint.textContent = 'Could not compute chart — check date and coordinates.';
+        hint.hidden = false;
+        return;
+      }
+      if (!hasTime) delete userChart.ascendant;
+
+      var agentChart = A.computeChart(buildBirth());
+      var syn = A.synastry(agentChart, userChart);
+
+      /* score + verdict */
+      $('compat-score').textContent = syn.score;
+      $('compat-verdict').textContent = syn.verdict;
+
+      /* meter */
+      var meter = $('compat-meter');
+      meter.style.width = syn.score + '%';
+      meter.className = 'compat-meter__fill';
+      if (syn.score >= 65) meter.classList.add('compat-meter__fill--high');
+      else if (syn.score >= 45) meter.classList.add('compat-meter__fill--mid');
+      else meter.classList.add('compat-meter__fill--low');
+
+      /* summary */
+      $('compat-summary').textContent =
+        'Your ' + syn.elements.user + ' and their ' + syn.elements.agent +
+        ' are ' + syn.elements.relation + '. ' +
+        'Modality: ' + syn.modality.user + ' meets ' + syn.modality.agent +
+        ' — ' + syn.modality.relation + '.';
+
+      /* reading */
+      $('compat-reading').textContent = syn.reading || '';
+
+      /* aspect chips */
+      var aspectsEl = $('compat-aspects');
+      aspectsEl.innerHTML = '';
+      syn.aspects.forEach(function (item) {
+        aspectsEl.appendChild(compatAspectChip(item));
+      });
+
+      /* romance axis */
+      var romanceEl = $('compat-romance');
+      romanceEl.innerHTML = '';
+      if (syn.romance && syn.romance.length) {
+        var heading = document.createElement('p');
+        heading.className = 'compat-romance__label';
+        heading.textContent = 'Venus & Mars — the romance axis';
+        romanceEl.appendChild(heading);
+        syn.romance.forEach(function (item) {
+          romanceEl.appendChild(compatAspectChip(item));
+        });
+        romanceEl.hidden = false;
+      } else {
+        romanceEl.hidden = true;
+      }
+
+      $('compat-result').hidden = false;
+    });
+  }
+
   /* ---- Gallery --------------------------------------------------------- */
 
   function galleryCard(entry, index) {
@@ -407,6 +673,7 @@
         pg('Sun') + ' ' + c.sun.sign + ' (' + ordinal(c.sun.house) + ') · ' +
         pg('Moon') + ' ' + c.moon.sign + ' (' + ordinal(c.moon.house) + ') · ' +
         c.ascendant.sign + ' rising · ' + c.dominant.element + ' ' + c.dominant.modality +
+        (entry.birth && entry.birth.place ? ' · born in ' + esc(entry.birth.place) : '') +
       '</p>' +
       '<div class="gallery-card__mood">' +
         '<span class="mood-tag">Sample sky: ' + esc(mood.moon.phase) + ' moon in ' +
@@ -497,38 +764,41 @@
   function myoRoll() {
     var date = randInt(1940, 2012) + '-' + pad2(randInt(1, 12)) + '-' + pad2(randInt(1, 28));
     var time = pad2(randInt(0, 23)) + ':' + pad2(randInt(0, 59));
-    var cities = Object.keys(A.CITIES);
-    var cityName = cities[randInt(0, cities.length - 1)];
-    var c = A.CITIES[cityName];
     var colorHex = '#' + ('000000' + randInt(0, 0xffffff).toString(16)).slice(-6);
 
-    var birth = {
-      datetime: date + 'T' + time + ':00',
-      tzOffsetMinutes: 0,
-      place: cityName,
-      lat: c.lat,
-      lon: c.lon
-    };
+    loadCitiesGeo().then(function (cities) {
+      var entry = (cities && cities.length)
+        ? cities[randInt(0, cities.length - 1)]
+        : ['Greenwich', 'GB', 51.48, 0];
 
-    var chart;
-    try {
-      chart = A.computeChart(birth);
-    } catch (err) {
-      $('myo-born').textContent = 'The ephemeris stumbled on that roll — try rolling again.';
-      $('myo-rolled').hidden = false;
-      return;
-    }
+      var birth = {
+        datetime: date + 'T' + time + ':00',
+        tzOffsetMinutes: 0,
+        place: entry[0] + ', ' + entry[1],
+        lat: entry[2],
+        lon: entry[3]
+      };
 
-    myoState = { birth: birth, colorHex: colorHex, chart: chart };
-    myoRenderRolled(chart, birth, colorHex);
+      var chart;
+      try {
+        chart = A.computeChart(birth);
+      } catch (err) {
+        $('myo-born').textContent = 'The ephemeris stumbled on that roll — try rolling again.';
+        $('myo-rolled').hidden = false;
+        return;
+      }
 
-    $('myo-prompt').value = A.renderBirthPrompt({ birth: birth, colorHex: colorHex, chart: chart, closing: 'Return only the filled-in JSON object — no other text.' });
-    $('myo-reply').value = '';
-    myoHideError();
+      myoState = { birth: birth, colorHex: colorHex, chart: chart };
+      myoRenderRolled(chart, birth, colorHex);
 
-    myoShow('myo-step-prompt', true);
-    myoShow('myo-step-reply', true);
-    myoShow('myo-step-result', false);
+      $('myo-prompt').value = A.renderBirthPrompt({ birth: birth, colorHex: colorHex, chart: chart, closing: 'Return only the filled-in JSON object — no other text.' });
+      $('myo-reply').value = '';
+      myoHideError();
+
+      myoShow('myo-step-prompt', true);
+      myoShow('myo-step-reply', true);
+      myoShow('myo-step-result', false);
+    });
   }
 
   function myoHideError() {
@@ -732,10 +1002,11 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     initStarfield();
-    populateCities();
+    populateCitySelect('birth-city', 'Reykjavík');
     wireControls();
     updateScrubLabel();
     render();
+    wireCompatibility();
     wireMakeYourOwn();
     renderGallery();
   });

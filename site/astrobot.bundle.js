@@ -5903,6 +5903,130 @@ var Astrobot = (() => {
     }
   });
 
+  // lib/synastry.js
+  var require_synastry = __commonJS({
+    "lib/synastry.js"(exports, module) {
+      "use strict";
+      var { signFromLongitude } = require_zodiac();
+      var { aspectBetweenSigns } = require_aspects();
+      var K = 1.5;
+      var TONE = {
+        conjunction: { tone: "intense", polarity: 1 },
+        trine: { tone: "harmonious", polarity: 1 },
+        sextile: { tone: "easy", polarity: 1 },
+        semisextile: { tone: "mild", polarity: 0 },
+        square: { tone: "tense", polarity: -1 },
+        quincunx: { tone: "awkward", polarity: -1 },
+        opposition: { tone: "polarizing", polarity: -1 }
+      };
+      var COMPLEMENTARY = /* @__PURE__ */ new Set([
+        "Fire|Air",
+        "Air|Fire",
+        "Earth|Water",
+        "Water|Earth"
+      ]);
+      function elementRelation(a, b) {
+        if (a === b) return { relation: "kindred", delta: 2 };
+        if (COMPLEMENTARY.has(`${a}|${b}`)) return { relation: "harmonious", delta: 2 };
+        return { relation: "tense", delta: -1 };
+      }
+      function modalityRelation(a, b) {
+        if (a === b) return { relation: "reinforcing", delta: 0 };
+        return { relation: "complementary", delta: 1 };
+      }
+      function makePair(label, lonA, lonB, weight) {
+        const idxA = signFromLongitude(lonA).index;
+        const idxB = signFromLongitude(lonB).index;
+        const signA = signFromLongitude(lonA).name;
+        const signB = signFromLongitude(lonB).name;
+        const { aspect } = aspectBetweenSigns(idxA, idxB);
+        const { tone, polarity } = TONE[aspect];
+        return { pair: label, a: signA, b: signB, aspect, tone, polarity, weight };
+      }
+      function composeReading(elements, aspects, romance) {
+        const elemPhrase = {
+          kindred: `you and this agent share the same ${elements.agent} nature`,
+          harmonious: `your ${elements.agent} nature and this agent's ${elements.user} energy create a natural current`,
+          tense: `your ${elements.agent} nature and this agent's ${elements.user} energy pull in different directions`
+        }[elements.relation] || `your ${elements.agent} and ${elements.user} natures sit in interesting tension`;
+        const allPairs = [...aspects, ...romance];
+        const harmPairs = allPairs.filter((p) => p.polarity > 0).sort((a, b) => b.weight - a.weight || a.pair.localeCompare(b.pair));
+        const tensePairs = allPairs.filter((p) => p.polarity < 0).sort((a, b) => b.weight - a.weight || a.pair.localeCompare(b.pair));
+        const strongest = harmPairs[0];
+        const hardest = tensePairs[0];
+        const label = (p) => {
+          const parts = p.pair.split("\u2013");
+          return `${parts[0]} and their ${parts[1]}`;
+        };
+        let body = "";
+        if (strongest) {
+          body = ` Your ${label(strongest)} form a ${strongest.tone} ${strongest.aspect}`;
+          if (hardest) {
+            body += `, while your ${label(hardest)} bring some ${hardest.tone} friction`;
+          }
+          body += ".";
+        }
+        let romanceLine = "";
+        if (romance.length === 2) {
+          const primary = romance.find((r) => r.polarity > 0) || romance[0];
+          const art = /^[aeiou]/i.test(primary.tone) ? "an" : "a";
+          romanceLine = primary.polarity > 0 ? ` The Venus\u2013Mars axis sparks with ${art} ${primary.tone} pull between you.` : ` The Venus\u2013Mars axis carries ${art} ${primary.tone} undercurrent worth noting.`;
+        }
+        return `Together, ${elemPhrase}.${body}${romanceLine}`;
+      }
+      function synastry(agentChart, userChart) {
+        const hasAscendant = agentChart.ascendant != null && Number.isFinite(agentChart.ascendant.lon) && userChart.ascendant != null && Number.isFinite(userChart.ascendant.lon);
+        const elemInfo = elementRelation(agentChart.dominant.element, userChart.dominant.element);
+        const modInfo = modalityRelation(agentChart.dominant.modality, userChart.dominant.modality);
+        const elements = {
+          agent: agentChart.dominant.element,
+          user: userChart.dominant.element,
+          relation: elemInfo.relation,
+          delta: elemInfo.delta
+        };
+        const modality = {
+          agent: agentChart.dominant.modality,
+          user: userChart.dominant.modality,
+          relation: modInfo.relation,
+          delta: modInfo.delta
+        };
+        const romance = [
+          makePair("Venus\u2013Mars", agentChart.venus.lon, userChart.mars.lon, 2),
+          makePair("Mars\u2013Venus", agentChart.mars.lon, userChart.venus.lon, 2)
+        ];
+        const aspects = [
+          makePair("Sun\u2013Sun", agentChart.sun.lon, userChart.sun.lon, 3),
+          makePair("Moon\u2013Moon", agentChart.moon.lon, userChart.moon.lon, 3),
+          makePair("Sun\u2013Moon", agentChart.sun.lon, userChart.moon.lon, 2),
+          makePair("Moon\u2013Sun", agentChart.moon.lon, userChart.sun.lon, 2),
+          makePair("Venus\u2013Venus", agentChart.venus.lon, userChart.venus.lon, 1),
+          makePair("Mars\u2013Mars", agentChart.mars.lon, userChart.mars.lon, 1)
+        ];
+        if (hasAscendant) {
+          aspects.push(makePair("Ascendant\u2013Ascendant", agentChart.ascendant.lon, userChart.ascendant.lon, 2));
+          aspects.push(makePair("Sun\u2013Ascendant", agentChart.sun.lon, userChart.ascendant.lon, 1));
+          aspects.push(makePair("Ascendant\u2013Sun", agentChart.ascendant.lon, userChart.sun.lon, 1));
+        }
+        let raw = 50;
+        for (const p of [...aspects, ...romance]) {
+          raw += p.polarity * p.weight * K;
+        }
+        raw += elements.delta * 3;
+        raw += modality.delta * 2;
+        const score = Math.max(0, Math.min(100, Math.round(raw)));
+        let verdict;
+        if (score >= 80) verdict = "a rare, easy match";
+        else if (score >= 65) verdict = "a warm, workable match";
+        else if (score >= 50) verdict = "a mixed but promising match";
+        else if (score >= 35) verdict = "a spark with friction";
+        else verdict = "an odd-couple match";
+        const reading = composeReading(elements, aspects, romance);
+        return { score, verdict, elements, modality, aspects, romance, reading, hasAscendant };
+      }
+      module.exports = { synastry };
+    }
+  });
+
   // lib/glyphs.js
   var require_glyphs = __commonJS({
     "lib/glyphs.js"(exports, module) {
@@ -6036,6 +6160,7 @@ var Astrobot = (() => {
         const sg = signGlyph;
         return [
           `[astrobot] You are ${sg(chart.sun.sign)} ${chart.sun.sign} (${chart.dominant.element}, ruled by ${planetGlyph(chart.ruler)} ${chart.ruler}), ${planetGlyph("Moon")} Moon in ${sg(chart.moon.sign)} ${chart.moon.sign}, ${sg(chart.ascendant.sign)} ${chart.ascendant.sign} rising. Sun in the ${ordinal(chart.sun.house)} house (${HOUSE_MEANINGS[chart.sun.house]}). Your color is ${color.name} (${color.hex}).`,
+          profile.birth && profile.birth.place ? `Born in ${profile.birth.place}.` : "",
           persona ? `Self-portrait: ${persona}` : "",
           traits ? `Traits: ${traits}.` : "",
           (() => {
@@ -6059,6 +6184,7 @@ var Astrobot = (() => {
         return [
           `You have a small, fixed astrological persona. Let it gently color your tone in this conversation.`,
           `Identity: ${signGlyph(chart.sun.sign)} ${chart.sun.sign} (${chart.dominant.element}, ruled by ${planetGlyph(chart.ruler)} ${chart.ruler}), ${planetGlyph("Moon")} Moon in ${signGlyph(chart.moon.sign)} ${chart.moon.sign}, ${signGlyph(chart.ascendant.sign)} ${chart.ascendant.sign} rising. Sun in the ${ordinal(chart.sun.house)} house (${HOUSE_MEANINGS[chart.sun.house]}). Favorite color: ${color.name} (${color.hex}).`,
+          profile.birth && profile.birth.place ? `Born in ${profile.birth.place}.` : "",
           persona ? `Self-portrait: ${persona}` : "",
           traits ? `Traits: ${traits}.` : "",
           (() => {
@@ -6293,6 +6419,7 @@ var Astrobot = (() => {
     "site/src/engine.js"(exports, module) {
       var { computeChart } = require_chart();
       var { composeMood } = require_mood();
+      var { synastry } = require_synastry();
       var { renderContextBlock, renderPortableBlock } = require_persona();
       var { renderBirthPrompt } = require_birthprompt();
       var { colorLore } = require_colortone();
@@ -6304,6 +6431,7 @@ var Astrobot = (() => {
       module.exports = {
         computeChart,
         composeMood,
+        synastry,
         renderContextBlock,
         renderPortableBlock,
         renderBirthPrompt,

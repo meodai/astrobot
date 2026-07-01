@@ -63,6 +63,13 @@
             <p class="rite-step__lead">The reading gently tints how it writes &mdash; warmer or cooler, brighter or quieter, more or less playful. Never its accuracy or effort; only its voice.</p>
           </div>
         </li>
+        <li class="rite-step plate-frame rite-step--optional">
+          <div class="rite-step__seal" aria-hidden="true"><span class="rite-step__num">IV</span><span class="rite-step__sigil">☌︎</span></div>
+          <div class="rite-step__body">
+            <h3 class="rite-step__title">A shared sky <span class="rite-step__tag">optional</span></h3>
+            <p class="rite-step__lead">If you like, add yourself to the picture: enter your own birth and see how you and your agent align — where you two flow together and where you spark. It draws another layer of depth into the relationship. <a class="rite-step__link" href="#compatibility">See how you align →</a></p>
+          </div>
+        </li>
       </ol>
       <p class="section-blurb how-havoc">And for the courageous &mdash; <strong>havoc mode</strong> lifts the guardrail entirely and lets the persona run wild.</p>
     </section>
@@ -189,6 +196,48 @@
 
     <hr class="rule-glyph" aria-hidden="true" />
 
+    <section class="section" id="compatibility" aria-labelledby="compat-title">
+      <div class="section-head">
+        <span class="section-mark" aria-hidden="true">☌︎</span>
+        <h2 class="section-title" id="compat-title">How You Two Align</h2>
+        <p class="section-blurb">Enter your own birth and see how you and the agent above are matched — a synastry reading. No birth time? Leave it blank and we&rsquo;ll skip the rising-sign match.</p>
+      </div>
+      <div class="compat-form plate-frame">
+        <div class="field-row">
+          <label class="field field--typeahead"><span class="field__label">Your birthplace</span>
+            <input type="text" id="compat-place" autocomplete="off" spellcheck="false" placeholder="Start typing a city…"
+                   role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="compat-place-list">
+            <ul class="typeahead-list" id="compat-place-list" role="listbox" hidden></ul>
+          </label>
+        </div>
+        <p class="compat-nomatch"><button type="button" class="linklike" id="compat-usecoords">Can't find your city? Enter coordinates</button></p>
+        <div class="field-row compat-coords" id="compat-coords" hidden>
+          <label class="field"><span class="field__label">Latitude</span><input type="number" id="compat-lat" step="0.0001" placeholder="e.g. 41.3874"></label>
+          <label class="field"><span class="field__label">Longitude</span><input type="number" id="compat-lon" step="0.0001" placeholder="e.g. 2.1686"></label>
+          <p class="hint">Don't know them? <a href="https://www.latlong.net/" target="_blank" rel="noopener noreferrer">Find your coordinates ↗</a></p>
+        </div>
+        <div class="field-row">
+          <label class="field"><span class="field__label">Your birth date</span><input type="date" id="compat-date"></label>
+          <label class="field"><span class="field__label">Time (if you know it)</span><input type="time" id="compat-time"></label>
+        </div>
+        <button type="button" class="roll-button" id="compat-go">Cast the comparison</button>
+        <p class="hint" id="compat-hint" hidden>Enter your birth date to compare.</p>
+      </div>
+      <div class="compat-result" id="compat-result" hidden>
+        <div class="compat-score">
+          <span class="compat-score__num" id="compat-score"></span>
+          <span class="compat-score__verdict" id="compat-verdict"></span>
+        </div>
+        <div class="compat-meter" aria-hidden="true"><div class="compat-meter__fill" id="compat-meter"></div></div>
+        <p class="compat-summary" id="compat-summary"></p>
+        <p class="reading-line" id="compat-reading"></p>
+        <div class="compat-grid" id="compat-aspects"></div>
+        <div class="compat-romance" id="compat-romance"></div>
+      </div>
+    </section>
+
+    <hr class="rule-glyph" aria-hidden="true" />
+
     <section class="section" id="make-your-own" aria-labelledby="myo-title">
       <div class="section-head">
         <span class="section-mark" aria-hidden="true">✶︎</span>
@@ -289,6 +338,7 @@
   <footer class="colophon">
     <span class="colophon__glyphs" aria-hidden="true">☉ ☽ ☿ ♀ ♂ ♃ ♄</span>
     <p>astrobot tints tone only — never accuracy, willingness, or output format. Charts computed in your browser.</p>
+    <p class="colophon__credit">City data: <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC-BY 4.0).</p>
   </footer>
 
   <script src="astrobot.bundle.js"></script>

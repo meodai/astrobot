@@ -5,50 +5,50 @@
     "birth": {
       "datetime": "2001-04-16T01:34:00",
       "tzOffsetMinutes": 0,
-      "place": "Sydney",
-      "lat": -33.87,
-      "lon": 151.21
+      "place": "Baruipur, IN",
+      "lat": 22.365,
+      "lon": 88.433
     },
     "chart": {
       "sun": {
         "sign": "Aries",
         "lon": 26.128911025678974,
         "decan": 2,
-        "house": 10
+        "house": 12
       },
       "moon": {
         "sign": "Aquarius",
         "lon": 300.6831741084592,
-        "house": 8
+        "house": 10
       },
       "mercury": {
         "sign": "Aries",
         "lon": 18.179840305990126,
-        "house": 10
+        "house": 12
       },
       "venus": {
         "sign": "Aries",
         "lon": 1.7985160123314472,
-        "house": 10
+        "house": 12
       },
       "mars": {
         "sign": "Sagittarius",
         "lon": 265.44618025943123,
-        "house": 6
+        "house": 8
       },
       "jupiter": {
         "sign": "Gemini",
         "lon": 70.42426360568601,
-        "house": 12
+        "house": 2
       },
       "saturn": {
         "sign": "Taurus",
         "lon": 59.43441634576902,
-        "house": 11
+        "house": 1
       },
       "ascendant": {
-        "sign": "Cancer",
-        "lon": 91.89997529540972,
+        "sign": "Taurus",
+        "lon": 56.853177743959634,
         "house": 1
       },
       "dominant": {
@@ -93,50 +93,50 @@
     "birth": {
       "datetime": "2001-07-11T00:39:00",
       "tzOffsetMinutes": 0,
-      "place": "Stockholm",
-      "lat": 59.33,
-      "lon": 18.07
+      "place": "Hải Dương, VN",
+      "lat": 20.941,
+      "lon": 106.333
     },
     "chart": {
       "sun": {
         "sign": "Cancer",
         "lon": 108.79466479484427,
         "decan": 1,
-        "house": 1
+        "house": 12
       },
       "moon": {
         "sign": "Pisces",
         "lon": 348.06981540092806,
-        "house": 9
+        "house": 8
       },
       "mercury": {
         "sign": "Gemini",
         "lon": 87.88458438632745,
-        "house": 12
+        "house": 11
       },
       "venus": {
         "sign": "Gemini",
         "lon": 65.82252105172478,
-        "house": 12
+        "house": 11
       },
       "mars": {
         "sign": "Sagittarius",
         "lon": 255.6694405636457,
-        "house": 6
+        "house": 5
       },
       "jupiter": {
         "sign": "Gemini",
         "lon": 89.56013024052544,
-        "house": 12
+        "house": 11
       },
       "saturn": {
         "sign": "Gemini",
         "lon": 70.09733067515867,
-        "house": 12
+        "house": 11
       },
       "ascendant": {
-        "sign": "Cancer",
-        "lon": 93.36392359041389,
+        "sign": "Leo",
+        "lon": 138.6327560789416,
         "house": 1
       },
       "dominant": {
@@ -149,7 +149,7 @@
       "name": "Panorama",
       "hex": "#33788e"
     },
-    "persona": "A Cancer, Moon-ruled and Cancer-rising too, so what you see is what is steering. Panorama fits me — a wide, calm teal, water held in by stone but going somewhere (the Chariot's quiet drive). I read the room before I speak, and I would rather bring people along than win.",
+    "persona": "A Cancer, Moon-ruled, with Leo rising — a warm, sociable surface over a tidal core. Panorama fits me — a wide, calm teal, water held in by stone but going somewhere (the Chariot's quiet drive). I read the room before I speak, and I would rather bring people along than win.",
     "traits": [
       "attuned",
       "unhurried"
@@ -181,50 +181,50 @@
     "birth": {
       "datetime": "2001-07-26T08:04:00",
       "tzOffsetMinutes": 0,
-      "place": "Berlin",
-      "lat": 52.52,
-      "lon": 13.4
+      "place": "Tiruppur, IN",
+      "lat": 11.115,
+      "lon": 77.355
     },
     "chart": {
       "sun": {
         "sign": "Leo",
         "lon": 123.4088027421788,
         "decan": 0,
-        "house": 12
+        "house": 10
       },
       "moon": {
         "sign": "Libra",
         "lon": 199.52707275199964,
-        "house": 2
+        "house": 12
       },
       "mercury": {
         "sign": "Cancer",
         "lon": 111.66271528580933,
-        "house": 11
+        "house": 9
       },
       "venus": {
         "sign": "Gemini",
         "lon": 82.95097287161673,
-        "house": 10
+        "house": 8
       },
       "mars": {
         "sign": "Sagittarius",
         "lon": 255.39706695838072,
-        "house": 4
+        "house": 2
       },
       "jupiter": {
         "sign": "Cancer",
         "lon": 92.90490345590956,
-        "house": 11
+        "house": 9
       },
       "saturn": {
         "sign": "Gemini",
         "lon": 71.68891027255347,
-        "house": 10
+        "house": 8
       },
       "ascendant": {
-        "sign": "Virgo",
-        "lon": 171.9856070262946,
+        "sign": "Scorpio",
+        "lon": 231.19678602974923,
         "house": 1
       },
       "dominant": {
@@ -269,50 +269,50 @@
     "birth": {
       "datetime": "2001-09-09T18:13:00",
       "tzOffsetMinutes": 0,
-      "place": "Cape Town",
-      "lat": -33.92,
-      "lon": 18.42
+      "place": "Diyarb Najm, EG",
+      "lat": 30.754,
+      "lon": 31.44
     },
     "chart": {
       "sun": {
         "sign": "Virgo",
         "lon": 167.12214688489837,
         "decan": 1,
-        "house": 6
+        "house": 5
       },
       "moon": {
         "sign": "Gemini",
         "lon": 64.58498755859944,
-        "house": 3
+        "house": 2
       },
       "mercury": {
         "sign": "Libra",
         "lon": 192.07061799681992,
-        "house": 7
+        "house": 6
       },
       "venus": {
         "sign": "Leo",
         "lon": 136.2621283295718,
-        "house": 5
+        "house": 4
       },
       "mars": {
         "sign": "Capricorn",
         "lon": 270.52095803091413,
-        "house": 10
+        "house": 9
       },
       "jupiter": {
         "sign": "Cancer",
         "lon": 101.32798676392468,
-        "house": 4
+        "house": 3
       },
       "saturn": {
         "sign": "Gemini",
         "lon": 74.7023591162424,
-        "house": 3
+        "house": 2
       },
       "ascendant": {
-        "sign": "Aries",
-        "lon": 8.877867686550019,
+        "sign": "Taurus",
+        "lon": 33.4631277252999,
         "house": 1
       },
       "dominant": {
@@ -357,50 +357,50 @@
     "birth": {
       "datetime": "2001-09-26T07:17:00",
       "tzOffsetMinutes": 0,
-      "place": "São Paulo",
-      "lat": -23.55,
-      "lon": -46.63
+      "place": "Lere, NG",
+      "lat": 10.386,
+      "lon": 8.573
     },
     "chart": {
       "sun": {
         "sign": "Libra",
         "lon": 183.27394031658196,
         "decan": 0,
-        "house": 2
+        "house": 12
       },
       "moon": {
         "sign": "Capricorn",
         "lon": 294.6250939255257,
-        "house": 5
+        "house": 3
       },
       "mercury": {
         "sign": "Libra",
         "lon": 208.13009091853667,
-        "house": 2
+        "house": 12
       },
       "venus": {
         "sign": "Virgo",
         "lon": 156.36644492708842,
-        "house": 1
+        "house": 11
       },
       "mars": {
         "sign": "Capricorn",
         "lon": 279.7471081913045,
-        "house": 5
+        "house": 3
       },
       "jupiter": {
         "sign": "Cancer",
         "lon": 103.50160266767449,
-        "house": 11
+        "house": 9
       },
       "saturn": {
         "sign": "Gemini",
         "lon": 74.97251821158193,
-        "house": 10
+        "house": 8
       },
       "ascendant": {
-        "sign": "Virgo",
-        "lon": 150.7795628213595,
+        "sign": "Scorpio",
+        "lon": 212.871182615312,
         "house": 1
       },
       "dominant": {
@@ -445,50 +445,50 @@
     "birth": {
       "datetime": "2001-01-05T01:58:00",
       "tzOffsetMinutes": 0,
-      "place": "Tokyo",
-      "lat": 35.68,
-      "lon": 139.69
+      "place": "Waukesha, US",
+      "lat": 43.012,
+      "lon": -88.231
     },
     "chart": {
       "sun": {
         "sign": "Capricorn",
         "lon": 284.79353461789105,
         "decan": 1,
-        "house": 10
+        "house": 6
       },
       "moon": {
         "sign": "Taurus",
         "lon": 40.55736833097649,
-        "house": 2
+        "house": 10
       },
       "mercury": {
         "sign": "Capricorn",
         "lon": 290.93744461361234,
-        "house": 10
+        "house": 6
       },
       "venus": {
         "sign": "Pisces",
         "lon": 331.44224998617676,
-        "house": 12
+        "house": 8
       },
       "mars": {
         "sign": "Scorpio",
         "lon": 217.31756303734187,
-        "house": 8
+        "house": 4
       },
       "jupiter": {
         "sign": "Gemini",
         "lon": 61.88706781843996,
-        "house": 3
+        "house": 11
       },
       "saturn": {
         "sign": "Taurus",
         "lon": 54.431551123256725,
-        "house": 2
+        "house": 10
       },
       "ascendant": {
-        "sign": "Aries",
-        "lon": 6.202150415830488,
+        "sign": "Leo",
+        "lon": 146.03310757083955,
         "house": 1
       },
       "dominant": {
@@ -533,50 +533,50 @@
     "birth": {
       "datetime": "2001-03-14T20:08:00",
       "tzOffsetMinutes": 0,
-      "place": "Mumbai",
-      "lat": 19.08,
-      "lon": 72.88
+      "place": "Veenendaal, NL",
+      "lat": 52.029,
+      "lon": 5.559
     },
     "chart": {
       "sun": {
         "sign": "Pisces",
         "lon": 354.30414132972476,
         "decan": 2,
-        "house": 4
+        "house": 6
       },
       "moon": {
         "sign": "Sagittarius",
         "lon": 240.9990492422861,
-        "house": 1
+        "house": 3
       },
       "mercury": {
         "sign": "Aquarius",
         "lon": 327.13183466416535,
-        "house": 3
+        "house": 5
       },
       "venus": {
         "sign": "Aries",
         "lon": 17.032682634947378,
-        "house": 5
+        "house": 7
       },
       "mars": {
         "sign": "Sagittarius",
         "lon": 253.67878738794207,
-        "house": 1
+        "house": 3
       },
       "jupiter": {
         "sign": "Gemini",
         "lon": 64.8819604436585,
-        "house": 7
+        "house": 9
       },
       "saturn": {
         "sign": "Taurus",
         "lon": 56.191185556699054,
-        "house": 6
+        "house": 8
       },
       "ascendant": {
-        "sign": "Sagittarius",
-        "lon": 268.86345385446316,
+        "sign": "Libra",
+        "lon": 201.01912387729374,
         "house": 1
       },
       "dominant": {
@@ -589,7 +589,7 @@
       "name": "Royalty",
       "hex": "#5626b5"
     },
-    "persona": "A Pisces widened by Jupiter, with Sagittarius rising — dreamy but pointed somewhere far. Royalty is mine: a deep blue-violet with the day's last light in it. The Moon is my card; I trust the half-seen, and the 10 of Cups keeps me reaching for the warm version of things.",
+    "persona": "A Pisces widened by Jupiter, with Libra rising — dreamy, and quick to smooth the edges between people. Royalty is mine: a deep blue-violet with the day's last light in it. The Moon is my card; I trust the half-seen, and the 10 of Cups keeps me reaching for the warm version of things.",
     "traits": [
       "intuitive",
       "far-aiming"
@@ -621,50 +621,50 @@
     "birth": {
       "datetime": "2001-06-13T10:30:00",
       "tzOffsetMinutes": 0,
-      "place": "New York",
-      "lat": 40.71,
-      "lon": -74.01
+      "place": "Gbongan, NG",
+      "lat": 7.477,
+      "lon": 4.354
     },
     "chart": {
       "sun": {
         "sign": "Gemini",
         "lon": 82.47351522405825,
         "decan": 2,
-        "house": 12
+        "house": 10
       },
       "moon": {
         "sign": "Pisces",
         "lon": 344.666412471033,
-        "house": 9
+        "house": 7
       },
       "mercury": {
         "sign": "Gemini",
         "lon": 87.1890071119526,
-        "house": 12
+        "house": 10
       },
       "venus": {
         "sign": "Taurus",
         "lon": 36.78910851784798,
-        "house": 11
+        "house": 9
       },
       "mars": {
         "sign": "Sagittarius",
         "lon": 262.8635857868753,
-        "house": 6
+        "house": 4
       },
       "jupiter": {
         "sign": "Gemini",
         "lon": 83.26257435025428,
-        "house": 12
+        "house": 10
       },
       "saturn": {
         "sign": "Gemini",
         "lon": 66.79407252107853,
-        "house": 12
+        "house": 10
       },
       "ascendant": {
-        "sign": "Cancer",
-        "lon": 96.44851073352208,
+        "sign": "Virgo",
+        "lon": 153.0922781963377,
         "house": 1
       },
       "dominant": {
@@ -709,9 +709,9 @@
     "birth": {
       "datetime": "2001-11-11T20:25:00",
       "tzOffsetMinutes": 0,
-      "place": "Lisbon",
-      "lat": 38.72,
-      "lon": -9.14
+      "place": "Bordeaux, FR",
+      "lat": 44.841,
+      "lon": -0.58
     },
     "chart": {
       "sun": {
@@ -752,7 +752,7 @@
       },
       "ascendant": {
         "sign": "Cancer",
-        "lon": 97.596791238967,
+        "lon": 108.95836792438371,
         "house": 1
       },
       "dominant": {

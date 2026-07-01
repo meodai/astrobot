@@ -11,6 +11,7 @@
     "lib/",
     "vendor/astronomy.js",
     "vendor/cities.json",
+    "vendor/cities-geo.json",
     "vendor/colornames.bestof.json",
     "README.md"
   ],
@@ -36,7 +37,8 @@
     "vendor": "cp node_modules/astronomy-engine/astronomy.js vendor/astronomy.js",
     "build:engine": "esbuild site/src/engine.js --bundle --format=iife --global-name=Astrobot --outfile=site/astrobot.bundle.js",
     "build:astrochart": "esbuild site/src/astrochart.js --bundle --format=iife --global-name=astrology --outfile=site/astrochart.bundle.js",
-    "build:site": "npm run build:engine && npm run build:astrochart"
+    "build:site": "npm run build:engine && npm run build:astrochart",
+    "sync:cities": "cp vendor/cities-geo.json site/cities-geo.json"
   },
   "devDependencies": {
     "@astrodraw/astrochart": "^3.0.2",
