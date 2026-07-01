@@ -9,6 +9,8 @@
   "files": [
     "bin/",
     "lib/",
+    "bin/astrobot-mcp.mjs",
+    "lib/mcp-tools.js",
     "vendor/astronomy.js",
     "vendor/cities.json",
     "vendor/cities-geo.json",
@@ -44,5 +46,9 @@
     "@astrodraw/astrochart": "^3.0.2",
     "astronomy-engine": "^2.1.19",
     "esbuild": "^0.21.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.3"
   }
 }

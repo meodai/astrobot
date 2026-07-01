@@ -177,9 +177,17 @@ async function run(argv, opts = {}) {
 }
 
 if (require.main === module) {
-  run(process.argv.slice(2))
-    .then((r) => { process.stdout.write(r.out); process.exit(r.code); })
-    .catch((e) => { process.stderr.write((e && e.message ? e.message : String(e)) + '\n'); process.exit(1); });
+  const argv = process.argv.slice(2);
+  if (argv[0] === 'mcp') {
+    // Handled outside run() so the normal process.exit path can't kill the long-lived server.
+    import('./astrobot-mcp.mjs')
+      .then((m) => m.startMcpServer())
+      .catch((e) => { process.stderr.write((e && e.message ? e.message : String(e)) + '\n'); process.exit(1); });
+  } else {
+    run(argv)
+      .then((r) => { process.stdout.write(r.out); process.exit(r.code); })
+      .catch((e) => { process.stderr.write((e && e.message ? e.message : String(e)) + '\n'); process.exit(1); });
+  }
 }
 
 module.exports = { run, parseArgs };
