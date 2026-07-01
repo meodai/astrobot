@@ -269,6 +269,7 @@
     $('pg-swatch-name').textContent = color.name + '  ' + color.hex;
     renderLore('pg-lore', color.hex);
     renderDials($('pg-dials'), mood.dials);
+    { var _rd = $('pg-reading'); if (_rd) _rd.textContent = mood.reading || ''; }
 
     var pgTarot = A.tarotFor && A.tarotFor(chart);
     var pgTarotEl = $('pg-tarot');
@@ -413,6 +414,7 @@
         esc(mood.moon.sign) + '</span>' +
         aspectTag +
         '<dl class="dials dials--compact" id="' + dialsId + '"></dl>' +
+        (mood.reading ? '<p class="reading-line">' + esc(mood.reading) + '</p>' : '') +
       '</div>';
 
     return { card: card, wheelId: wheelId, dialsId: dialsId, chart: c, dials: entry.sample.mood.dials };

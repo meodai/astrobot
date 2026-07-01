@@ -911,3 +911,13 @@ textarea.rite-textarea:focus {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
 }
+
+/* Daily horoscope reading line */
+.reading-line {
+  margin: .7rem 0 0;
+  font-family: var(--body);
+  font-style: italic;
+  font-size: .95rem;
+  color: var(--gold);
+  line-height: 1.45;
+}

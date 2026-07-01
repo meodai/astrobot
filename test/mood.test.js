@@ -86,3 +86,11 @@ test('solar return (birthday) is detected and lifts the dials', () => {
   assert.strictEqual(off.solarReturn, false);
   assert.ok(sum(bday.dials) > sum(off.dials), 'birthday dials should sum higher than a normal day');
 });
+
+test('dailyReading: normal day sentence and solar-return sentence', () => {
+  const { dailyReading } = require('../lib/mood.js');
+  const normal = composeMood(CHART, D);
+  assert.match(normal.reading, /^Today .*Lean \w+ and \w+\.$/);
+  const bday = dailyReading({ solarReturn: true, sunAspect: 'trine', moon: { sign: 'Leo', phase: 'full' }, dials: { warmth: 4, energy: 4, playfulness: 4, verbosity: 4, metaphor: 4 } });
+  assert.match(bday, /solar return|birthday/i);
+});
