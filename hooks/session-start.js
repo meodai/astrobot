@@ -2,6 +2,7 @@
 const profile = require('../lib/profile.js');
 const { composeMood } = require('../lib/mood.js');
 const { renderContextBlock } = require('../lib/persona.js');
+const { synastry } = require('../lib/synastry.js');
 
 function buildOutput(input) {
   try {
@@ -9,7 +10,9 @@ function buildOutput(input) {
     const resolved = profile.resolve(model);
     if (!resolved || !resolved.data || !resolved.data.chart) return '';
     const mood = composeMood(resolved.data.chart, new Date(), resolved.data.color && resolved.data.color.hex);
-    const additionalContext = renderContextBlock(resolved.data, mood);
+    const user = profile.getUser();
+    const syn = user && user.chart ? synastry(resolved.data.chart, user.chart) : null;
+    const additionalContext = renderContextBlock(resolved.data, mood, syn);
     return JSON.stringify({
       hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext },
     });

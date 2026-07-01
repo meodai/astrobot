@@ -76,3 +76,71 @@ test('setHavoc does NOT change _default (remains a plain model-id string)', () =
   assert.strictEqual(store._default, 'claude-x');
   assert.strictEqual(typeof store._default, 'string');
 });
+
+// --- _user / setUser / getUser / clearUser / list ---
+
+test('setUser / getUser roundtrip', () => {
+  const profile = require('../lib/profile.js');
+  const userData = { birth: { datetime: '1990-05-05T09:30:00' }, chart: { sun: { sign: 'Taurus' } } };
+  profile.setUser(userData);
+  assert.deepStrictEqual(profile.getUser(), userData);
+});
+
+test('clearUser removes _user, getUser returns null', () => {
+  const profile = require('../lib/profile.js');
+  profile.setUser({ birth: {}, chart: {} });
+  profile.clearUser();
+  assert.strictEqual(profile.getUser(), null);
+});
+
+test('getUser returns null when no user has been stored', () => {
+  const profile = require('../lib/profile.js');
+  assert.strictEqual(profile.getUser(), null);
+});
+
+test('list() excludes keys starting with underscore', () => {
+  const profile = require('../lib/profile.js');
+  profile.save('real-model', { color: { name: 'Teal' } });
+  profile.setUser({ birth: {}, chart: {} });
+  const keys = profile.list();
+  assert.ok(!keys.includes('_user'), '_user must not appear in list()');
+  assert.ok(!keys.includes('_default'), '_default must not appear in list()');
+  assert.ok(keys.includes('real-model'), 'real-model should be in list()');
+});
+
+test('_user is not resolvable via resolve("_user")', () => {
+  const profile = require('../lib/profile.js');
+  profile.setUser({ birth: {}, chart: {} });
+  assert.strictEqual(profile.resolve('_user'), null);
+});
+
+test('_user is not accessible via get("_user")', () => {
+  const profile = require('../lib/profile.js');
+  profile.setUser({ birth: {}, chart: {} });
+  assert.strictEqual(profile.get('_user'), null);
+});
+
+test('_default resolution still works after setUser', () => {
+  const profile = require('../lib/profile.js');
+  profile.save('claude-x', { color: { name: 'Teal' } });
+  profile.setUser({ birth: {}, chart: {} });
+  const resolved = profile.resolve(undefined);
+  assert.ok(resolved, 'resolve(undefined) should still find _default');
+  assert.strictEqual(resolved.model, 'claude-x');
+});
+
+test('setHavoc returns false for _user key', () => {
+  const profile = require('../lib/profile.js');
+  profile.setUser({ birth: {}, chart: {} });
+  const ok = profile.setHavoc('_user', true);
+  assert.strictEqual(ok, false);
+});
+
+test('save() rejects reserved keys (cannot clobber _user via --model _user)', () => {
+  const profile = require('../lib/profile.js');
+  profile.setUser({ birth: { place: 'Lisbon, PT' }, chart: { sun: { sign: 'Taurus' } } });
+  assert.throws(() => profile.save('_user', { chart: {} }), /reserved/);
+  assert.throws(() => profile.save('_default', { chart: {} }), /reserved/);
+  // the stored user chart survived the attempts
+  assert.strictEqual(profile.getUser().chart.sun.sign, 'Taurus');
+});

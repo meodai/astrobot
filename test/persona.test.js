@@ -149,3 +149,52 @@ test('renderPortableBlock omits Born-in line when birth is absent', () => {
   const block = renderPortableBlock(profileNoBirth, MOOD);
   assert.ok(!block.includes('Born in'), 'should not contain "Born in" when birth is absent');
 });
+
+// --- Companion line (syn) ---
+
+const SYN = {
+  score: 75,
+  verdict: 'a warm, workable match',
+  elements: { agent: 'Water', user: 'Fire', relation: 'tense' },
+  modality: { agent: 'Fixed', user: 'Cardinal', relation: 'complementary', delta: 1 },
+};
+
+test('renderContextBlock includes Companion line when syn is provided', () => {
+  const block = renderContextBlock(PROFILE, MOOD, SYN);
+  assert.match(block, /Companion —/);
+  assert.match(block, /a warm, workable match/);
+  assert.match(block, /75\/100/);
+  assert.match(block, /Water/);
+  assert.match(block, /Fire/);
+});
+
+test('renderPortableBlock includes Companion line when syn is provided', () => {
+  const block = renderPortableBlock(PROFILE, MOOD, SYN);
+  assert.match(block, /Companion —/);
+  assert.match(block, /a warm, workable match/);
+  assert.match(block, /75\/100/);
+});
+
+test('renderContextBlock omits Companion when syn is not provided', () => {
+  const block = renderContextBlock(PROFILE, MOOD);
+  assert.ok(!block.includes('Companion —'), 'should not contain Companion when no syn');
+});
+
+test('renderPortableBlock omits Companion when syn is not provided', () => {
+  const block = renderPortableBlock(PROFILE, MOOD);
+  assert.ok(!block.includes('Companion —'), 'should not contain Companion when no syn');
+});
+
+test('renderContextBlock includes Companion in havoc mode too', () => {
+  const havocProfile = Object.assign({}, PROFILE, { havoc: true });
+  const block = renderContextBlock(havocProfile, MOOD, SYN);
+  assert.match(block, /Companion —/);
+  assert.match(block, /HAVOC/);
+});
+
+test('renderPortableBlock includes Companion in havoc mode too', () => {
+  const havocProfile = Object.assign({}, PROFILE, { havoc: true });
+  const block = renderPortableBlock(havocProfile, MOOD, SYN);
+  assert.match(block, /Companion —/);
+  assert.match(block, /HAVOC/);
+});
