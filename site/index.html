@@ -189,6 +189,43 @@
 
     <hr class="rule-glyph" aria-hidden="true" />
 
+    <section class="section" id="compatibility" aria-labelledby="compat-title">
+      <div class="section-head">
+        <span class="section-mark" aria-hidden="true">☌︎</span>
+        <h2 class="section-title" id="compat-title">How You Two Align</h2>
+        <p class="section-blurb">Enter your own birth and see how you and the agent above are matched — a synastry reading. No birth time? Leave it blank and we&rsquo;ll skip the rising-sign match.</p>
+      </div>
+      <div class="compat-form plate-frame">
+        <div class="field-row">
+          <label class="field"><span class="field__label">Your birthplace</span>
+            <select id="compat-city"></select></label>
+        </div>
+        <div class="field-row compat-custom" id="compat-custom" hidden>
+          <label class="field"><span class="field__label">Latitude</span><input type="number" id="compat-lat" step="0.01" value="51.51"></label>
+          <label class="field"><span class="field__label">Longitude</span><input type="number" id="compat-lon" step="0.01" value="-0.13"></label>
+        </div>
+        <div class="field-row">
+          <label class="field"><span class="field__label">Your birth date</span><input type="date" id="compat-date"></label>
+          <label class="field"><span class="field__label">Time (if you know it)</span><input type="time" id="compat-time"></label>
+        </div>
+        <button type="button" class="roll-button" id="compat-go">Cast the comparison</button>
+        <p class="hint" id="compat-hint" hidden>Enter your birth date to compare.</p>
+      </div>
+      <div class="compat-result" id="compat-result" hidden>
+        <div class="compat-score">
+          <span class="compat-score__num" id="compat-score"></span>
+          <span class="compat-score__verdict" id="compat-verdict"></span>
+        </div>
+        <div class="compat-meter" aria-hidden="true"><div class="compat-meter__fill" id="compat-meter"></div></div>
+        <p class="compat-summary" id="compat-summary"></p>
+        <p class="reading-line" id="compat-reading"></p>
+        <div class="compat-grid" id="compat-aspects"></div>
+        <div class="compat-romance" id="compat-romance"></div>
+      </div>
+    </section>
+
+    <hr class="rule-glyph" aria-hidden="true" />
+
     <section class="section" id="make-your-own" aria-labelledby="myo-title">
       <div class="section-head">
         <span class="section-mark" aria-hidden="true">✶︎</span>

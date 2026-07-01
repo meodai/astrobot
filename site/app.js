@@ -180,8 +180,8 @@
 
   function $(id) { return document.getElementById(id); }
 
-  function populateCities() {
-    var sel = $('birth-city');
+  function populateCitySelect(selectId, defaultCity) {
+    var sel = $(selectId);
     var custom = document.createElement('option');
     custom.value = '__custom__';
     custom.textContent = 'Custom coordinates…';
@@ -192,7 +192,7 @@
       o.textContent = name;
       sel.appendChild(o);
     });
-    sel.value = 'Reykjavík';
+    sel.value = defaultCity;
   }
 
   function currentCoords() {
@@ -354,6 +354,133 @@
         if (lastChart) drawWheel('pg-wheel', lastChart, pgWheelSize());
         if (myoChart) drawWheel('myo-wheel', myoChart, myoWheelSize());
       }, 180);
+    });
+  }
+
+  /* ---- Compatibility (synastry) --------------------------------------- */
+
+  function compatCoords() {
+    var city = $('compat-city').value;
+    if (city === '__custom__') {
+      return { lat: parseFloat($('compat-lat').value), lon: parseFloat($('compat-lon').value) };
+    }
+    var c = A.CITIES[city];
+    return { lat: c.lat, lon: c.lon };
+  }
+
+  var TONE_CLASS = {
+    harmonious: 'good', easy: 'good', intense: 'good',
+    mild: 'neutral',
+    tense: 'hard', awkward: 'hard', polarizing: 'hard'
+  };
+
+  function compatAspectChip(item) {
+    var toneClass = TONE_CLASS[item.tone] || 'neutral';
+    var div = document.createElement('div');
+    div.className = 'compat-aspect compat-aspect--' + toneClass;
+    var pair = document.createElement('span');
+    pair.className = 'compat-aspect__pair';
+    pair.textContent = item.pair;
+    var gl = document.createElement('span');
+    gl.className = 'compat-aspect__glyphs';
+    gl.textContent = asText(A.glyphs.signGlyph(item.a)) + ' ' +
+      asText(A.glyphs.aspectGlyph(item.aspect)) + ' ' +
+      asText(A.glyphs.signGlyph(item.b));
+    var tone = document.createElement('span');
+    tone.className = 'compat-aspect__tone';
+    tone.textContent = item.tone;
+    div.appendChild(pair);
+    div.appendChild(gl);
+    div.appendChild(tone);
+    return div;
+  }
+
+  function wireCompatibility() {
+    populateCitySelect('compat-city', 'London');
+
+    $('compat-city').addEventListener('change', function () {
+      $('compat-custom').hidden = $('compat-city').value !== '__custom__';
+    });
+
+    $('compat-go').addEventListener('click', function () {
+      var hint = $('compat-hint');
+      var dateVal = $('compat-date').value;
+      if (!dateVal) {
+        hint.hidden = false;
+        $('compat-date').focus();
+        return;
+      }
+      hint.hidden = true;
+
+      var timeVal = $('compat-time').value;
+      var hasTime = !!timeVal;
+      var coords = compatCoords();
+      var userBirth = {
+        datetime: dateVal + 'T' + (timeVal || '12:00') + ':00',
+        tzOffsetMinutes: 0,
+        lat: coords.lat,
+        lon: coords.lon
+      };
+
+      var userChart;
+      try {
+        userChart = A.computeChart(userBirth);
+      } catch (err) {
+        hint.textContent = 'Could not compute chart — check date and coordinates.';
+        hint.hidden = false;
+        return;
+      }
+      if (!hasTime) delete userChart.ascendant;
+
+      var agentChart = A.computeChart(buildBirth());
+      var syn = A.synastry(agentChart, userChart);
+
+      /* score + verdict */
+      $('compat-score').textContent = syn.score;
+      $('compat-verdict').textContent = syn.verdict;
+
+      /* meter */
+      var meter = $('compat-meter');
+      meter.style.width = syn.score + '%';
+      meter.className = 'compat-meter__fill';
+      if (syn.score >= 65) meter.classList.add('compat-meter__fill--high');
+      else if (syn.score >= 45) meter.classList.add('compat-meter__fill--mid');
+      else meter.classList.add('compat-meter__fill--low');
+
+      /* summary */
+      $('compat-summary').textContent =
+        'Your ' + syn.elements.user + ' and their ' + syn.elements.agent +
+        ' are ' + syn.elements.relation + '. ' +
+        'Modality: ' + syn.modality.user + ' meets ' + syn.modality.agent +
+        ' — ' + syn.modality.relation + '.';
+
+      /* reading */
+      $('compat-reading').textContent = syn.reading || '';
+
+      /* aspect chips */
+      var aspectsEl = $('compat-aspects');
+      aspectsEl.innerHTML = '';
+      syn.aspects.forEach(function (item) {
+        aspectsEl.appendChild(compatAspectChip(item));
+      });
+
+      /* romance axis */
+      var romanceEl = $('compat-romance');
+      romanceEl.innerHTML = '';
+      if (syn.romance && syn.romance.length) {
+        var heading = document.createElement('p');
+        heading.className = 'compat-romance__label';
+        heading.textContent = 'Venus & Mars — the romance axis';
+        romanceEl.appendChild(heading);
+        syn.romance.forEach(function (item) {
+          romanceEl.appendChild(compatAspectChip(item));
+        });
+        romanceEl.hidden = false;
+      } else {
+        romanceEl.hidden = true;
+      }
+
+      $('compat-result').hidden = false;
     });
   }
 
@@ -732,10 +859,11 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     initStarfield();
-    populateCities();
+    populateCitySelect('birth-city', 'Reykjavík');
     wireControls();
     updateScrubLabel();
     render();
+    wireCompatibility();
     wireMakeYourOwn();
     renderGallery();
   });
