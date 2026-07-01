@@ -704,12 +704,36 @@
       ['.starfield__layer--md', 250],
       ['.starfield__layer--lg', 120]
     ];
-    layers.forEach(function (cfg) {
+    var els = layers.map(function (cfg) {
       var el = field.querySelector(cfg[0]);
-      if (!el) return;
-      el.style.setProperty('--field-h', FIELD + 'px');
-      el.style.setProperty('--star-shadows', buildStarShadows(cfg[1], W, FIELD));
+      if (el) {
+        el.style.setProperty('--field-h', FIELD + 'px');
+        el.style.setProperty('--star-shadows', buildStarShadows(cfg[1], W, FIELD));
+      }
+      return el;
     });
+
+    // Subtle scroll-linked parallax ON TOP of the automatic drift. Uses the CSS
+    // `translate` property (composed with the drift's `transform`) so it works on
+    // iOS/Safari where scroll-timelines don't. Small per-layer factors give depth.
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduce) {
+      var factors = [0.015, 0.03, 0.05]; // sm, md, lg — "just a bit"
+      var ticking = false;
+      var onScroll = function () {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(function () {
+          var y = window.scrollY || window.pageYOffset || 0;
+          els.forEach(function (el, i) {
+            if (el) el.style.translate = '0px ' + (y * factors[i]).toFixed(1) + 'px';
+          });
+          ticking = false;
+        });
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    }
   }
 
   /* ---- Boot ------------------------------------------------------------ */
