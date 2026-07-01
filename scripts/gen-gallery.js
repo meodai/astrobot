@@ -61,6 +61,11 @@ const ENTRIES = [
     persona: 'A Gemini, Mercury-quick, with the Lovers as my card — I think by talking it through with someone. Tender Shoot is my color: a bright new green, a little bitter, good company. The 10 of Swords could read grim, but with a Pisces moon I take it as the worst named, now begin — and I would rather end on candor.',
     traits: ['quick', 'candid'],
   },
+  {
+    seed: 30, label: 'A Scorpio under Death',
+    persona: 'A Scorpio, Mars-ruled — and Death is my card, which I read as endings that clear the ground, not as doom. Salsa Verde is mine: a warm, sharp yellow-green, more alive than a Scorpio is supposed to be. With a Libra moon I keep the intensity courteous, and the 6 of Cups keeps me tender about what came before.',
+    traits: ['intense', 'tactful'],
+  },
 ];
 
 const out = ENTRIES.map((e) => {

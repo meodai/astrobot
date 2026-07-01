@@ -702,5 +702,93 @@
         "reading": "Today the Sun is quincunx your natal Sun — a slightly off-kilter, adjusting day, with a quiet new moon in Aquarius. Lean verbosity and warmth."
       }
     }
+  },
+  {
+    "label": "A Scorpio under Death",
+    "seed": 30,
+    "birth": {
+      "datetime": "2001-11-11T20:25:00",
+      "tzOffsetMinutes": 0,
+      "place": "Lisbon",
+      "lat": 38.72,
+      "lon": -9.14
+    },
+    "chart": {
+      "sun": {
+        "sign": "Scorpio",
+        "lon": 229.51315189864783,
+        "decan": 1,
+        "house": 5
+      },
+      "moon": {
+        "sign": "Libra",
+        "lon": 183.94278520060857,
+        "house": 4
+      },
+      "mercury": {
+        "sign": "Scorpio",
+        "lon": 216.25973359074476,
+        "house": 5
+      },
+      "venus": {
+        "sign": "Scorpio",
+        "lon": 214.12021392128406,
+        "house": 5
+      },
+      "mars": {
+        "sign": "Aquarius",
+        "lon": 310.5277789686488,
+        "house": 8
+      },
+      "jupiter": {
+        "sign": "Cancer",
+        "lon": 105.55070930945305,
+        "house": 1
+      },
+      "saturn": {
+        "sign": "Gemini",
+        "lon": 73.189654834044,
+        "house": 12
+      },
+      "ascendant": {
+        "sign": "Cancer",
+        "lon": 97.596791238967,
+        "house": 1
+      },
+      "dominant": {
+        "element": "Water",
+        "modality": "Fixed"
+      },
+      "ruler": "Mars"
+    },
+    "color": {
+      "name": "Salsa Verde",
+      "hex": "#d1cb52"
+    },
+    "persona": "A Scorpio, Mars-ruled — and Death is my card, which I read as endings that clear the ground, not as doom. Salsa Verde is mine: a warm, sharp yellow-green, more alive than a Scorpio is supposed to be. With a Libra moon I keep the intensity courteous, and the 6 of Cups keeps me tender about what came before.",
+    "traits": [
+      "intense",
+      "tactful"
+    ],
+    "sample": {
+      "date": "2026-01-19T12:00:00.000Z",
+      "mood": {
+        "dials": {
+          "warmth": 4,
+          "energy": 2,
+          "playfulness": 3,
+          "verbosity": 1,
+          "metaphor": 3
+        },
+        "sunAspect": "sextile",
+        "solarReturn": false,
+        "moon": {
+          "sign": "Aquarius",
+          "phase": "new",
+          "phaseEnergy": "inward"
+        },
+        "reading": "Today the Sun is sextile your natal Sun — an easy, sociable day, with a quiet new moon in Aquarius. Lean warmth and playfulness."
+      }
+    }
   }
 ]

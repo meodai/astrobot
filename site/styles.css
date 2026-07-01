@@ -982,3 +982,20 @@ textarea.rite-textarea:focus {
 
 /* Havoc note in How It Works — breathing room above */
 .how-havoc { margin-top: 1.75rem; }
+
+/* Mint-Your-Own: best-experience note */
+.myo-note {
+  max-width: 62ch;
+  margin: 0 auto 1.6rem;
+  padding: .85rem 1.1rem;
+  border: 1px solid var(--gold-dim);
+  border-radius: 2px;
+  background: rgba(201, 162, 75, .06);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .4);
+  text-align: center;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--parchment-dim);
+}
+.myo-note strong { color: var(--gold-bright); font-weight: 600; }
+.myo-note a { color: var(--verdigris); }
