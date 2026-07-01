@@ -34,7 +34,7 @@
       COLOR_BACKGROUND: 'transparent',
       POINTS_COLOR: '#E7CE84',            // planet glyphs — gilt
       POINTS_TEXT_SIZE: Math.round(8 * scale),
-      SIGNS_COLOR: '#C9A24B',             // sign glyphs + degree text — leaf gold
+      SIGNS_COLOR: '#0a0c17',             // sign glyphs — midnight ink, for contrast on the gold ring
       CIRCLE_COLOR: '#7d6a37',            // ring strokes — tarnished gold
       LINE_COLOR: '#6c5b30',             // spokes
       CUSPS_FONT_COLOR: '#C9A24B',
@@ -210,9 +210,10 @@
     var coords = currentCoords();
     var cityVal = $('birth-city').value;
     var place = (cityVal === '__custom__') ? 'Custom coordinates' : cityVal;
+    var datetime = date + 'T' + time + ':00';
     return {
-      datetime: date + 'T' + time + ':00',
-      tzOffsetMinutes: 0,
+      datetime: datetime,
+      tzOffsetMinutes: inferOffset(coords.lat, coords.lon, datetime),
       place: place,
       lat: coords.lat,
       lon: coords.lon
@@ -364,10 +365,34 @@
   /* ---- Compatibility (synastry) --------------------------------------- */
 
   var _citiesGeo = null;
+  var _geoArr = [];
   function loadCitiesGeo() {
     if (_citiesGeo) return _citiesGeo;
     _citiesGeo = fetch('cities-geo.json').then(function (r) { return r.json(); }).catch(function () { return []; });
+    // Cache the resolved array for synchronous nearest-city lookups, then re-render so
+    // charts drawn before the data arrived pick up the inferred birth timezone.
+    _citiesGeo.then(function (arr) { _geoArr = arr || []; if (typeof render === 'function') render(); });
     return _citiesGeo;
+  }
+
+  // Nearest known city's country code — used to infer the birth timezone from coordinates.
+  function nearestCC(lat, lon) {
+    if (!_geoArr.length || !isFinite(lat) || !isFinite(lon)) return null;
+    var cosLat = Math.cos(lat * Math.PI / 180), best = null, bd = Infinity;
+    for (var i = 0; i < _geoArr.length; i++) {
+      var e = _geoArr[i], dLat = e[2] - lat, dLon = (e[3] - lon) * cosLat, d = dLat * dLat + dLon * dLon;
+      if (d < bd) { bd = d; best = e[1]; }
+    }
+    return best;
+  }
+
+  // Birth UTC offset (minutes) inferred from the birthplace + date (historical DST via Intl).
+  // Falls back to 0 when the geo data isn't loaded yet or the country spans several zones.
+  function inferOffset(lat, lon, datetime) {
+    var cc = nearestCC(lat, lon);
+    if (!cc || !A.resolveOffset) return 0;
+    var tz = A.resolveOffset(cc, datetime);
+    return (tz && typeof tz.offsetMinutes === 'number') ? tz.offsetMinutes : 0;
   }
 
   function attachTypeahead(input, list) {
@@ -554,9 +579,10 @@
 
       var timeVal = $('compat-time').value;
       var hasTime = !!timeVal;
+      var compatDatetime = dateVal + 'T' + (timeVal || '12:00') + ':00';
       var userBirth = {
-        datetime: dateVal + 'T' + (timeVal || '12:00') + ':00',
-        tzOffsetMinutes: 0,
+        datetime: compatDatetime,
+        tzOffsetMinutes: inferOffset(coords.lat, coords.lon, compatDatetime),
         lat: coords.lat,
         lon: coords.lon
       };
@@ -1003,6 +1029,7 @@
   document.addEventListener('DOMContentLoaded', function () {
     initStarfield();
     populateCitySelect('birth-city', 'Reykjavík');
+    loadCitiesGeo();   // eager: lets the birth timezone be inferred without focusing a typeahead
     wireControls();
     updateScrubLabel();
     render();

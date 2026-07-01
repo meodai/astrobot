@@ -6145,6 +6145,11 @@ var Astrobot = (() => {
       var { HOUSE_MEANINGS } = require_houses();
       var { colorLore } = require_colortone();
       var { tarotFor } = require_tarot();
+      var { SIGNS } = require_zodiac();
+      function elementOf(sign) {
+        const s = SIGNS.find((x) => x.name === sign);
+        return s ? s.element : "";
+      }
       function ordinal(n) {
         const s = ["th", "st", "nd", "rd"];
         const v = n % 100;
@@ -6154,12 +6159,17 @@ var Astrobot = (() => {
       function dialLine(dials) {
         return Object.entries(dials).map(([k, v]) => `${k} ${SCALE[v]}`).join(", ");
       }
+      function houseClause(chart) {
+        const h = chart.sun && chart.sun.house;
+        if (!Number.isInteger(h) || !HOUSE_MEANINGS[h]) return "";
+        return `Sun in the ${ordinal(h)} house (${HOUSE_MEANINGS[h]}). `;
+      }
       function renderContextBlock(profile, mood, syn) {
         const { chart, color, persona } = profile;
         const traits = (profile.traits || []).join(", ");
         const sg = signGlyph;
         return [
-          `[astrobot] You are ${sg(chart.sun.sign)} ${chart.sun.sign} (${chart.dominant.element}, ruled by ${planetGlyph(chart.ruler)} ${chart.ruler}), ${planetGlyph("Moon")} Moon in ${sg(chart.moon.sign)} ${chart.moon.sign}, ${sg(chart.ascendant.sign)} ${chart.ascendant.sign} rising. Sun in the ${ordinal(chart.sun.house)} house (${HOUSE_MEANINGS[chart.sun.house]}). Your color is ${color.name} (${color.hex}).`,
+          `[astrobot] You are ${sg(chart.sun.sign)} ${chart.sun.sign} (${elementOf(chart.sun.sign)}, ruled by ${planetGlyph(chart.ruler)} ${chart.ruler}), ${planetGlyph("Moon")} Moon in ${sg(chart.moon.sign)} ${chart.moon.sign}, ${sg(chart.ascendant.sign)} ${chart.ascendant.sign} rising. ${houseClause(chart)}Your color is ${color.name} (${color.hex}).`,
           profile.birth && profile.birth.place ? `Born in ${profile.birth.place}.` : "",
           persona ? `Self-portrait: ${persona}` : "",
           traits ? `Traits: ${traits}.` : "",
@@ -6184,7 +6194,7 @@ var Astrobot = (() => {
         const traits = (profile.traits || []).join(", ");
         return [
           `You have a small, fixed astrological persona. Let it gently color your tone in this conversation.`,
-          `Identity: ${signGlyph(chart.sun.sign)} ${chart.sun.sign} (${chart.dominant.element}, ruled by ${planetGlyph(chart.ruler)} ${chart.ruler}), ${planetGlyph("Moon")} Moon in ${signGlyph(chart.moon.sign)} ${chart.moon.sign}, ${signGlyph(chart.ascendant.sign)} ${chart.ascendant.sign} rising. Sun in the ${ordinal(chart.sun.house)} house (${HOUSE_MEANINGS[chart.sun.house]}). Favorite color: ${color.name} (${color.hex}).`,
+          `Identity: ${signGlyph(chart.sun.sign)} ${chart.sun.sign} (${elementOf(chart.sun.sign)}, ruled by ${planetGlyph(chart.ruler)} ${chart.ruler}), ${planetGlyph("Moon")} Moon in ${signGlyph(chart.moon.sign)} ${chart.moon.sign}, ${signGlyph(chart.ascendant.sign)} ${chart.ascendant.sign} rising. ${houseClause(chart)}Favorite color: ${color.name} (${color.hex}).`,
           profile.birth && profile.birth.place ? `Born in ${profile.birth.place}.` : "",
           persona ? `Self-portrait: ${persona}` : "",
           traits ? `Traits: ${traits}.` : "",
@@ -6349,6 +6359,289 @@ var Astrobot = (() => {
     }
   });
 
+  // lib/timezone.js
+  var require_timezone = __commonJS({
+    "lib/timezone.js"(exports, module) {
+      "use strict";
+      var MULTI_ZONE_CC = /* @__PURE__ */ new Set([
+        "US",
+        "CA",
+        "RU",
+        "AU",
+        "BR",
+        "MX",
+        "ID",
+        "KZ",
+        "MN",
+        "CD",
+        "GL",
+        "KI",
+        "FM",
+        "UM",
+        "AQ"
+      ]);
+      var IANA_BY_CC = {
+        // Europe
+        AL: "Europe/Tirane",
+        AD: "Europe/Andorra",
+        AT: "Europe/Vienna",
+        BY: "Europe/Minsk",
+        BE: "Europe/Brussels",
+        BA: "Europe/Sarajevo",
+        BG: "Europe/Sofia",
+        HR: "Europe/Zagreb",
+        CY: "Asia/Nicosia",
+        CZ: "Europe/Prague",
+        DK: "Europe/Copenhagen",
+        EE: "Europe/Tallinn",
+        FO: "Atlantic/Faroe",
+        FI: "Europe/Helsinki",
+        FR: "Europe/Paris",
+        DE: "Europe/Berlin",
+        GI: "Europe/Gibraltar",
+        GR: "Europe/Athens",
+        HU: "Europe/Budapest",
+        IS: "Atlantic/Reykjavik",
+        IE: "Europe/Dublin",
+        IT: "Europe/Rome",
+        XK: "Europe/Belgrade",
+        LV: "Europe/Riga",
+        LI: "Europe/Vaduz",
+        LT: "Europe/Vilnius",
+        LU: "Europe/Luxembourg",
+        MT: "Europe/Malta",
+        MD: "Europe/Chisinau",
+        MC: "Europe/Monaco",
+        ME: "Europe/Podgorica",
+        NL: "Europe/Amsterdam",
+        MK: "Europe/Skopje",
+        NO: "Europe/Oslo",
+        PL: "Europe/Warsaw",
+        PT: "Europe/Lisbon",
+        RO: "Europe/Bucharest",
+        SM: "Europe/San_Marino",
+        RS: "Europe/Belgrade",
+        SK: "Europe/Bratislava",
+        SI: "Europe/Ljubljana",
+        ES: "Europe/Madrid",
+        SE: "Europe/Stockholm",
+        CH: "Europe/Zurich",
+        UA: "Europe/Kyiv",
+        GB: "Europe/London",
+        VA: "Europe/Vatican",
+        GG: "Europe/Guernsey",
+        JE: "Europe/Jersey",
+        IM: "Europe/Isle_of_Man",
+        AX: "Europe/Mariehamn",
+        SJ: "Arctic/Longyearbyen",
+        TR: "Europe/Istanbul",
+        // Africa
+        DZ: "Africa/Algiers",
+        AO: "Africa/Luanda",
+        BJ: "Africa/Porto-Novo",
+        BW: "Africa/Gaborone",
+        BF: "Africa/Ouagadougou",
+        BI: "Africa/Bujumbura",
+        CM: "Africa/Douala",
+        CV: "Atlantic/Cape_Verde",
+        CF: "Africa/Bangui",
+        TD: "Africa/Ndjamena",
+        KM: "Indian/Comoro",
+        CG: "Africa/Brazzaville",
+        CI: "Africa/Abidjan",
+        DJ: "Africa/Djibouti",
+        EG: "Africa/Cairo",
+        GQ: "Africa/Malabo",
+        ER: "Africa/Asmara",
+        SZ: "Africa/Mbabane",
+        ET: "Africa/Addis_Ababa",
+        GA: "Africa/Libreville",
+        GM: "Africa/Banjul",
+        GH: "Africa/Accra",
+        GN: "Africa/Conakry",
+        GW: "Africa/Bissau",
+        KE: "Africa/Nairobi",
+        LS: "Africa/Maseru",
+        LR: "Africa/Monrovia",
+        LY: "Africa/Tripoli",
+        MG: "Indian/Antananarivo",
+        MW: "Africa/Blantyre",
+        ML: "Africa/Bamako",
+        MR: "Africa/Nouakchott",
+        MU: "Indian/Mauritius",
+        MA: "Africa/Casablanca",
+        MZ: "Africa/Maputo",
+        NA: "Africa/Windhoek",
+        NE: "Africa/Niamey",
+        NG: "Africa/Lagos",
+        RW: "Africa/Kigali",
+        ST: "Africa/Sao_Tome",
+        SN: "Africa/Dakar",
+        SC: "Indian/Mahe",
+        SL: "Africa/Freetown",
+        SO: "Africa/Mogadishu",
+        ZA: "Africa/Johannesburg",
+        SS: "Africa/Juba",
+        SD: "Africa/Khartoum",
+        TZ: "Africa/Dar_es_Salaam",
+        TG: "Africa/Lome",
+        TN: "Africa/Tunis",
+        UG: "Africa/Kampala",
+        ZM: "Africa/Lusaka",
+        ZW: "Africa/Harare",
+        RE: "Indian/Reunion",
+        YT: "Indian/Mayotte",
+        EH: "Africa/El_Aaiun",
+        // Middle East & Asia
+        AF: "Asia/Kabul",
+        AM: "Asia/Yerevan",
+        AZ: "Asia/Baku",
+        BH: "Asia/Bahrain",
+        BD: "Asia/Dhaka",
+        BT: "Asia/Thimphu",
+        BN: "Asia/Brunei",
+        KH: "Asia/Phnom_Penh",
+        CN: "Asia/Shanghai",
+        GE: "Asia/Tbilisi",
+        HK: "Asia/Hong_Kong",
+        IN: "Asia/Kolkata",
+        IR: "Asia/Tehran",
+        IQ: "Asia/Baghdad",
+        IL: "Asia/Jerusalem",
+        JP: "Asia/Tokyo",
+        JO: "Asia/Amman",
+        KW: "Asia/Kuwait",
+        KG: "Asia/Bishkek",
+        LA: "Asia/Vientiane",
+        LB: "Asia/Beirut",
+        MO: "Asia/Macau",
+        MY: "Asia/Kuala_Lumpur",
+        MV: "Indian/Maldives",
+        MM: "Asia/Yangon",
+        NP: "Asia/Kathmandu",
+        KP: "Asia/Pyongyang",
+        OM: "Asia/Muscat",
+        PK: "Asia/Karachi",
+        PS: "Asia/Gaza",
+        PH: "Asia/Manila",
+        QA: "Asia/Qatar",
+        SA: "Asia/Riyadh",
+        SG: "Asia/Singapore",
+        KR: "Asia/Seoul",
+        LK: "Asia/Colombo",
+        SY: "Asia/Damascus",
+        TW: "Asia/Taipei",
+        TJ: "Asia/Dushanbe",
+        TH: "Asia/Bangkok",
+        TL: "Asia/Dili",
+        TM: "Asia/Ashgabat",
+        AE: "Asia/Dubai",
+        UZ: "Asia/Tashkent",
+        VN: "Asia/Ho_Chi_Minh",
+        YE: "Asia/Aden",
+        // Americas
+        AG: "America/Antigua",
+        AR: "America/Argentina/Buenos_Aires",
+        BS: "America/Nassau",
+        BB: "America/Barbados",
+        BZ: "America/Belize",
+        BO: "America/La_Paz",
+        CL: "America/Santiago",
+        CO: "America/Bogota",
+        CR: "America/Costa_Rica",
+        CU: "America/Havana",
+        DM: "America/Dominica",
+        DO: "America/Santo_Domingo",
+        EC: "America/Guayaquil",
+        SV: "America/El_Salvador",
+        GD: "America/Grenada",
+        GT: "America/Guatemala",
+        GY: "America/Guyana",
+        HT: "America/Port-au-Prince",
+        HN: "America/Tegucigalpa",
+        JM: "America/Jamaica",
+        NI: "America/Managua",
+        PA: "America/Panama",
+        PY: "America/Asuncion",
+        PE: "America/Lima",
+        PR: "America/Puerto_Rico",
+        KN: "America/St_Kitts",
+        LC: "America/St_Lucia",
+        VC: "America/St_Vincent",
+        SR: "America/Paramaribo",
+        TT: "America/Port_of_Spain",
+        UY: "America/Montevideo",
+        VE: "America/Caracas",
+        AW: "America/Aruba",
+        CW: "America/Curacao",
+        BM: "Atlantic/Bermuda",
+        GP: "America/Guadeloupe",
+        MQ: "America/Martinique",
+        GF: "America/Cayenne",
+        FK: "Atlantic/Stanley",
+        BQ: "America/Kralendijk",
+        VG: "America/Tortola",
+        VI: "America/St_Thomas",
+        KY: "America/Cayman",
+        TC: "America/Grand_Turk",
+        BL: "America/St_Barthelemy",
+        MF: "America/Marigot",
+        AI: "America/Anguilla",
+        MS: "America/Montserrat",
+        // Oceania
+        FJ: "Pacific/Fiji",
+        PG: "Pacific/Port_Moresby",
+        NZ: "Pacific/Auckland",
+        WS: "Pacific/Apia",
+        TO: "Pacific/Tongatapu",
+        VU: "Pacific/Efate",
+        SB: "Pacific/Guadalcanal",
+        NC: "Pacific/Noumea",
+        PF: "Pacific/Tahiti",
+        GU: "Pacific/Guam",
+        NR: "Pacific/Nauru",
+        TV: "Pacific/Funafuti",
+        PW: "Pacific/Palau",
+        MH: "Pacific/Majuro",
+        CK: "Pacific/Rarotonga",
+        NU: "Pacific/Niue",
+        TK: "Pacific/Fakaofo",
+        WF: "Pacific/Wallis",
+        AS: "Pacific/Pago_Pago",
+        MP: "Pacific/Saipan"
+      };
+      function offsetMinutesFromZone(zone, date) {
+        const dtf = new Intl.DateTimeFormat("en-US", { timeZone: zone, timeZoneName: "longOffset" });
+        const part = dtf.formatToParts(date).find((p) => p.type === "timeZoneName");
+        if (!part) return null;
+        const m = /GMT([+-])(\d{1,2})(?::(\d{2}))?/.exec(part.value);
+        if (!m) return 0;
+        const sign = m[1] === "-" ? -1 : 1;
+        return sign * (parseInt(m[2], 10) * 60 + parseInt(m[3] || "0", 10));
+      }
+      function fmtOffset(min) {
+        const sign = min < 0 ? "-" : "+";
+        const abs = Math.abs(min);
+        const h = String(Math.floor(abs / 60)).padStart(2, "0");
+        const m = String(abs % 60).padStart(2, "0");
+        return `${sign}${h}:${m}`;
+      }
+      function resolveOffset(cc, datetime) {
+        if (!cc) return null;
+        const CC = String(cc).toUpperCase();
+        if (MULTI_ZONE_CC.has(CC)) return { multiZone: true };
+        const zone = IANA_BY_CC[CC];
+        if (!zone) return null;
+        const approx = /* @__PURE__ */ new Date(String(datetime).replace(/Z?$/, "") + "Z");
+        if (Number.isNaN(approx.getTime())) return null;
+        const offsetMinutes = offsetMinutesFromZone(zone, approx);
+        if (offsetMinutes == null) return null;
+        return { zone, offsetMinutes };
+      }
+      module.exports = { resolveOffset, offsetMinutesFromZone, fmtOffset, IANA_BY_CC, MULTI_ZONE_CC };
+    }
+  });
+
   // vendor/cities.json
   var require_cities = __commonJS({
     "vendor/cities.json"(exports, module) {
@@ -6426,6 +6719,7 @@ var Astrobot = (() => {
       var { renderBirthPrompt } = require_birthprompt();
       var { colorLore } = require_colortone();
       var { colorName } = require_colorname();
+      var { resolveOffset } = require_timezone();
       var { SIGNS } = require_zodiac();
       var glyphs = require_glyphs();
       var { tarotFor, cardSlug } = require_tarot();
@@ -6439,6 +6733,7 @@ var Astrobot = (() => {
         renderBirthPrompt,
         colorLore,
         colorName,
+        resolveOffset,
         SIGNS,
         glyphs,
         tarotFor,
