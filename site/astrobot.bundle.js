@@ -6626,6 +6626,12 @@ var Astrobot = (() => {
         const m = String(abs % 60).padStart(2, "0");
         return `${sign}${h}:${m}`;
       }
+      function offsetForZone(zone, datetime) {
+        if (!zone) return null;
+        const approx = /* @__PURE__ */ new Date(String(datetime).replace(/Z?$/, "") + "Z");
+        if (Number.isNaN(approx.getTime())) return null;
+        return offsetMinutesFromZone(zone, approx);
+      }
       function resolveOffset(cc, datetime) {
         if (!cc) return null;
         const CC = String(cc).toUpperCase();
@@ -6638,7 +6644,7 @@ var Astrobot = (() => {
         if (offsetMinutes == null) return null;
         return { zone, offsetMinutes };
       }
-      module.exports = { resolveOffset, offsetMinutesFromZone, fmtOffset, IANA_BY_CC, MULTI_ZONE_CC };
+      module.exports = { resolveOffset, offsetForZone, offsetMinutesFromZone, fmtOffset, IANA_BY_CC, MULTI_ZONE_CC };
     }
   });
 
@@ -6646,65 +6652,301 @@ var Astrobot = (() => {
   var require_cities = __commonJS({
     "vendor/cities.json"(exports, module) {
       module.exports = {
-        London: { lat: 51.51, lon: -0.13 },
-        Paris: { lat: 48.85, lon: 2.35 },
-        Berlin: { lat: 52.52, lon: 13.4 },
-        Madrid: { lat: 40.42, lon: -3.7 },
-        Rome: { lat: 41.9, lon: 12.5 },
-        Amsterdam: { lat: 52.37, lon: 4.9 },
-        Z\u00FCrich: { lat: 47.37, lon: 8.54 },
-        Vienna: { lat: 48.21, lon: 16.37 },
-        Prague: { lat: 50.08, lon: 14.44 },
-        Athens: { lat: 37.98, lon: 23.73 },
-        Lisbon: { lat: 38.72, lon: -9.14 },
-        Stockholm: { lat: 59.33, lon: 18.07 },
-        Oslo: { lat: 59.91, lon: 10.75 },
-        Copenhagen: { lat: 55.68, lon: 12.57 },
-        Dublin: { lat: 53.35, lon: -6.26 },
-        Reykjav\u00EDk: { lat: 64.13, lon: -21.9 },
-        Moscow: { lat: 55.76, lon: 37.62 },
-        Istanbul: { lat: 41.01, lon: 28.98 },
-        Warsaw: { lat: 52.23, lon: 21.01 },
-        Kyiv: { lat: 50.45, lon: 30.52 },
-        "New York": { lat: 40.71, lon: -74.01 },
-        "Los Angeles": { lat: 34.05, lon: -118.24 },
-        Chicago: { lat: 41.88, lon: -87.63 },
-        "San Francisco": { lat: 37.77, lon: -122.42 },
-        Toronto: { lat: 43.65, lon: -79.38 },
-        Vancouver: { lat: 49.28, lon: -123.12 },
-        "Mexico City": { lat: 19.43, lon: -99.13 },
-        Bogot\u00E1: { lat: 4.71, lon: -74.07 },
-        Lima: { lat: -12.05, lon: -77.04 },
-        Santiago: { lat: -33.45, lon: -70.67 },
-        "Buenos Aires": { lat: -34.6, lon: -58.38 },
-        "S\xE3o Paulo": { lat: -23.55, lon: -46.63 },
-        "Rio de Janeiro": { lat: -22.91, lon: -43.17 },
-        Cairo: { lat: 30.04, lon: 31.24 },
-        Lagos: { lat: 6.52, lon: 3.38 },
-        Nairobi: { lat: -1.29, lon: 36.82 },
-        "Cape Town": { lat: -33.92, lon: 18.42 },
-        Johannesburg: { lat: -26.2, lon: 28.05 },
-        Casablanca: { lat: 33.57, lon: -7.59 },
-        Accra: { lat: 5.6, lon: -0.19 },
-        "Addis Ababa": { lat: 9.03, lon: 38.74 },
-        Tokyo: { lat: 35.68, lon: 139.69 },
-        Beijing: { lat: 39.9, lon: 116.41 },
-        Shanghai: { lat: 31.23, lon: 121.47 },
-        "Hong Kong": { lat: 22.32, lon: 114.17 },
-        Seoul: { lat: 37.57, lon: 126.98 },
-        Singapore: { lat: 1.35, lon: 103.82 },
-        Bangkok: { lat: 13.76, lon: 100.5 },
-        Mumbai: { lat: 19.08, lon: 72.88 },
-        Delhi: { lat: 28.61, lon: 77.21 },
-        Dubai: { lat: 25.2, lon: 55.27 },
-        Tehran: { lat: 35.69, lon: 51.39 },
-        Jakarta: { lat: -6.21, lon: 106.85 },
-        Manila: { lat: 14.6, lon: 120.98 },
-        Karachi: { lat: 24.86, lon: 67.01 },
-        Sydney: { lat: -33.87, lon: 151.21 },
-        Melbourne: { lat: -37.81, lon: 144.96 },
-        Auckland: { lat: -36.85, lon: 174.76 },
-        Honolulu: { lat: 21.31, lon: -157.86 }
+        London: {
+          lat: 51.51,
+          lon: -0.13,
+          tz: "Europe/London"
+        },
+        Paris: {
+          lat: 48.85,
+          lon: 2.35,
+          tz: "Europe/Paris"
+        },
+        Berlin: {
+          lat: 52.52,
+          lon: 13.4,
+          tz: "Europe/Berlin"
+        },
+        Madrid: {
+          lat: 40.42,
+          lon: -3.7,
+          tz: "Europe/Madrid"
+        },
+        Rome: {
+          lat: 41.9,
+          lon: 12.5,
+          tz: "Europe/Rome"
+        },
+        Amsterdam: {
+          lat: 52.37,
+          lon: 4.9,
+          tz: "Europe/Amsterdam"
+        },
+        Z\u00FCrich: {
+          lat: 47.37,
+          lon: 8.54,
+          tz: "Europe/Zurich"
+        },
+        Vienna: {
+          lat: 48.21,
+          lon: 16.37,
+          tz: "Europe/Vienna"
+        },
+        Prague: {
+          lat: 50.08,
+          lon: 14.44,
+          tz: "Europe/Prague"
+        },
+        Athens: {
+          lat: 37.98,
+          lon: 23.73,
+          tz: "Europe/Athens"
+        },
+        Lisbon: {
+          lat: 38.72,
+          lon: -9.14,
+          tz: "Europe/Lisbon"
+        },
+        Stockholm: {
+          lat: 59.33,
+          lon: 18.07,
+          tz: "Europe/Stockholm"
+        },
+        Oslo: {
+          lat: 59.91,
+          lon: 10.75,
+          tz: "Europe/Oslo"
+        },
+        Copenhagen: {
+          lat: 55.68,
+          lon: 12.57,
+          tz: "Europe/Copenhagen"
+        },
+        Dublin: {
+          lat: 53.35,
+          lon: -6.26,
+          tz: "Europe/Dublin"
+        },
+        Reykjav\u00EDk: {
+          lat: 64.13,
+          lon: -21.9,
+          tz: "Atlantic/Reykjavik"
+        },
+        Moscow: {
+          lat: 55.76,
+          lon: 37.62,
+          tz: "Europe/Moscow"
+        },
+        Istanbul: {
+          lat: 41.01,
+          lon: 28.98,
+          tz: "Europe/Istanbul"
+        },
+        Warsaw: {
+          lat: 52.23,
+          lon: 21.01,
+          tz: "Europe/Warsaw"
+        },
+        Kyiv: {
+          lat: 50.45,
+          lon: 30.52,
+          tz: "Europe/Kyiv"
+        },
+        "New York": {
+          lat: 40.71,
+          lon: -74.01,
+          tz: "America/New_York"
+        },
+        "Los Angeles": {
+          lat: 34.05,
+          lon: -118.24,
+          tz: "America/Los_Angeles"
+        },
+        Chicago: {
+          lat: 41.88,
+          lon: -87.63,
+          tz: "America/Chicago"
+        },
+        "San Francisco": {
+          lat: 37.77,
+          lon: -122.42,
+          tz: "America/Los_Angeles"
+        },
+        Toronto: {
+          lat: 43.65,
+          lon: -79.38,
+          tz: "America/Toronto"
+        },
+        Vancouver: {
+          lat: 49.28,
+          lon: -123.12,
+          tz: "America/Vancouver"
+        },
+        "Mexico City": {
+          lat: 19.43,
+          lon: -99.13,
+          tz: "America/Mexico_City"
+        },
+        Bogot\u00E1: {
+          lat: 4.71,
+          lon: -74.07,
+          tz: "America/Bogota"
+        },
+        Lima: {
+          lat: -12.05,
+          lon: -77.04,
+          tz: "America/Lima"
+        },
+        Santiago: {
+          lat: -33.45,
+          lon: -70.67,
+          tz: "America/Santiago"
+        },
+        "Buenos Aires": {
+          lat: -34.6,
+          lon: -58.38,
+          tz: "America/Argentina/Buenos_Aires"
+        },
+        "S\xE3o Paulo": {
+          lat: -23.55,
+          lon: -46.63,
+          tz: "America/Sao_Paulo"
+        },
+        "Rio de Janeiro": {
+          lat: -22.91,
+          lon: -43.17,
+          tz: "America/Sao_Paulo"
+        },
+        Cairo: {
+          lat: 30.04,
+          lon: 31.24,
+          tz: "Africa/Cairo"
+        },
+        Lagos: {
+          lat: 6.52,
+          lon: 3.38,
+          tz: "Africa/Lagos"
+        },
+        Nairobi: {
+          lat: -1.29,
+          lon: 36.82,
+          tz: "Africa/Nairobi"
+        },
+        "Cape Town": {
+          lat: -33.92,
+          lon: 18.42,
+          tz: "Africa/Johannesburg"
+        },
+        Johannesburg: {
+          lat: -26.2,
+          lon: 28.05,
+          tz: "Africa/Johannesburg"
+        },
+        Casablanca: {
+          lat: 33.57,
+          lon: -7.59,
+          tz: "Africa/Casablanca"
+        },
+        Accra: {
+          lat: 5.6,
+          lon: -0.19,
+          tz: "Africa/Accra"
+        },
+        "Addis Ababa": {
+          lat: 9.03,
+          lon: 38.74,
+          tz: "Africa/Addis_Ababa"
+        },
+        Tokyo: {
+          lat: 35.68,
+          lon: 139.69,
+          tz: "Asia/Tokyo"
+        },
+        Beijing: {
+          lat: 39.9,
+          lon: 116.41,
+          tz: "Asia/Shanghai"
+        },
+        Shanghai: {
+          lat: 31.23,
+          lon: 121.47,
+          tz: "Asia/Shanghai"
+        },
+        "Hong Kong": {
+          lat: 22.32,
+          lon: 114.17,
+          tz: "Asia/Hong_Kong"
+        },
+        Seoul: {
+          lat: 37.57,
+          lon: 126.98,
+          tz: "Asia/Seoul"
+        },
+        Singapore: {
+          lat: 1.35,
+          lon: 103.82,
+          tz: "Asia/Singapore"
+        },
+        Bangkok: {
+          lat: 13.76,
+          lon: 100.5,
+          tz: "Asia/Bangkok"
+        },
+        Mumbai: {
+          lat: 19.08,
+          lon: 72.88,
+          tz: "Asia/Kolkata"
+        },
+        Delhi: {
+          lat: 28.61,
+          lon: 77.21,
+          tz: "Asia/Kolkata"
+        },
+        Dubai: {
+          lat: 25.2,
+          lon: 55.27,
+          tz: "Asia/Dubai"
+        },
+        Tehran: {
+          lat: 35.69,
+          lon: 51.39,
+          tz: "Asia/Tehran"
+        },
+        Jakarta: {
+          lat: -6.21,
+          lon: 106.85,
+          tz: "Asia/Jakarta"
+        },
+        Manila: {
+          lat: 14.6,
+          lon: 120.98,
+          tz: "Asia/Manila"
+        },
+        Karachi: {
+          lat: 24.86,
+          lon: 67.01,
+          tz: "Asia/Karachi"
+        },
+        Sydney: {
+          lat: -33.87,
+          lon: 151.21,
+          tz: "Australia/Sydney"
+        },
+        Melbourne: {
+          lat: -37.81,
+          lon: 144.96,
+          tz: "Australia/Melbourne"
+        },
+        Auckland: {
+          lat: -36.85,
+          lon: 174.76,
+          tz: "Pacific/Auckland"
+        },
+        Honolulu: {
+          lat: 21.31,
+          lon: -157.86,
+          tz: "Pacific/Honolulu"
+        }
       };
     }
   });
@@ -6719,7 +6961,7 @@ var Astrobot = (() => {
       var { renderBirthPrompt } = require_birthprompt();
       var { colorLore } = require_colortone();
       var { colorName } = require_colorname();
-      var { resolveOffset } = require_timezone();
+      var { resolveOffset, offsetForZone } = require_timezone();
       var { SIGNS } = require_zodiac();
       var glyphs = require_glyphs();
       var { tarotFor, cardSlug } = require_tarot();
@@ -6734,6 +6976,7 @@ var Astrobot = (() => {
         colorLore,
         colorName,
         resolveOffset,
+        offsetForZone,
         SIGNS,
         glyphs,
         tarotFor,

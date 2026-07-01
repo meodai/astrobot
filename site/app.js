@@ -211,9 +211,15 @@
     var cityVal = $('birth-city').value;
     var place = (cityVal === '__custom__') ? 'Custom coordinates' : cityVal;
     var datetime = date + 'T' + time + ':00';
+    // Curated cities carry an exact IANA zone (correct even in multi-timezone countries);
+    // custom coordinates fall back to country-level inference.
+    var cityData = (cityVal !== '__custom__') ? A.CITIES[cityVal] : null;
+    var tzOff = (cityData && cityData.tz && A.offsetForZone)
+      ? A.offsetForZone(cityData.tz, datetime)
+      : inferOffset(coords.lat, coords.lon, datetime);
     return {
       datetime: datetime,
-      tzOffsetMinutes: inferOffset(coords.lat, coords.lon, datetime),
+      tzOffsetMinutes: (typeof tzOff === 'number') ? tzOff : 0,
       place: place,
       lat: coords.lat,
       lon: coords.lon

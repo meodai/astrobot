@@ -6,7 +6,7 @@ const { renderContextBlock, renderPortableBlock } = require('../../lib/persona.j
 const { renderBirthPrompt } = require('../../lib/birthprompt.js');
 const { colorLore } = require('../../lib/colortone.js');
 const { colorName } = require('../../lib/colorname.js');
-const { resolveOffset } = require('../../lib/timezone.js');
+const { resolveOffset, offsetForZone } = require('../../lib/timezone.js');
 const { SIGNS } = require('../../lib/zodiac.js');
 const glyphs = require('../../lib/glyphs.js');
 const { tarotFor, cardSlug } = require('../../lib/tarot.js');
@@ -22,6 +22,7 @@ module.exports = {
   colorLore,
   colorName,
   resolveOffset,
+  offsetForZone,
   SIGNS,
   glyphs,
   tarotFor,

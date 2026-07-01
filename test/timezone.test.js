@@ -1,7 +1,7 @@
 // test/timezone.test.js
 const { test } = require('node:test');
 const assert = require('node:assert');
-const { resolveOffset, offsetMinutesFromZone, fmtOffset } = require('../lib/timezone.js');
+const { resolveOffset, offsetForZone, offsetMinutesFromZone, fmtOffset } = require('../lib/timezone.js');
 const { nearestCity } = require('../lib/geocode.js');
 
 test('single-zone country resolves to its representative zone and offset', () => {
@@ -38,6 +38,18 @@ test('India half-hour offset is formatted correctly', () => {
   const r = resolveOffset('IN', '1990-01-01T12:00:00');
   assert.strictEqual(r.offsetMinutes, 330);
   assert.strictEqual(fmtOffset(r.offsetMinutes), '+05:30');
+});
+
+test('offsetForZone resolves an exact zone in a multi-timezone country', () => {
+  // New York vs Los Angeles — country code alone (US) could not disambiguate.
+  assert.strictEqual(offsetForZone('America/New_York', '1995-06-15T18:20:00'), -240); // EDT
+  assert.strictEqual(offsetForZone('America/Los_Angeles', '1995-06-15T18:20:00'), -420); // PDT
+  assert.strictEqual(offsetForZone('Australia/Sydney', '1988-12-01T04:00:00'), 660); // AEDT
+});
+
+test('offsetForZone returns null for missing zone or bad datetime', () => {
+  assert.strictEqual(offsetForZone('', '1995-06-15T18:20:00'), null);
+  assert.strictEqual(offsetForZone('Asia/Tokyo', 'nope'), null);
 });
 
 test('offsetMinutesFromZone handles a bare-GMT zone as zero', () => {
