@@ -1120,3 +1120,5 @@ textarea.rite-textarea:focus {
   color: var(--gold);
   margin: 0 0 .7rem;
 }
+
+.compat-legend { text-align: center; font-size: var(--fs-label); color: var(--parchment-dim); font-style: italic; margin: 0 0 .6rem; }

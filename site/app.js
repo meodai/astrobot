@@ -460,6 +460,13 @@
       /* aspect chips */
       var aspectsEl = $('compat-aspects');
       aspectsEl.innerHTML = '';
+      if (!document.getElementById('compat-legend')) {
+        var _lg = document.createElement('p');
+        _lg.id = 'compat-legend';
+        _lg.className = 'compat-legend';
+        _lg.textContent = 'In each pair the left glyph is the agent’s, the right is yours.';
+        aspectsEl.parentNode.insertBefore(_lg, aspectsEl);
+      }
       syn.aspects.forEach(function (item) {
         aspectsEl.appendChild(compatAspectChip(item));
       });

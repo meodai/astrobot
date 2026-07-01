@@ -6005,7 +6005,7 @@ var Astrobot = (() => {
         if (hasAscendant) {
           aspects.push(makePair("Ascendant\u2013Ascendant", agentChart.ascendant.lon, userChart.ascendant.lon, 2));
           aspects.push(makePair("Sun\u2013Ascendant", agentChart.sun.lon, userChart.ascendant.lon, 1));
-          aspects.push(makePair("Sun\u2013Ascendant", userChart.sun.lon, agentChart.ascendant.lon, 1));
+          aspects.push(makePair("Ascendant\u2013Sun", agentChart.ascendant.lon, userChart.sun.lon, 1));
         }
         let raw = 50;
         for (const p of [...aspects, ...romance]) {
