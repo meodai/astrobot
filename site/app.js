@@ -673,6 +673,7 @@
         pg('Sun') + ' ' + c.sun.sign + ' (' + ordinal(c.sun.house) + ') · ' +
         pg('Moon') + ' ' + c.moon.sign + ' (' + ordinal(c.moon.house) + ') · ' +
         c.ascendant.sign + ' rising · ' + c.dominant.element + ' ' + c.dominant.modality +
+        (entry.birth && entry.birth.place ? ' · born in ' + esc(entry.birth.place) : '') +
       '</p>' +
       '<div class="gallery-card__mood">' +
         '<span class="mood-tag">Sample sky: ' + esc(mood.moon.phase) + ' moon in ' +
