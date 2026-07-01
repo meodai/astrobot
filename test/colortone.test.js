@@ -25,10 +25,11 @@ test('hexToHsl returns null for bad input', () => {
 });
 
 // colorTone
-test('colorTone #ff5a1f is warm+vivid → warmth>0, playfulness>0', () => {
+test('colorTone #ff5a1f is warm+vivid → warmth>0, metaphor>0', () => {
+  // warm hue → warmth +1; vivid saturation → metaphor +1.
   const d = colorTone('#ff5a1f');
   assert.ok((d.warmth || 0) > 0, `warmth should be >0, got ${d.warmth}`);
-  assert.ok((d.playfulness || 0) > 0, `playfulness should be >0, got ${d.playfulness}`);
+  assert.ok((d.metaphor || 0) > 0, `metaphor should be >0, got ${d.metaphor}`);
 });
 
 test('colorLore #b0c0c8 is cool+muted on hue/sat axes', () => {
@@ -38,11 +39,11 @@ test('colorLore #b0c0c8 is cool+muted on hue/sat axes', () => {
   assert.strictEqual(lore.vividMuted, 'muted');
 });
 
-test('colorTone #b0c0c8 (cool+muted, Moon-nearest) → warmth<0, playfulness<0', () => {
-  // Cool hue → warmth -1; muted sat → playfulness -1; Moon nudge → metaphor +1 (no warmth offset).
+test('colorTone #b0c0c8 (cool+muted, Moon-nearest) → warmth<0, verbosity<0', () => {
+  // Cool hue → warmth -1; muted sat → metaphor -1 & verbosity -1; Moon nudge → metaphor +1.
   const d = colorTone('#b0c0c8');
   assert.ok((d.warmth || 0) < 0, `warmth should be <0, got ${d.warmth}`);
-  assert.ok((d.playfulness || 0) < 0, `playfulness should be <0, got ${d.playfulness}`);
+  assert.ok((d.verbosity || 0) < 0, `verbosity should be <0, got ${d.verbosity}`);
 });
 
 test('colorLore #3aa34c (green hue) is warm-cool balanced', () => {

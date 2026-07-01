@@ -47,16 +47,16 @@ test('sun in its own season raises energy vs opposition', () => {
 });
 
 // Color integration tests
-test('warm-vivid color raises warmth & playfulness vs cool-muted color', () => {
-  const warmVivid = composeMood(CHART, D, '#ff5a1f'); // warm orange, vivid
+test('warm-vivid color raises warmth & metaphor vs cool-muted color', () => {
+  const warmVivid = composeMood(CHART, D, '#ff5a1f'); // warm orange, vivid → warmth + metaphor
   const coolMuted = composeMood(CHART, D, '#b0c0c8'); // cool gray-blue, muted, Moon-nearest
   assert.ok(
     warmVivid.dials.warmth > coolMuted.dials.warmth,
     `warmVivid warmth ${warmVivid.dials.warmth} should exceed coolMuted ${coolMuted.dials.warmth}`,
   );
   assert.ok(
-    warmVivid.dials.playfulness > coolMuted.dials.playfulness,
-    `warmVivid playfulness ${warmVivid.dials.playfulness} should exceed coolMuted ${coolMuted.dials.playfulness}`,
+    warmVivid.dials.metaphor > coolMuted.dials.metaphor,
+    `warmVivid metaphor ${warmVivid.dials.metaphor} should exceed coolMuted ${coolMuted.dials.metaphor}`,
   );
 });
 
@@ -70,4 +70,19 @@ test('composeMood with colorHex is deterministic', () => {
   const a = composeMood(CHART, D, '#ff5a1f');
   const b = composeMood(CHART, D, '#ff5a1f');
   assert.deepStrictEqual(a, b);
+});
+
+test('solar return (birthday) is detected and lifts the dials', () => {
+  const sum = (d) => Object.values(d).reduce((a, b) => a + b, 0);
+  // CHART.sun.lon = 280 (Capricorn); the transiting Sun returns there around Jan 1.
+  let bday = null, bdayDate = null;
+  for (let i = 0; i < 25; i++) {
+    const date = new Date(Date.UTC(2026, 0, 1) + i * 86400000);
+    const m = composeMood(CHART, date);
+    if (m.solarReturn) { bday = m; bdayDate = date; break; }
+  }
+  assert.ok(bday, 'a solar return should occur near the natal Sun degree');
+  const off = composeMood(CHART, new Date(bdayDate.getTime() + 40 * 86400000));
+  assert.strictEqual(off.solarReturn, false);
+  assert.ok(sum(bday.dials) > sum(off.dials), 'birthday dials should sum higher than a normal day');
 });
