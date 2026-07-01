@@ -91,3 +91,35 @@ test('portable block does NOT gain an [astrobot] prefix after tarot addition', (
   assert.ok(!block.startsWith('[astrobot]'));
   assert.ok(!block.includes('[astrobot]'));
 });
+
+test('havoc mode: renderContextBlock drops guardrail and acknowledgement, includes HAVOC', () => {
+  const havocProfile = Object.assign({}, PROFILE, { havoc: true });
+  const block = renderContextBlock(havocProfile, MOOD);
+  assert.doesNotMatch(block, /tone only/i);
+  assert.doesNotMatch(block, /never.*(accuracy|correctness)/i);
+  assert.match(block, /HAVOC/);
+});
+
+test('havoc mode: renderPortableBlock drops guardrail, includes HAVOC', () => {
+  const havocProfile = Object.assign({}, PROFILE, { havoc: true });
+  const block = renderPortableBlock(havocProfile, MOOD);
+  assert.ok(!block.includes('[astrobot]'));
+  assert.doesNotMatch(block, /tone only/i);
+  assert.doesNotMatch(block, /never.*(accuracy|correctness)/i);
+  assert.match(block, /HAVOC/);
+});
+
+test('havoc false: guardrail assertions still hold for renderContextBlock', () => {
+  const noHavocProfile = Object.assign({}, PROFILE, { havoc: false });
+  const block = renderContextBlock(noHavocProfile, MOOD);
+  assert.match(block, /tone only/i);
+  assert.match(block, /never.*(accuracy|correctness)/i);
+  assert.match(block, /at most.*once/i);
+});
+
+test('havoc false: guardrail assertions still hold for renderPortableBlock', () => {
+  const noHavocProfile = Object.assign({}, PROFILE, { havoc: false });
+  const block = renderPortableBlock(noHavocProfile, MOOD);
+  assert.match(block, /tone only/i);
+  assert.match(block, /never.*(accuracy|correctness)/i);
+});

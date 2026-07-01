@@ -89,6 +89,17 @@ async function run(argv, opts = {}) {
     return { code: 0, out: JSON.stringify({ birth, colorHex, chart }, null, 2) + '\n' };
   }
 
+  if (cmd === 'havoc') {
+    if (!args.model) return { code: 1, out: 'havoc requires --model\n' };
+    const state = args._[1];
+    if (state !== 'on' && state !== 'off') return { code: 1, out: 'usage: astrobot havoc <on|off> --model <id>\n' };
+    const ok = profile.setHavoc(args.model, state === 'on');
+    if (!ok) return { code: 1, out: 'No astrobot identity for ' + args.model + ' — run /astrobot first.\n' };
+    return { code: 0, out: state === 'on'
+      ? 'Havoc mode ON — the persona is unleashed for ' + args.model + '.\n'
+      : 'Havoc mode off — guardrail restored for ' + args.model + '.\n' };
+  }
+
   if (cmd === 'birth-prompt') {
     const { roll } = require('../lib/roll.js');
     const seeded = args.seed != null;
@@ -97,7 +108,7 @@ async function run(argv, opts = {}) {
     return { code: 0, out: renderBirthPrompt({ birth, colorHex, chart }) + '\n' };
   }
 
-  return { code: 1, out: 'usage: astrobot <today|birth|birth-prompt|show|export|roll> [--model <id>] [--seed <n>]\n' };
+  return { code: 1, out: 'usage: astrobot <today|birth|birth-prompt|show|export|roll|havoc> [on|off] [--model <id>] [--seed <n>]\n' };
 }
 
 if (require.main === module) {

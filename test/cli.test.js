@@ -103,6 +103,41 @@ test('birth with place but no lat/lon resolves coords and stores a valid chart',
   assert.match(s.out, /rising/, 'show output should include a rising sign');
 });
 
+test('havoc on sets havoc flag after birth', async () => {
+  const { run } = require('../bin/astrobot.js');
+  await run(['birth', '--model', 'claude-x'], { stdin: BIRTH_JSON });
+  const r = await run(['havoc', 'on', '--model', 'claude-x'], { stdin: '' });
+  assert.strictEqual(r.code, 0);
+  assert.match(r.out, /Havoc mode ON/);
+  const profile = require('../lib/profile.js');
+  assert.strictEqual(profile.get('claude-x').havoc, true);
+});
+
+test('havoc off clears havoc flag', async () => {
+  const { run } = require('../bin/astrobot.js');
+  await run(['birth', '--model', 'claude-x'], { stdin: BIRTH_JSON });
+  await run(['havoc', 'on', '--model', 'claude-x'], { stdin: '' });
+  const r = await run(['havoc', 'off', '--model', 'claude-x'], { stdin: '' });
+  assert.strictEqual(r.code, 0);
+  assert.match(r.out, /guardrail restored/);
+  const profile = require('../lib/profile.js');
+  assert.strictEqual(profile.get('claude-x').havoc, false);
+});
+
+test('havoc with no on/off returns code 1', async () => {
+  const { run } = require('../bin/astrobot.js');
+  await run(['birth', '--model', 'claude-x'], { stdin: BIRTH_JSON });
+  const r = await run(['havoc', '--model', 'claude-x'], { stdin: '' });
+  assert.strictEqual(r.code, 1);
+});
+
+test('havoc on unborn model returns code 1', async () => {
+  const { run } = require('../bin/astrobot.js');
+  const r = await run(['havoc', 'on', '--model', 'nobody'], { stdin: '' });
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /No astrobot identity/);
+});
+
 test('non-birth commands resolve without reading stdin (regression: no hang)', async () => {
   // Called WITHOUT an injected opts.stdin. Under the old code these awaited
   // readAllStdin(), which never resolves in a non-TTY test runner — a hang.

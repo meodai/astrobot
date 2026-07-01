@@ -44,3 +44,35 @@ test('corrupt JSON is treated as empty, never throws', () => {
   const profile = require('../lib/profile.js');
   assert.deepStrictEqual(profile.load(), {});
 });
+
+test('setHavoc returns true and persists havoc:true, leaves _default unchanged', () => {
+  const profile = require('../lib/profile.js');
+  profile.save('claude-x', { color: { name: 'Teal' } });
+  const ok = profile.setHavoc('claude-x', true);
+  assert.strictEqual(ok, true);
+  assert.strictEqual(profile.get('claude-x').havoc, true);
+  assert.strictEqual(profile.load()._default, 'claude-x'); // _default unchanged
+});
+
+test('setHavoc false clears havoc flag', () => {
+  const profile = require('../lib/profile.js');
+  profile.save('claude-x', { color: { name: 'Teal' }, havoc: true });
+  profile.setHavoc('claude-x', false);
+  assert.strictEqual(profile.get('claude-x').havoc, false);
+});
+
+test('setHavoc returns false for unknown model', () => {
+  const profile = require('../lib/profile.js');
+  const ok = profile.setHavoc('unknown', true);
+  assert.strictEqual(ok, false);
+});
+
+test('setHavoc does NOT change _default (remains a plain model-id string)', () => {
+  const profile = require('../lib/profile.js');
+  profile.save('claude-x', { color: { name: 'Teal' } });
+  profile.setHavoc('claude-x', true);
+  const store = profile.load();
+  // _default must still be the plain model-id string, not an object
+  assert.strictEqual(store._default, 'claude-x');
+  assert.strictEqual(typeof store._default, 'string');
+});
