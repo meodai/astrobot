@@ -88,4 +88,5 @@ console.log('wrote site/gallery.json:', out.length, 'entries');
 // Verify each entry's derived color.name matches the name referenced in its persona.
 out.forEach((entry) => {
   process.stdout.write('  seed ' + entry.seed + ': ' + entry.color.hex + ' → ' + entry.color.name + '\n');
+  if (!entry.persona.includes(entry.color.name)) throw new Error('gallery seed ' + entry.seed + ': persona omits derived color name "' + entry.color.name + '"');
 });
