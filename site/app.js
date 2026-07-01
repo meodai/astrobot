@@ -294,7 +294,8 @@
       chart: chart,
       color: color,
       persona: '(placeholder — a real persona is written by the model)',
-      traits: []
+      traits: [],
+      havoc: $('pg-havoc') ? $('pg-havoc').checked : false
     };
     $('pg-context').textContent = A.renderContextBlock(profile, mood);
   }
@@ -340,6 +341,7 @@
       updateScrubLabel();
       render();
     });
+    if ($('pg-havoc')) $('pg-havoc').addEventListener('change', render);
     window.addEventListener('resize', function () {
       clearTimeout(pgResizeTimer);
       pgResizeTimer = setTimeout(function () {

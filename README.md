@@ -96,6 +96,19 @@ any conversation.
 
 Publish with `npm publish --access public` (scoped public package).
 
+## Havoc mode
+
+Toggle opt-in unleashed behavior per model:
+
+```
+astrobot havoc on --model <id>   # drops the tone-only guardrail; persona goes full character
+astrobot havoc off --model <id>  # restores the guardrail
+```
+
+When havoc is ON the injected/exported block replaces the restraint lines with an invitation to
+be theatrical, moody, and in-character without limit. Accuracy, effort, and format are still
+the model's own domain — this is about expressive range only.
+
 ## Development
 
 ```
