@@ -6,6 +6,7 @@ const { resolveCoords } = require('../lib/places.js');
 const { composeMood } = require('../lib/mood.js');
 const { renderContextBlock, renderPortableBlock } = require('../lib/persona.js');
 const { renderBirthPrompt } = require('../lib/birthprompt.js');
+const { colorName } = require('../lib/colorname.js');
 
 function parseArgs(argv) {
   const args = { _: [] };
@@ -45,21 +46,22 @@ async function run(argv, opts = {}) {
     const stdin = opts.stdin !== undefined ? opts.stdin : await readAllStdin();
     let input;
     try { input = JSON.parse(stdin); } catch { return { code: 1, out: 'birth: invalid JSON on stdin\n' }; }
-    if (!input || !input.birth || !input.color || !input.color.name) {
-      return { code: 1, out: 'birth: requires birth and color{name} fields\n' };
+    if (!input || !input.birth || !input.color || !input.color.hex) {
+      return { code: 1, out: 'birth: requires birth and color{hex} fields\n' };
     }
     const coords = resolveCoords(input.birth);
     const birth = { ...input.birth, ...coords };
     let chart;
     try { chart = computeChart(birth); }
     catch (e) { return { code: 1, out: 'birth: ' + e.message + '\n' }; }
+    const derivedName = colorName(input.color.hex) || input.color.hex;
     const data = {
-      birth, chart, color: input.color,
+      birth, chart, color: { ...input.color, name: derivedName },
       persona: input.persona, traits: input.traits || [],
       born: new Date().toISOString().slice(0, 10),
     };
     profile.save(args.model, data);
-    return { code: 0, out: `Born: a ${chart.sun.sign} (${chart.dominant.element}, ${chart.ascendant.sign} rising), color ${input.color.name}.\n` };
+    return { code: 0, out: `Born: a ${chart.sun.sign} (${chart.dominant.element}, ${chart.ascendant.sign} rising), color ${derivedName}.\n` };
   }
 
   if (cmd === 'export') {

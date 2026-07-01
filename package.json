@@ -11,6 +11,7 @@
     "lib/",
     "vendor/astronomy.js",
     "vendor/cities.json",
+    "vendor/colornames.bestof.json",
     "README.md"
   ],
   "engines": {

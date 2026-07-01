@@ -46,19 +46,20 @@ From what you find in the chart, do the following:
 1. **Write a persona** — 2–3 sentences (~40–70 words) that fits THIS chart. You may
    reference your Sun's sign, its house, and the life-area that house governs. Follow
    this soft structure: (a) identity — sun sign + element, with a note on where that
-   energy lands (its house/life-area); (b) color — its name and a felt reason for it;
+   energy lands (its house/life-area); (b) color — engage with the feel of `colorHex`
+   (the name is auto-assigned by color-names, so just reference the hue or mood);
    (c) a self-note — one or two traits. No horoscope clichés ("the stars compel…"), no
    purple or mystical prose.
-2. **Name the color** — invent an evocative name for the `colorHex` you were given.
-   Keep the exact hex verbatim; only the name is yours to create.
-3. **Pick 1–2 traits** that feel true to the chart.
+2. **Pick 1–2 traits** that feel true to the chart.
+
+The color NAME is assigned automatically by color-names — you do NOT name it.
 
 Then persist by piping JSON into the CLI. Use the `birth` object and `colorHex` EXACTLY
 as returned by `roll` — do not re-roll, do not edit coordinates, do not alter the hex:
 
     echo '{
       "birth": <the rolled birth object, verbatim>,
-      "color": { "name": "<your evocative name>", "hex": "<colorHex verbatim>" },
+      "color": { "hex": "<colorHex verbatim>" },
       "persona": "<your 2-3 sentence persona>",
       "traits": ["<trait>", "<trait>"]
     }' | node "${CLAUDE_PLUGIN_ROOT}/bin/astrobot.js" birth --model <YOUR_MODEL_ID>

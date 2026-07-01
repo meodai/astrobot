@@ -16,10 +16,13 @@ beforeEach(() => {
 
 const BIRTH_JSON = JSON.stringify({
   birth: { datetime: '2000-01-01T12:00:00', tzOffsetMinutes: 0, lat: 51.5, lon: -0.13 },
-  color: { name: 'Deep Teal', hex: '#0E6B6B' },
+  color: { hex: '#0E6B6B' },
   persona: 'A grounded Capricorn.',
   traits: ['steady', 'dry-humored'],
 });
+// The color name is now auto-derived by colorName('#0E6B6B'). Compute it here for assertions.
+const { colorName } = require('../lib/colorname.js');
+const DERIVED_COLOR_NAME = colorName('#0E6B6B');
 
 test('today prints nothing when no profile exists', async () => {
   const { run } = require('../bin/astrobot.js');
@@ -33,10 +36,13 @@ test('birth saves a profile, then today emits a context block', async () => {
   const b = await run(['birth', '--model', 'claude-x'], { stdin: BIRTH_JSON });
   assert.strictEqual(b.code, 0);
   assert.match(b.out, /Capricorn/);
+  // Color name is auto-derived; must not be "undefined" and must be non-empty.
+  assert.ok(!b.out.includes('undefined'), 'birth output should not contain undefined');
+  assert.ok(b.out.includes(DERIVED_COLOR_NAME), 'birth output should include derived color name: ' + DERIVED_COLOR_NAME);
 
   const t = await run(['today', '--model', 'claude-x'], { stdin: '' });
   assert.match(t.out, /\[astrobot\]/);
-  assert.match(t.out, /Deep Teal/);
+  assert.ok(t.out.includes(DERIVED_COLOR_NAME), 'today output should include derived color name: ' + DERIVED_COLOR_NAME);
 });
 
 test('today falls back to _default when model omitted', async () => {
@@ -56,6 +62,20 @@ test('birth with JSON missing color returns code 1 and does not throw', async ()
   assert.match(r.out, /requires birth and color/);
 });
 
+test('birth with color.hex but no color.name auto-derives the name', async () => {
+  const { run } = require('../bin/astrobot.js');
+  const input = JSON.stringify({
+    birth: { datetime: '2000-01-01T12:00:00', tzOffsetMinutes: 0, lat: 51.5, lon: -0.13 },
+    color: { hex: '#0E6B6B' },
+    persona: 'A test persona.',
+    traits: ['test'],
+  });
+  const r = await run(['birth', '--model', 'auto-name-test'], { stdin: input });
+  assert.strictEqual(r.code, 0);
+  assert.ok(!r.out.includes('undefined'), 'output should not contain undefined');
+  assert.ok(r.out.includes(DERIVED_COLOR_NAME), 'output should include derived name: ' + DERIVED_COLOR_NAME);
+});
+
 test('export prints a portable block for a born model, nothing-ish when absent', async () => {
   const { run } = require('../bin/astrobot.js');
   const none = await run(['export', '--model', 'x'], { stdin: '' });
@@ -70,7 +90,7 @@ test('birth with place but no lat/lon resolves coords and stores a valid chart',
   const { run } = require('../bin/astrobot.js');
   const input = JSON.stringify({
     birth: { datetime: '2000-01-01T12:00:00', tzOffsetMinutes: 0, place: 'London' },
-    color: { name: 'Slate Blue', hex: '#6A5ACD' },
+    color: { hex: '#6A5ACD' },
   });
   const b = await run(['birth', '--model', 'place-test'], { stdin: input });
   assert.strictEqual(b.code, 0, 'birth should succeed: ' + b.out);
