@@ -108,7 +108,7 @@ async function run(argv, opts = {}) {
     return { code: 0, out: renderBirthPrompt({ birth, colorHex, chart }) + '\n' };
   }
 
-  return { code: 1, out: 'usage: astrobot <today|birth|birth-prompt|show|export|roll|havoc <on|off>> [--model <id>] [--seed <n>]\n' };
+  return { code: 1, out: 'usage: astrobot <today|birth|birth-prompt|show|export|roll|havoc> [on|off] [--model <id>] [--seed <n>]\n' };
 }
 
 if (require.main === module) {

@@ -103,6 +103,7 @@ test('havoc mode: renderContextBlock drops guardrail and acknowledgement, includ
 test('havoc mode: renderPortableBlock drops guardrail, includes HAVOC', () => {
   const havocProfile = Object.assign({}, PROFILE, { havoc: true });
   const block = renderPortableBlock(havocProfile, MOOD);
+  assert.ok(!block.includes('[astrobot]'));
   assert.doesNotMatch(block, /tone only/i);
   assert.doesNotMatch(block, /never.*(accuracy|correctness)/i);
   assert.match(block, /HAVOC/);
